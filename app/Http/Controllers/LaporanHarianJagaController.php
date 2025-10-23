@@ -13,7 +13,15 @@ class LaporanHarianJagaController extends Controller
      */
     public function index()
     {
-        $laporan = LaporanHarianJaga::where('user_id', Auth::id())->latest()->get();
+        $this->authorize('viewAny', LaporanHarianJaga::class); // Otorisasi untuk melihat daftar laporan
+
+        // Logika filter data tetap di sini sesuai peran
+        if (Auth::user()->role === 'danru' || Auth::user()->role === 'superadmin') {
+        $laporan = LaporanHarianJaga::latest()->get(); // Danru/SuperAdmin melihat semua
+        } else {
+            $laporan = LaporanHarianJaga::where('user_id', Auth::id())->latest()->get(); // Anggota hanya melihat miliknya
+        }
+
         return view('laporan-harian-jaga.index', compact('laporan'));
     }
 
@@ -22,6 +30,7 @@ class LaporanHarianJagaController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', LaporanHarianJaga::class); // Otorisasi untuk membuat laporan
         return view('laporan-harian-jaga.create');
     }
 
@@ -30,6 +39,8 @@ class LaporanHarianJagaController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', LaporanHarianJaga::class); // Otorisasi untuk menyimpan laporan
+
         // validasi input
         $request->validate([
             'tanggal_jaga' => 'required|date',
@@ -58,10 +69,7 @@ class LaporanHarianJagaController extends Controller
      */
     public function show(LaporanHarianJaga $laporanHarianJaga)
     {
-        // Menampilkan detail laporan harian jaga
-        if (Auth::user()->role === 'anggota' && $laporanHarianJaga->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('view', $laporanHarianJaga); // Otorisasi untuk melihat laporan spesifik
         return view('laporan-harian-jaga.show', compact('laporanHarianJaga'));
     }
 
@@ -70,10 +78,7 @@ class LaporanHarianJagaController extends Controller
      */
     public function edit(LaporanHarianJaga $laporanHarianJaga)
     {
-        // Menampilkan form edit laporan harian jaga
-        if (Auth::user()->role === 'anggota' && $laporanHarianJaga->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $laporanHarianJaga); // Otorisasi untuk mengedit laporan
         return view('laporan-harian-jaga.edit', compact('laporanHarianJaga'));
     }
 
@@ -82,6 +87,8 @@ class LaporanHarianJagaController extends Controller
      */
     public function update(Request $request, LaporanHarianJaga $laporanHarianJaga)
     {
+        $this->authorize('update', $laporanHarianJaga); // Otorisasi untuk memperbarui laporan
+
         $request->validate([
             'tanggal_jaga' => 'required|date',
             'shift' => 'required|string|max:255',
@@ -90,11 +97,6 @@ class LaporanHarianJagaController extends Controller
             'catatan_serah_terima' => 'nullable|string',
             'status' => 'nullable|string|in:draft,submitted,approved,rejected',  // hanya nilai tertentu yang diizinkan
         ]);
-
-        // memperbarui laporan
-        if (Auth::user()->role === 'anggota' && $laporanHarianJaga->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
 
         $laporanHarianJaga->tanggal_jaga = $request->tanggal_jaga;
         $laporanHarianJaga->shift = $request->shift;
@@ -112,10 +114,7 @@ class LaporanHarianJagaController extends Controller
      */
     public function destroy(LaporanHarianJaga $laporanHarianJaga)
     {
-        // menghapus laporan
-        if (Auth::user()->role === 'anggota' && $laporanHarianJaga->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('delete', $laporanHarianJaga); // Otorisasi untuk menghapus laporan
 
         $laporanHarianJaga->delete();
 
