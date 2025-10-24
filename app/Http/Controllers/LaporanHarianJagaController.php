@@ -104,6 +104,7 @@ class LaporanHarianJagaController extends Controller
         $laporanHarianJaga->kejadian_menonjol = $request->kejadian_menonjol;
         $laporanHarianJaga->catatan_serah_terima = $request->catatan_serah_terima;
         $laporanHarianJaga->status = $request->status ?? $laporanHarianJaga->status;
+        $laporanHarianJaga->last_edited_by_user_id = Auth::id(); // Catat siapa yang mengedit terakhir
         $laporanHarianJaga->save();
 
         return redirect()->route('laporan-harian-jaga.index')->with('success', 'Laporan harian jaga berhasil diperbarui.');
@@ -116,7 +117,9 @@ class LaporanHarianJagaController extends Controller
     {
         $this->authorize('delete', $laporanHarianJaga); // Otorisasi untuk menghapus laporan
 
-        $laporanHarianJaga->delete();
+        $laporanHarianJaga->deleted_by_user_id = Auth::id(); // Catat siapa yang menghapus
+        $laporanHarianJaga->save(); // simpan perubahan sebelum menghapus
+        $laporanHarianJaga->delete(); // soft delete
 
         return redirect()->route('laporan-harian-jaga.index')->with('success', 'Laporan harian jaga berhasil dihapus.');
     }

@@ -21,6 +21,8 @@ class LaporanHarianJaga extends Model
         'kejadian_menonjol',
         'catatan_serah_terima',
         'status',
+        'last_edited_by_user_id',
+        'deleted_by_user_id',
     ];
 
     protected $casts = [
@@ -28,10 +30,26 @@ class LaporanHarianJaga extends Model
     ];
 
     /**
-     * Relasi ke model User (pengguna yang membuat laporan)
+     * User yang punya LaporanHarianJaga
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(related: User::class);
+    }
+
+    /**
+     * User yang terakhir mengedit laporanHarianJaga
+     */
+    public function lastEditedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_edited_by_user_id');
+    }
+
+    /**
+     * User yang menghapus laporanHarianJaga
+     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by_user_id');
     }
 }
