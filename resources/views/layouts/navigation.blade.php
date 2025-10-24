@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('laporan-harian-jaga.index')" :active="request()->routeIs('laporan-harian-jaga.*')">
                         {{ __('Laporan Harian Jaga') }}
                     </x-nav-link>
+                    @can('viewAny', App\Models\ReportType::class)
+                        <x-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
+                            {{ __('Manajemen Jenis Laporan') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
