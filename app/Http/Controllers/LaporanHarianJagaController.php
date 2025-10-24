@@ -69,6 +69,9 @@ class LaporanHarianJagaController extends Controller
      */
     public function show(LaporanHarianJaga $laporanHarianJaga)
     {
+        // mengambil laporan, termasuk yg sudah dihapus secara soft delete
+        $laporanHarianJaga = LaporanHarianJaga::withTrashed()->findOrFail($laporanHarianJaga->id);
+
         $this->authorize('view', $laporanHarianJaga); // Otorisasi untuk melihat laporan spesifik
         return view('laporan-harian-jaga.show', compact('laporanHarianJaga'));
     }
@@ -122,5 +125,47 @@ class LaporanHarianJagaController extends Controller
         $laporanHarianJaga->delete(); // soft delete
 
         return redirect()->route('laporan-harian-jaga.index')->with('success', 'Laporan harian jaga berhasil dihapus.');
+    }
+
+    /**
+     * Display a listing of the soft-deleted resources.
+     */
+    public function archive()
+    {
+        // hanya danru dan superadmin yang bisa mengakses arsip
+        $this->authorize('viewAny', LaporanHarianJaga::class); // sama seperti metode viewAny di policy
+
+        if (Auth::user()->role === 'anggota') {
+            abort(403, 'Anda tidak memiliki akses ke arsip laporan.'); // anggota tidak boleh mengakses arsip
+        }
+
+        $laporan = LaporanHarianJaga::onlyTrashed()->latest()->get(); // ambil hanya yang dihapus secara soft delete
+        return view('laporan-harian-jaga.archive', compact('laporan'));
+    }
+
+    /**
+     * Restore a soft-deleted resource.
+     */
+    public function restore($id)
+    {
+        $laporanHarianJaga = LaporanHarianJaga::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $laporanHarianJaga); // Otorisasi untuk mengembalikan laporan
+
+        $laporanHarianJaga->restore();
+
+        return redirect()->route('laporan-harian-jaga.index')->with('success', 'Laporan harian jaga berhasil dipulihkan.');
+    }
+
+    /**
+     * Permanently delete a soft-deleted resource.
+     */
+    public function forceDelete($id)
+    {
+        $laporanHarianJaga = LaporanHarianJaga::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $laporanHarianJaga); // Otorisasi untuk menghapus permanen laporan
+
+        $laporanHarianJaga->forceDelete();
+
+        return redirect()->route('laporan-harian-jaga.archive')->with('success', 'Laporan harian jaga berhasil dihapus secara permanen.');
     }
 }

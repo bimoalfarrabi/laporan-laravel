@@ -102,7 +102,7 @@ class LaporanHarianJagaPolicy
      */
     public function forceDelete(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // jangan force delete
+        // hanya super admin yg bisa force delete
         return false;
     }
 }

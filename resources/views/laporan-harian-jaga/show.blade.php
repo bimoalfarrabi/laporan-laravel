@@ -42,12 +42,52 @@
                         <strong>Terakhir Diperbarui:</strong>
                         {{ $laporanHarianJaga->updated_at->format('d-m-Y H:i') }}
                     </div>
+                    <div class="mb-4">
+                        <strong>Terakhir Diperbarui Oleh:</strong>
+                        {{ $laporanHarianJaga->lastEditedBy ? $laporanHarianJaga->lastEditedBy->name : 'N/A' }}
+                    </div>
+                    @if ($laporanHarianJaga->deleted_at)
+                        <div class="mb-4 text-red-600">
+                            <strong>Dihapus Oleh:</strong>
+                            {{ $laporanHarianJaga->deletedBy ? $laporanHarianJaga->deletedBy->name : 'N/A' }}
+                        </div>
+                        <div class="mb-4 text-red-600">
+                            <strong>Waktu Dihapus:</strong>
+                            {{ $laporanHarianJaga->deleted_at->format('d-m-Y H:i') }}
+                        </div>
+                    @endif
 
                     <div class="flex items-center justify-start mt-6">
-                        <a href="{{ route('laporan-harian-jaga.edit', $laporanHarianJaga->id) }}"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration- 150 mr-2">
-                            {{ __('Edit Laporan') }}
-                        </a>
+                        @if ($laporanHarianJaga->deleted_at)
+                            @can('restore', $laporanHarianJaga)
+                                <form action="{{ route('laporan-harian-jaga.restore', $laporanHarianJaga->id) }}"
+                                    method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2"
+                                        onclick="return confirm('Apakah Anda yakin ingin memulihkan laporan ini?')">
+                                        {{ __('Pulihkan Laporan') }}
+                                    </button>
+                                </form>
+                            @endcan
+                            @can('forceDelete', $laporanHarianJaga)
+                                <form action="{{ route('laporan-harian-jaga.forceDelete', $laporanHarianJaga->id) }}"
+                                    method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 focus:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2"
+                                        onclick="return confirm('PERINGATAN: Ini akan menghapus laporan secara PERMANEN. Apakah Anda yakin?')">
+                                        {{ __('Hapus Permanen') }}
+                                    </button>
+                                </form>
+                            @endcan
+                        @else
+                            <a href="{{ route('laporan-harian-jaga.edit', $laporanHarianJaga->id) }}"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                {{ __('Edit Laporan') }}
+                            </a>
+                        @endif
                         <a href="{{ route('laporan-harian-jaga.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Kembali ke Daftar') }}
