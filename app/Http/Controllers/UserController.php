@@ -40,14 +40,19 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+
         $this->authorize('create', User::class);
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:roles,name', // pastikan role valid
+            'role' => 'required|string', // pastikan role valid
         ]);
+
+        if (!Role::where('name', $request->role)->exists()) {
+            return redirect()->back()->withErrors(['role' => 'Peran yang dipilih tidak valid'])->withInput();
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -82,8 +87,12 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|string|in:roles,name',
+            'role' => 'required|string',
         ]);
+
+        if (!Role::where('name', $request->role)->exists()) {
+            return redirect()->back()->withErrors(['role' => 'Peran yang dipilih tidak valid'])->withInput();
+        }
 
         $user->name = $request->name;
         $user->email = $request->email;
