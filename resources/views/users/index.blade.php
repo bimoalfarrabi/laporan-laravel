@@ -10,11 +10,18 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     @can('create', App\Models\User::class)
-                        <div class="flex items-center mb-4 space-x-4">
+                        <div class="flex items-center mb-4 space-x-4"> {{-- Tambahkan space-x-4 --}}
                             <a href="{{ route('users.create') }}"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Buat Pengguna Baru
                             </a>
+                            @can('viewAny', App\Models\User::class)
+                                {{-- Tombol Arsip Pengguna --}}
+                                <a href="{{ route('users.archive') }}"
+                                    class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-400 focus:bg-yellow-400 active:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    Lihat Arsip Pengguna
+                                </a>
+                            @endcan
                         </div>
                     @endcan
 

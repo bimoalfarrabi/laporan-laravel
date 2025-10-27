@@ -41,7 +41,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
 
     // Manajemen User
-    Route::resource('users', UserController::class);
+    Route::get('users/archive', [UserController::class, 'archive'])->name('users.archive');
+    Route::resource('users', UserController::class)->withTrashed();
+    Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::delete('users/{user}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
 });
 

@@ -131,4 +131,55 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'Password pengguna ' . $user->name . ' berhasil di-reset ke "123456". Pengguna akan diminta untuk mengubah password saat login berikutnya.');
     }
+
+    public function archive(Request $request)
+    {
+        $this->authorize('viewAny', User::class);
+
+        $search = $request->query('search');
+        $filterRole = $request->query('role');
+
+        $query = User::onlyTrashed()->with('roles'); // Hanya mengambil yang di-soft delete
+
+        if (Auth::user()->hasRole('superadmin')) {
+            // SuperAdmin melihat semua pengguna di arsip
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            }
+            if ($filterRole) {
+                $query->role($filterRole);
+            }
+        } else {
+            // Danru tidak bisa melihat arsip pengguna
+            abort(403, 'Anda tidak memiliki akses ke arsip pengguna.');
+        }
+
+        $users = $query->latest()->get();
+        $roles = Role::all();
+
+        return view('users.archive', compact('users', 'roles', 'search', 'filterRole'));
+    }
+
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $user);
+
+        $user->restore();
+
+        return redirect()->route('users.index')->with('success', 'Pengguna ' . $user->name . ' berhasil dipulihkan.');
+    }
+
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $user);
+
+        $user->forceDelete();
+
+        return redirect()->route('users.archive')->with('success', 'Pengguna ' . $user->name . ' berhasil dihapus permanen');
+    }
 }

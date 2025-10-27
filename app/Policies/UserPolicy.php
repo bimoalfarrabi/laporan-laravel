@@ -11,7 +11,11 @@ class UserPolicy
     public function before(User $user, string $ability): bool|null
     {
         if ($user->hasRole('superadmin')) {
-            return true; // superadmin boleh akses semua selain pengecualian di atas
+            // SuperAdmin bisa melakukan semua kecuali menghapus atau mereset password dirinya sendiri
+            if (in_array($ability, ['forceDelete']) && $user->id === auth()->user()->id) { // Tambahkan 'forceDelete'
+                return false; // SuperAdmin tidak bisa menghapus/reset password/forceDelete dirinya sendiri
+            }
+            return true;
         }
 
         return null; // lanjutkan cek method lain
