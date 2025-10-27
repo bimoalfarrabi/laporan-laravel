@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Report extends Model
 {
-    use HasFactory, SoftDeletes; // Tambahkan SoftDeletes
+    use HasFactory, SoftDeletes;
 
-    protected $table = 'reports'; // Nama tabel di database
+    protected $table = 'reports';
 
     protected $fillable = [
         'report_type_id',
@@ -23,36 +23,24 @@ class Report extends Model
     ];
 
     protected $casts = [
-        'data' => 'array', // Mengubah kolom 'data' (JSON) menjadi array PHP secara otomatis
+        'data' => 'array',
     ];
 
-    /**
-     * Get the ReportType that owns the Report.
-     */
     public function reportType(): BelongsTo
     {
         return $this->belongsTo(ReportType::class);
     }
 
-    /**
-     * Get the user who created the Report.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the user who last edited the Report.
-     */
     public function lastEditedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'last_edited_by_user_id');
     }
 
-    /**
-     * Get the user who deleted the Report.
-     */
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by_user_id');

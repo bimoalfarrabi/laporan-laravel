@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\LaporanHarianJaga;
 use App\Models\ReportType;
+use App\Models\Report;
 use App\Policies\LaporanHarianJagaPolicy;
 use App\Policies\ReportTypePolicy;
+use App\Policies\ReportPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -19,6 +21,7 @@ class AuthServiceProvider extends ServiceProvider
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         LaporanHarianJaga::class => LaporanHarianJagaPolicy::class,
         ReportType::class => ReportTypePolicy::class,
+        Report::class => ReportPolicy::class,
     ];
 
     /**

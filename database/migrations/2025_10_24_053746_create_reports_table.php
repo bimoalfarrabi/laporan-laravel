@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId(ReportType::class)->constrained('report_types')->cascadeOnDelete();
-            $table->foreignId(User::class)->constrained('users')->cascadeOnDelete();
+            $table->foreignId('report_type_id')->constrained('report_types')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->json('data'); // Menyimpan data laporan sesuai skema dari report_types
             $table->string('status')->default('draft'); // Status laporan (draft, submitted, approved, rejected)
             $table->timestamps();

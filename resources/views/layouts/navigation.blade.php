@@ -23,6 +23,11 @@
                             {{ __('Manajemen Jenis Laporan') }}
                         </x-nav-link>
                     @endcan
+                    @can('viewAny', App\Models\Report::class)
+                        <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                            {{ __('Laporan Dinamis') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 

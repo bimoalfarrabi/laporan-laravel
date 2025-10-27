@@ -4,6 +4,7 @@ use App\Http\Controllers\LaporanHarianJagaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportTypeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,7 +25,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/laporan-harian-jaga/{id}/restore', [LaporanHarianJagaController::class, 'restore'])->name('laporan-harian-jaga.restore');
     Route::delete('/laporan-harian-jaga/{id}/force-delete', [LaporanHarianJagaController::class, 'forceDelete'])->name('laporan-harian-jaga.forceDelete');
 
+    // Manajemen Jenis Laporan
     Route::resource('report-types', ReportTypeController::class);
+
+    // Laporan
+    Route::get('/reports/archive', [ReportController::class, 'archive'])->name('reports.archive');
+    Route::resource('reports', ReportController::class)->withTrashed();
+    Route::post('/reports/{id}/restore', [ReportController::class, 'restore'])->name('reports.restore');
+    Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
 });
 
 require __DIR__.'/auth.php';
