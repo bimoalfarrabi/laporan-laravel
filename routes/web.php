@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportTypeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('reports', ReportController::class)->withTrashed();
     Route::post('/reports/{id}/restore', [ReportController::class, 'restore'])->name('reports.restore');
     Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
+
+    // Manajemen User
+    Route::resource('users', UserController::class);
 });
 
 require __DIR__.'/auth.php';

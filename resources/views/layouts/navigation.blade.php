@@ -15,9 +15,6 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('laporan-harian-jaga.index')" :active="request()->routeIs('laporan-harian-jaga.*')">
-                        {{ __('Laporan Harian Jaga') }}
-                    </x-nav-link>
                     @can('viewAny', App\Models\ReportType::class)
                         <x-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
                             {{ __('Manajemen Jenis Laporan') }}
@@ -26,6 +23,11 @@
                     @can('viewAny', App\Models\Report::class)
                         <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                             {{ __('Laporan Dinamis') }}
+                        </x-nav-link>
+                    @endcan
+                    @can('viewAny', App\Models\User::class)
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('Manajemen Pengguna') }}
                         </x-nav-link>
                     @endcan
                 </div>
