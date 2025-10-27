@@ -6,6 +6,7 @@ use App\Http\Controllers\ReportTypeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ForcePasswordChangeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,6 +15,10 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// perubahan password (diluar grup auth)
+Route::get('/force-password-change', [ForcePasswordChangeController::class, 'showChangeForm'])->name('password.force-change');
+Route::post('/force-password-change', [ForcePasswordChangeController::class, 'updatePassword'])->name('password.update-forced');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -37,6 +42,7 @@ Route::middleware('auth')->group(function () {
 
     // Manajemen User
     Route::resource('users', UserController::class);
+    Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

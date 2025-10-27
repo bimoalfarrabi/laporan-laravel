@@ -111,4 +111,15 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
+
+    public function resetPassword(User $user)
+    {
+        $this->authorize('resetPassword', $user);
+
+        $user->password = Hash::make('123456');
+        $user->must_reset_password = true;
+        $user->save();
+
+        return redirect()->route('users.index')->with('success', 'Password pengguna ' . $user->name . ' berhasil di-reset ke "123456". Pengguna akan diminta untuk mengubah password saat login berikutnya.');
+    }
 }

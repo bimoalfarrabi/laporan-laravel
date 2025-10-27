@@ -10,13 +10,13 @@ class UserPolicy
 
     public function before(User $user, string $ability): bool|null
     {
-        // Jika SuperAdmin, langsung izinkan semua.
-        if ($user->role === 'superadmin') {
-            return true;
+        if ($user->hasRole('superadmin')) {
+            return true; // superadmin boleh akses semua selain pengecualian di atas
         }
 
-        return null; // Lanjutkan ke metode otorisasi lainnya
+        return null; // lanjutkan cek method lain
     }
+
 
     /**
      * Determine whether the user can view any models.
@@ -69,19 +69,24 @@ class UserPolicy
         return false;
     }
 
-    // /**
-    //  * Determine whether the user can restore the model.
-    //  */
-    // public function restore(User $user, User $model): bool
-    // {
-    //     return false;
-    // }
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, User $model): bool
+    {
+        return false;
+    }
 
-    // /**
-    //  * Determine whether the user can permanently delete the model.
-    //  */
-    // public function forceDelete(User $user, User $model): bool
-    // {
-    //     return false;
-    // }
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, User $model): bool
+    {
+        return false;
+    }
+
+    public function resetPassword(User $user, User $model): bool
+    {
+        return $user->hasRole('superadmin');
+    }
 }

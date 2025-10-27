@@ -104,6 +104,17 @@
                                                         class="text-blue-600 hover:text-blue-900 mr-2">Edit
                                                     </a>
                                                 @endcan
+                                                @can('resetPassword', $user)
+                                                    {{-- Tombol Reset Password --}}
+                                                    <form action="{{ route('users.resetPassword', $user->id) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="text-yellow-600 hover:text-yellow-900 mr-2"
+                                                            onclick="return confirm('Apakah Anda yakin ingin mereset password pengguna {{ $user->name }} ke \'123456\'?')">Reset
+                                                            Pass</button>
+                                                    </form>
+                                                @endcan
                                                 @can('delete', $user)
                                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST"
                                                         class="inline">
