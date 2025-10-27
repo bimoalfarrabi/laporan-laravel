@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="flex items-center mb-4 space-x-8">
+                    <div class="flex items-center mb-4 space-x-4">
                         <a href="{{ route('reports.create') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             Buat Laporan Baru
@@ -29,6 +29,33 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
+
+                    {{-- Form Search dan Filter --}}
+                    <form method="GET" action="{{ route('reports.index') }}" class="mb-4">
+                        <div class="flex flex-wrap items-center space-x-4">
+                            <input type="text" name="search" placeholder="Cari Jenis/Pembuat Laporan..."
+                                value="{{ $search }}"
+                                class="block w-full md:w-1/3 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <select name="report_type_id"
+                                class="block w-full md:w-1/4 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="">Semua Jenis Laporan</option>
+                                @foreach ($reportTypes as $reportType)
+                                    <option value="{{ $reportType->id }}"
+                                        {{ $filterReportTypeId == $reportType->id ? 'selected' : '' }}>
+                                        {{ $reportType->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-primary-button type="submit">
+                                {{ __('Filter') }}
+                            </x-primary-button>
+                            <a href="{{ route('reports.index') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Reset') }}
+                            </a>
+                        </div>
+                    </form>
+                    {{-- End Form Search dan Filter --}}
 
                     @if ($reports->isEmpty())
                         <p class="mt-4">Belum ada Laporan Dinamis yang dibuat.</p>
@@ -78,8 +105,7 @@
                                                 <a href="{{ route('reports.show', $report->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
                                                 <a href="{{ route('reports.edit', $report->id) }}"
-                                                    class="text-blue-600 hover:text-blue-900 mr-2">
-                                                    Edit</a>
+                                                    class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
                                                 <form action="{{ route('reports.destroy', $report->id) }}"
                                                     method="POST" class="inline">
                                                     @csrf

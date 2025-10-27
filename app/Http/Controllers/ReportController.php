@@ -14,17 +14,52 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Report::class); // Otorisasi untuk melihat daftar laporan
 
+        $search = $request->query('search');
+        $filterReportTypeId = $request->query('report_type_id');
+
+        $query = Report::query()->with('reportType', 'user');
+
         if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
-            $reports = Report::with(['reportType', 'user'])->latest()->get(); // Danru/SuperAdmin melihat semua
+            // Danru/SuperAdmin melihat semua pengguna
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('reportType', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    })->orWhereHas('user', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    })
+                        // Untuk search di data JSON, ini akan lebih kompleks.
+                        // Contoh sederhana: cari di 'data' yang berupa string.
+                        // Jika ingin search di JSON, bisa menggunakan where('data->your_field', 'like', ...)
+                    ;
+                });
+            }
+            if ($filterReportTypeId) {
+                $query->where('report_type_id', $filterReportTypeId);
+            }
         } else {
-            $reports = Report::with(['reportType', 'user'])->where('user_id', Auth::id())->latest()->get(); // Anggota hanya melihat miliknya
+            // Anggota hanya melihat miliknya
+            $query->where('user_id', Auth::id());
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('reportType', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    });
+                });
+            }
+            if ($filterReportTypeId) {
+                $query->where('report_type_id', $filterReportTypeId);
+            }
         }
 
-        return view('reports.index', compact('reports'));
+        $reports = $query->latest()->get();
+        $reportTypes = ReportType::where('is_active', true)->get(); // Untuk filter dropdown
+
+        return view('reports.index', compact('reports', 'search', 'filterReportTypeId', 'reportTypes'));
     }
 
     /**
