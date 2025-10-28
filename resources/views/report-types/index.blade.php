@@ -77,7 +77,9 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900"
-                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus jenis laporan ini?')">Hapus</button>
+                                                        data-confirm-dialog="true"
+                                                        data-swal-title="Hapus Jenis Laporan?"
+                                                        data-swal-text="Semua laporan dengan jenis ini juga akan terhapus. Anda yakin?">Hapus</button>
                                                 </form>
                                             </td>
                                         </tr>

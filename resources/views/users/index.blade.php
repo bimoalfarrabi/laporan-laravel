@@ -118,7 +118,10 @@
                                                         @csrf
                                                         <button type="submit"
                                                             class="text-yellow-600 hover:text-yellow-900 mr-2"
-                                                            onclick="return confirm('Apakah Anda yakin ingin mereset password pengguna {{ $user->name }} ke \'123456\'?')">Reset
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Reset Password?"
+                                                            data-swal-text="Password untuk {{ $user->name }} akan direset menjadi '123456'."
+                                                            >Reset
                                                             Pass</button>
                                                     </form>
                                                 @endcan
@@ -128,7 +131,9 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-900"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">Hapus</button>
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Hapus Pengguna?"
+                                                            data-swal-text="Pengguna akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
                                                     </form>
                                                 @endcan
                                             </td>

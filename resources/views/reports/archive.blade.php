@@ -74,7 +74,10 @@
                                                         @csrf
                                                         <button type="submit"
                                                             class="text-green-600 hover:text-green-900 mr-2"
-                                                            onclick="return confirm('Apakah Anda yakin ingin memulihkan laporan ini?')">Pulihkan</button>
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Pulihkan Laporan?"
+                                                            data-swal-text="Laporan akan dikembalikan ke daftar aktif."
+                                                            data-swal-icon="info">Pulihkan</button>
                                                     </form>
                                                 @endcan
                                                 @can('forceDelete', $report)
@@ -83,7 +86,10 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-900"
-                                                            onclick="return confirm('PERINGATAN: Ini akan menghapus laporan secara PERMANEN. Apakah Anda yakin?')">Hapus
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Hapus Permanen?"
+                                                            data-swal-text="PERINGATAN: Laporan akan dihapus selamanya dan tidak dapat dipulihkan!"
+                                                            >Hapus
                                                             Permanen</button>
                                                     </form>
                                                 @endcan

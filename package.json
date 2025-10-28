@@ -19,6 +19,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "@rollup/rollup-win32-x64-msvc": "^4.52.5"
+        "@rollup/rollup-win32-x64-msvc": "^4.52.5",
+        "sweetalert2": "^11.26.3"
     }
 }
