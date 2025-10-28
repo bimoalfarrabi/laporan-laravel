@@ -56,7 +56,7 @@
                         </div>
                     @endif
 
-                    <h3 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight mt-6 mb-4">Data Laporan:</h3>
+                    <h3 class="font-semibold text-lg text-gray-800 leading-tight mt-6 mb-4">Data Laporan:</h3>
                     @foreach ($report->reportType->fields_schema as $field)
                         <div class="mb-2">
                             <strong>{{ $field['label'] }}:</strong>
