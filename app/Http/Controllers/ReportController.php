@@ -299,7 +299,7 @@ class ReportController extends Controller
 
     public function approve(Report $report)
     {
-        $this->authorize('update', $report); // Menggunakan policy yang sama dengan update
+        $this->authorize('approve', $report); // Menggunakan policy approve
 
         if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
             $report->status = 'disetujui';
@@ -312,7 +312,7 @@ class ReportController extends Controller
 
     public function reject(Report $report)
     {
-        $this->authorize('update', $report); // Menggunakan policy yang sama dengan update
+        $this->authorize('reject', $report); // Menggunakan policy reject
 
         if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
             $report->status = 'ditolak';

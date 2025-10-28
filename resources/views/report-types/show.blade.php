@@ -43,10 +43,12 @@
                     </div>
 
                     <div class="flex items-center justify-start mt-6">
-                        <a href="{{ route('report-types.edit', $reportType->id) }}"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
-                            {{ __('Edit Jenis Laporan') }}
-                        </a>
+                        @can('update', $reportType)
+                            <a href="{{ route('report-types.edit', $reportType->id) }}"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                {{ __('Edit Jenis Laporan') }}
+                            </a>
+                        @endcan
                         <a href="{{ route('report-types.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Kembali ke Daftar') }}

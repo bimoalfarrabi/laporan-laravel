@@ -96,21 +96,25 @@
                     @endforeach
 
                     <div class="flex items-center justify-start mt-6">
-                        @if ((Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) && $report->status == 'belum disetujui')
-                            <form action="{{ route('reports.approve', $report->id) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit"
-                                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
-                                    {{ __('Setujui') }}
-                                </button>
-                            </form>
-                            <form action="{{ route('reports.reject', $report->id) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit"
-                                    class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 focus:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
-                                    {{ __('Tolak') }}
-                                </button>
-                            </form>
+                        @if (($report->status == 'belum disetujui') && (Auth::user()->can('reports:approve') || Auth::user()->can('reports:reject')))
+                            @can('approve', $report)
+                                <form action="{{ route('reports.approve', $report->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                        {{ __('Setujui') }}
+                                    </button>
+                                </form>
+                            @endcan
+                            @can('reject', $report)
+                                <form action="{{ route('reports.reject', $report->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 focus:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                        {{ __('Tolak') }}
+                                    </button>
+                                </form>
+                            @endcan
                         @endif
 
                         @if ($report->deleted_at)
@@ -137,10 +141,12 @@
                                 </form>
                             @endcan
                         @else
-                            <a href="{{ route('reports.edit', $report->id) }}"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
-                                {{ __('Edit Laporan') }}
-                            </a>
+                            @can('update', $report)
+                                <a href="{{ route('reports.edit', $report->id) }}"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                    {{ __('Edit Laporan') }}
+                                </a>
+                            @endcan
                         @endif
                         <a href="{{ route('reports.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">

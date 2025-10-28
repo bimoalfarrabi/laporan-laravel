@@ -22,7 +22,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Buat Permissions untuk Laporan (Reports)
         $permissions = [
             // Reports
-            'reports:view-any', 'reports:view-own', 'reports:create', 'reports:update-any', 'reports:update-own', 'reports:delete-any', 'reports:delete-own', 'reports:restore', 'reports:force-delete',
+            'reports:view-any', 'reports:view-own', 'reports:create', 'reports:update-any', 'reports:update-own', 'reports:delete-any', 'reports:delete-own', 'reports:restore', 'reports:force-delete', 'reports:approve', 'reports:reject',
 
             // Report Types
             'report-types:view-any', 'report-types:create', 'report-types:update', 'report-types:delete',
@@ -43,7 +43,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Beri hak akses default ke peran
         $danruRole->givePermissionTo([
             // Reports
-            'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore',
+            'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore', 'reports:approve', 'reports:reject',
             // Users
             'users:view-any', 'users:view',
         ]);

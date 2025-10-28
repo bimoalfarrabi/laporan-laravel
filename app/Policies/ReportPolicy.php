@@ -101,4 +101,14 @@ class ReportPolicy
     {
         return $user->can('reports:force-delete');
     }
+
+    public function approve(User $user, Report $report): bool
+    {
+        return $user->can('reports:approve');
+    }
+
+    public function reject(User $user, Report $report): bool
+    {
+        return $user->can('reports:reject');
+    }
 }
