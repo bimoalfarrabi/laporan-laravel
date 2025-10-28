@@ -29,9 +29,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Users
             'users:view-any', 'users:view', 'users:create', 'users:update', 'users:delete', 'users:restore', 'users:force-delete', 'users:reset-password',
-
-            // Laporan Harian Jaga
-            'laporan-harian-jaga:view-any', 'laporan-harian-jaga:view-own', 'laporan-harian-jaga:create', 'laporan-harian-jaga:update-any', 'laporan-harian-jaga:update-own', 'laporan-harian-jaga:delete-any', 'laporan-harian-jaga:delete-own', 'laporan-harian-jaga:restore', 'laporan-harian-jaga:force-delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -47,8 +44,6 @@ class RolesAndPermissionsSeeder extends Seeder
         $danruRole->givePermissionTo([
             // Reports
             'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore',
-            // Laporan Harian Jaga
-            'laporan-harian-jaga:view-any', 'laporan-harian-jaga:create', 'laporan-harian-jaga:update-any', 'laporan-harian-jaga:delete-any', 'laporan-harian-jaga:restore',
             // Users
             'users:view-any', 'users:view',
         ]);
@@ -56,8 +51,6 @@ class RolesAndPermissionsSeeder extends Seeder
         $anggotaRole->givePermissionTo([
             // Reports
             'reports:view-own', 'reports:create', 'reports:update-own', 'reports:delete-own',
-            // Laporan Harian Jaga
-            'laporan-harian-jaga:view-own', 'laporan-harian-jaga:create', 'laporan-harian-jaga:update-own', 'laporan-harian-jaga:delete-own',
         ]);
 
 
