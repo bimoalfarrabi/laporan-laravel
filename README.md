@@ -21,6 +21,66 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Getting Started
+
+Follow these steps to set up the project locally:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [YOUR_REPOSITORY_URL]
+    cd laporan
+    ```
+
+2.  **Install PHP Dependencies:**
+    ```bash
+    composer install
+    ```
+
+3.  **Environment Setup:**
+    -   Copy the example environment file:
+        ```bash
+        cp .env.example .env
+        ```
+    -   Generate an application key:
+        ```bash
+        php artisan key:generate
+        ```
+    -   Edit the `.env` file and configure your database credentials (DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+
+4.  **Database Migration and Seeding:**
+    -   Run migrations and seed the database with initial data (including roles, permissions, and default users):
+        ```bash
+        php artisan migrate:fresh --seed
+        ```
+
+5.  **Install Node.js Dependencies:**
+    ```bash
+    npm install
+    ```
+
+6.  **Build Frontend Assets:**
+    -   Compile the frontend assets (CSS, JavaScript):
+        ```bash
+        npm run build
+        ```
+    -   For development with hot reloading, use:
+        ```bash
+        npm run dev
+        ```
+
+7.  **Start the Local Server:**
+    ```bash
+    php artisan serve
+    ```
+
+8.  **Access the Application:**
+    -   Open your web browser and navigate to the URL provided by `php artisan serve` (e.g., `http://127.0.0.1:8000`).
+
+9.  **Default Login Credentials:**
+    -   **Superadmin:**
+        -   Email: `superadmin@example.com`
+        -   Password: `password`
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
