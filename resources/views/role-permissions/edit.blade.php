@@ -41,10 +41,10 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-12">
-                            <a href="{{ route('role-permissions.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300">Batal</a>
-                            <x-primary-button class="ms-4">
+                            <x-primary-button>
                                 {{ __('Simpan') }}
                             </x-primary-button>
+                            <a href="{{ route('role-permissions.index') }}" class="ms-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300">Batal</a>
                         </div>
                     </form>
 
