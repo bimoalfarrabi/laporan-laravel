@@ -27,8 +27,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        //danru dapat melihat daftar pengguna (di-filter di controller)
-        return $user->hasRole('danru');
+        return $user->can('users:view-any');
     }
 
     /**
@@ -36,13 +35,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        //danru dapat melihat detail pengguna
-        if ($user->hasRole('danru')) {
-            return true;
-        }
-
-        //anggota tidak dapat melihat detail pengguna lain
-        return false;
+        return $user->can('users:view');
     }
 
     /**
@@ -50,7 +43,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('users:create');
     }
 
     /**
@@ -58,7 +51,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return false;
+        return $user->can('users:update');
     }
 
     /**
@@ -66,11 +59,8 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        // superadmin tidak bisa hapus diri sendiri
-        if ($user->hasRole('superadmin') && $user->id === $model->id) {
-            return false;
-        }
-        return false;
+        if ($user->id === $model->id) return false; // tidak bisa hapus diri sendiri
+        return $user->can('users:delete');
     }
 
     /**
@@ -78,7 +68,7 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return false;
+        return $user->can('users:restore');
     }
 
     /**
@@ -86,11 +76,12 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return false;
+        if ($user->id === $model->id) return false; // tidak bisa hapus diri sendiri
+        return $user->can('users:force-delete');
     }
 
     public function resetPassword(User $user, User $model): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->can('users:reset-password');
     }
 }

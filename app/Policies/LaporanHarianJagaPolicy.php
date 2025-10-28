@@ -28,8 +28,7 @@ class LaporanHarianJagaPolicy
      */
     public function viewAny(User $user): bool
     {
-        // super admin sudah di-handle di metode before
-        return in_array($user->role, ['danru', 'anggota']);
+        return $user->can('laporan-harian-jaga:view-any') || $user->can('laporan-harian-jaga:view-own');
     }
 
     /**
@@ -37,14 +36,15 @@ class LaporanHarianJagaPolicy
      */
     public function view(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // super admin sudah di-handle di metode before
-        // danru bisa melihat semua laporan
-        if ($user->role === 'danru') {
+        if ($user->can('laporan-harian-jaga:view-any')) {
             return true;
         }
 
-        // anggota hanya bisa melihat laporannya sendiri
-        return $user->id === $laporanHarianJaga->user_id;
+        if ($user->can('laporan-harian-jaga:view-own')) {
+            return $user->id === $laporanHarianJaga->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -52,9 +52,7 @@ class LaporanHarianJagaPolicy
      */
     public function create(User $user): bool
     {
-        // super admin sudah di-handle di metode before
-        // danru dan anggota bisa membuat laporan
-        return in_array($user->role, ['danru', 'anggota']);
+        return $user->can('laporan-harian-jaga:create');
     }
 
     /**
@@ -62,14 +60,15 @@ class LaporanHarianJagaPolicy
      */
     public function update(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // super admin sudah di-handle di metode before
-        // danru bisa update semua laporan
-        if ($user->role === 'danru') {
+        if ($user->can('laporan-harian-jaga:update-any')) {
             return true;
         }
 
-        // anggota hanya bisa mengupdate laporannya sendiri
-        return $user->id === $laporanHarianJaga->user_id;
+        if ($user->can('laporan-harian-jaga:update-own')) {
+            return $user->id === $laporanHarianJaga->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -77,14 +76,15 @@ class LaporanHarianJagaPolicy
      */
     public function delete(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // super admin sudah di-handle di metode before
-        // danru bisa menghapus semua laporan
-        if ($user->role === 'danru') {
+        if ($user->can('laporan-harian-jaga:delete-any')) {
             return true;
         }
 
-        // anggota hanya bisa menghapus laporannya sendiri
-        return $user->id === $laporanHarianJaga->user_id;
+        if ($user->can('laporan-harian-jaga:delete-own')) {
+            return $user->id === $laporanHarianJaga->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -92,9 +92,7 @@ class LaporanHarianJagaPolicy
      */
     public function restore(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // super admin sudah di-handle di metode before
-        // danru dapat restore laporan, apabila ada soft delete
-        return $user->role === 'danru';
+        return $user->can('laporan-harian-jaga:restore');
     }
 
     /**
@@ -102,7 +100,6 @@ class LaporanHarianJagaPolicy
      */
     public function forceDelete(User $user, LaporanHarianJaga $laporanHarianJaga): bool
     {
-        // hanya super admin yg bisa force delete
-        return false;
+        return $user->can('laporan-harian-jaga:force-delete');
     }
 }

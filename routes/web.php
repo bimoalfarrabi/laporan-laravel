@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ForcePasswordChangeController;
+use App\Http\Controllers\RolePermissionController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -49,6 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::delete('users/{user}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
+
+    // Manajemen Hak Akses
+    Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
+    Route::get('role-permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('role-permissions.edit');
+    Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
 });
 
 require __DIR__ . '/auth.php';

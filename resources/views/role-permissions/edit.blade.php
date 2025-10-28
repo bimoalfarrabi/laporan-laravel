@@ -1,0 +1,87 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Edit Hak Akses untuk Peran: ') . ucfirst($role->name) }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <form action="{{ route('role-permissions.update', $role->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="space-y-10">
+                            @foreach ($permissions as $group => $groupPermissions)
+                                <div class="bg-gray-50 rounded-lg p-6 shadow-sm border border-gray-200">
+                                    <div class="flex justify-between items-center border-b border-gray-300 pb-3 mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ ucfirst($group) }}</h3>
+                                        <div>
+                                            <label class="inline-flex items-center">
+                                                <input type="checkbox" class="select-all-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" data-group="{{ $group }}">
+                                                <span class="ms-2 text-sm font-medium text-gray-700">Select All</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        @foreach ($groupPermissions as $permission)
+                                            <label class="inline-flex items-center">
+                                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                                    class="permission-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                    data-group="{{ $group }}"
+                                                    {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
+                                                <span class="ms-2 text-sm text-gray-600">{{ $permission->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="flex items-center justify-end mt-12">
+                            <a href="{{ route('role-permissions.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300">Batal</a>
+                            <x-primary-button class="ms-4">
+                                {{ __('Simpan') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+
+                    @push('scripts')
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Logic for Select All
+                            document.querySelectorAll('.select-all-checkbox').forEach(masterCheckbox => {
+                                masterCheckbox.addEventListener('change', function () {
+                                    const group = this.dataset.group;
+                                    document.querySelectorAll(`.permission-checkbox[data-group="${group}"]`).forEach(permissionCheckbox => {
+                                        permissionCheckbox.checked = this.checked;
+                                    });
+                                });
+                            });
+
+                            // Logic to update Select All if all children are checked/unchecked
+                            document.querySelectorAll('.permission-checkbox').forEach(permissionCheckbox => {
+                                permissionCheckbox.addEventListener('change', function () {
+                                    const group = this.dataset.group;
+                                    const allCheckboxesInGroup = document.querySelectorAll(`.permission-checkbox[data-group="${group}"]`);
+                                    const masterCheckbox = document.querySelector(`.select-all-checkbox[data-group="${group}"]`);
+                                    masterCheckbox.checked = Array.from(allCheckboxesInGroup).every(c => c.checked);
+                                });
+                            });
+
+                            // Set initial state of Select All checkboxes on page load
+                            document.querySelectorAll('.select-all-checkbox').forEach(masterCheckbox => {
+                                const group = masterCheckbox.dataset.group;
+                                const allCheckboxesInGroup = document.querySelectorAll(`.permission-checkbox[data-group="${group}"]`);
+                                masterCheckbox.checked = Array.from(allCheckboxesInGroup).every(c => c.checked);
+                            });
+                        });
+                    </script>
+                    @endpush
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

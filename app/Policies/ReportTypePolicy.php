@@ -23,7 +23,7 @@ class ReportTypePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('report-types:view-any');
     }
 
     /**
@@ -31,7 +31,8 @@ class ReportTypePolicy
      */
     public function view(User $user, ReportType $reportType): bool
     {
-        return false;
+        // Dalam konteks ini, view sama dengan viewAny, tidak ada pembedaan own/any
+        return $user->can('report-types:view-any');
     }
 
     /**
@@ -39,7 +40,7 @@ class ReportTypePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('report-types:create');
     }
 
     /**
@@ -47,7 +48,7 @@ class ReportTypePolicy
      */
     public function update(User $user, ReportType $reportType): bool
     {
-        return false;
+        return $user->can('report-types:update');
     }
 
     /**
@@ -55,7 +56,7 @@ class ReportTypePolicy
      */
     public function delete(User $user, ReportType $reportType): bool
     {
-        return false;
+        return $user->can('report-types:delete');
     }
 
     /**
@@ -63,7 +64,7 @@ class ReportTypePolicy
      */
     public function restore(User $user, ReportType $reportType): bool
     {
-        return false;
+        return false; // Tidak ada soft delete pada ReportType
     }
 
     /**
@@ -71,6 +72,6 @@ class ReportTypePolicy
      */
     public function forceDelete(User $user, ReportType $reportType): bool
     {
-        return false;
+        return false; // Tidak ada soft delete pada ReportType
     }
 }

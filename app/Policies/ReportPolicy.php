@@ -27,8 +27,7 @@ class ReportPolicy
      */
     public function viewAny(User $user): bool
     {
-        // danru dan anggotas dapat melihat daftar laporan
-        return $user->hasRole(['danru', 'anggota']);
+        return $user->can('reports:view-any') || $user->can('reports:view-own');
     }
 
     /**
@@ -36,13 +35,15 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
-        // danru bisa melihat semua laporan
-        if ($user->hasRole('danru')) {
+        if ($user->can('reports:view-any')) {
             return true;
         }
 
-        // anggota hanya bisa melihat laporannya sendiri
-        return $user->id === $report->user_id;
+        if ($user->can('reports:view-own')) {
+            return $user->id === $report->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -50,8 +51,7 @@ class ReportPolicy
      */
     public function create(User $user): bool
     {
-        // danru dan anggota bisa membuat laporan
-        return $user->hasRole(['danru', 'anggota']);
+        return $user->can('reports:create');
     }
 
     /**
@@ -59,13 +59,15 @@ class ReportPolicy
      */
     public function update(User $user, Report $report): bool
     {
-        // danru bisa mengupdate semua laporan
-        if ($user->hasRole('danru')) {
+        if ($user->can('reports:update-any')) {
             return true;
         }
 
-        // anggota hanya bisa mengupdate laporannya sendiri
-        return $user->id === $report->user_id;
+        if ($user->can('reports:update-own')) {
+            return $user->id === $report->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -73,13 +75,15 @@ class ReportPolicy
      */
     public function delete(User $user, Report $report): bool
     {
-        // danru bisa menghapus semua laporan
-        if ($user->hasRole('danru')) {
+        if ($user->can('reports:delete-any')) {
             return true;
         }
 
-        // anggota hanya bisa menghapus laporannya sendiri
-        return $user->id === $report->user_id;
+        if ($user->can('reports:delete-own')) {
+            return $user->id === $report->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -87,8 +91,7 @@ class ReportPolicy
      */
     public function restore(User $user, Report $report): bool
     {
-        // hanya danru yang bisa mengembalikan laporan
-        return $user->hasRole('danru');
+        return $user->can('reports:restore');
     }
 
     /**
@@ -96,7 +99,6 @@ class ReportPolicy
      */
     public function forceDelete(User $user, Report $report): bool
     {
-        // hanya super admin yang bisa menghapus permanen laporan
-        return false;
+        return $user->can('reports:force-delete');
     }
 }

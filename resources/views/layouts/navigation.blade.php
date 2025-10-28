@@ -30,6 +30,11 @@
                             {{ __('Manajemen Pengguna') }}
                         </x-nav-link>
                     @endcan
+                    @role('superadmin')
+                        <x-nav-link :href="route('role-permissions.index')" :active="request()->routeIs('role-permissions.*')">
+                            {{ __('Manajemen Hak Akses') }}
+                        </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
