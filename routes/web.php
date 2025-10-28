@@ -3,6 +3,7 @@
 use App\Http\Controllers\LaporanHarianJagaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportTypeController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -12,9 +13,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 // perubahan password (diluar grup auth)
 Route::get('/force-password-change', [ForcePasswordChangeController::class, 'showChangeForm'])->name('password.force-change');
