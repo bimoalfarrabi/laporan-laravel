@@ -118,15 +118,17 @@
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
                                                 <a href="{{ route('reports.edit', $report->id) }}"
                                                     class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                                                <form action="{{ route('reports.destroy', $report->id) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900"
-                                                        data-confirm-dialog="true"
-                                                        data-swal-title="Hapus Laporan?"
-                                                        data-swal-text="Laporan akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
-                                                </form>
+                                                @can('delete', $report)
+                                                    <form action="{{ route('reports.destroy', $report->id) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900"
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Hapus Laporan?"
+                                                            data-swal-text="Laporan akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
+                                                    </form>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach

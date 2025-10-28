@@ -10,10 +10,12 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center mb-4 space-x-4">
-                        <a href="{{ route('report-types.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Buat Jenis Laporan Baru
-                        </a>
+                        @can('create', App\Models\ReportType::class)
+                            <a href="{{ route('report-types.create') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Buat Jenis Laporan Baru
+                            </a>
+                        @endcan
                     </div>
 
                     @if (session('success'))
@@ -70,17 +72,21 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('report-types.show', $type->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
-                                                <a href="{{ route('report-types.edit', $type->id) }}"
-                                                    class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                                                <form action="{{ route('report-types.destroy', $type->id) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900"
-                                                        data-confirm-dialog="true"
-                                                        data-swal-title="Hapus Jenis Laporan?"
-                                                        data-swal-text="Semua laporan dengan jenis ini juga akan terhapus. Anda yakin?">Hapus</button>
-                                                </form>
+                                                @can('update', $type)
+                                                    <a href="{{ route('report-types.edit', $type->id) }}"
+                                                        class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
+                                                @endcan
+                                                @can('delete', $type)
+                                                    <form action="{{ route('report-types.destroy', $type->id) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900"
+                                                            data-confirm-dialog="true"
+                                                            data-swal-title="Hapus Jenis Laporan?"
+                                                            data-swal-text="Semua laporan dengan jenis ini juga akan terhapus. Anda yakin?">Hapus</button>
+                                                    </form>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach
