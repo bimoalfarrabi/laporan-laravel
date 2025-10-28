@@ -116,8 +116,10 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('reports.show', $report->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
-                                                <a href="{{ route('reports.edit', $report->id) }}"
-                                                    class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
+                                                @can('update', $report)
+                                                    <a href="{{ route('reports.edit', $report->id) }}"
+                                                        class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
+                                                @endcan
                                                 @can('delete', $report)
                                                     <form action="{{ route('reports.destroy', $report->id) }}"
                                                         method="POST" class="inline">
