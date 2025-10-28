@@ -99,7 +99,19 @@
                                                 {{ $report->user->name }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                {{ ucfirst($report->status) }}
+                                                @php
+                                                    $bgColor = '';
+                                                    if ($report->status == 'belum disetujui') {
+                                                        $bgColor = 'bg-yellow-200 text-yellow-800';
+                                                    } elseif ($report->status == 'disetujui') {
+                                                        $bgColor = 'bg-green-200 text-green-800';
+                                                    } elseif ($report->status == 'ditolak') {
+                                                        $bgColor = 'bg-red-200 text-red-800';
+                                                    }
+                                                @endphp
+                                                <span class="px-2 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }}">
+                                                    {{ ucfirst($report->status) }}
+                                                </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('reports.show', $report->id) }}"

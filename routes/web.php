@@ -40,6 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/{id}/restore', [ReportController::class, 'restore'])->name('reports.restore');
     Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
 
+    // Rute untuk approve dan reject laporan
+    Route::post('/reports/{report}/approve', [ReportController::class, 'approve'])->name('reports.approve');
+    Route::post('/reports/{report}/reject', [ReportController::class, 'reject'])->name('reports.reject');
+
     // Manajemen User
     Route::get('users/archive', [UserController::class, 'archive'])->name('users.archive');
     Route::resource('users', UserController::class)->withTrashed();

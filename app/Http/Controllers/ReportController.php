@@ -143,7 +143,7 @@ class ReportController extends Controller
         $report->report_type_id = $reportType->id;
         $report->user_id = Auth::id();
         $report->data = $reportData; // simpan data
-        $report->status = 'draft'; // default status
+        $report->status = 'belum disetujui'; // default status
         $report->last_edited_by_user_id = Auth::id();
         $report->save();
 
@@ -295,5 +295,31 @@ class ReportController extends Controller
         $report->forceDelete();
 
         return redirect()->route('reports.archive')->with('success', 'Laporan berhasil dihapus secara permanen.');
+    }
+
+    public function approve(Report $report)
+    {
+        $this->authorize('update', $report); // Menggunakan policy yang sama dengan update
+
+        if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
+            $report->status = 'disetujui';
+            $report->save();
+            return redirect()->back()->with('success', 'Laporan disetujui.');
+        }
+
+        abort(403, 'Anda tidak memiliki izin untuk menyetujui laporan ini.');
+    }
+
+    public function reject(Report $report)
+    {
+        $this->authorize('update', $report); // Menggunakan policy yang sama dengan update
+
+        if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
+            $report->status = 'ditolak';
+            $report->save();
+            return redirect()->back()->with('success', 'Laporan ditolak.');
+        }
+
+        abort(403, 'Anda tidak memiliki izin untuk menolak laporan ini.');
     }
 }
