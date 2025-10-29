@@ -113,7 +113,6 @@ class ReportController extends Controller
             } elseif ($field['type'] === 'file') {
                 $rules[] = 'file';
                 $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
-                $rules[] = 'max:2048'; // maksimal 2MB
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
@@ -130,8 +129,50 @@ class ReportController extends Controller
             $fieldName = $field['name'];
             if ($field['type'] === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
-                $path = $file->store('reports/' . Auth::id(), 'public'); // simpan di storage/app/public/reports/{user_id}
-                $reportData[$fieldName] = $path;
+                
+                // --- Native GD Compression Logic ---
+                $originalPath = $file->getRealPath();
+                $originalExtension = strtolower($file->getClientOriginalExtension());
+
+                // Create image resource from uploaded file
+                $imageResource = null;
+                switch ($originalExtension) {
+                    case 'jpg':
+                    case 'jpeg':
+                        $imageResource = imagecreatefromjpeg($originalPath);
+                        break;
+                    case 'png':
+                        $imageResource = imagecreatefrompng($originalPath);
+                        break;
+                    case 'gif':
+                        $imageResource = imagecreatefromgif($originalPath);
+                        break;
+                }
+
+                if ($imageResource) {
+                    // Generate unique filename with .jpg extension
+                    $filename = uniqid() . '.jpg';
+                    $storagePath = 'reports/' . Auth::id() . '/' . $filename;
+                    $publicPath = storage_path('app/public/' . $storagePath);
+
+                    // Ensure directory exists
+                    if (!file_exists(dirname($publicPath))) {
+                        mkdir(dirname($publicPath), 0755, true);
+                    }
+
+                    // Save the compressed image as a JPG
+                    imagejpeg($imageResource, $publicPath, 75); // 75% quality
+
+                    // Free up memory
+                    imagedestroy($imageResource);
+
+                    $reportData[$fieldName] = $storagePath;
+                } else {
+                    // If file type is not supported, store it without compression
+                    $reportData[$fieldName] = $file->store('reports/' . Auth::id(), 'public');
+                }
+                // --- End of Native GD Logic ---
+
             } elseif ($field['type'] === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
             } else {
@@ -199,21 +240,20 @@ class ReportController extends Controller
                 } else {
                     $rules[] = 'nullable';
                 }
-
-                if ($field['type'] === 'date') {
-                    $rules[] = 'date';
-                } elseif ($field['type'] === 'time') {
-                    $rules[] = 'date_format:H:i';
-                } elseif ($field['type'] === 'number') {
-                    $rules[] = 'numeric';
-                } elseif ($field['type'] === 'file') {
-                    $rules[] = 'file';
-                    $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
-                    $rules[] = 'max:2048'; // maksimal 2MB
-                }
-
-                $validationRules[$fieldName] = implode('|', $rules);
             }
+
+            if ($field['type'] === 'date') {
+                $rules[] = 'date';
+            } elseif ($field['type'] === 'time') {
+                $rules[] = 'date_format:H:i';
+            } elseif ($field['type'] === 'number') {
+                $rules[] = 'numeric';
+            } elseif ($field['type'] === 'file') {
+                $rules[] = 'file';
+                $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
+            }
+
+            $validationRules[$fieldName] = implode('|', $rules);
         }
 
         $validator = Validator::make($request->all(), $validationRules);
@@ -225,18 +265,60 @@ class ReportController extends Controller
         // proses upload file dan upload data
         foreach ($reportType->fields_schema as $field) {
             $fieldName = $field['name'];
-            if ($field['type'] === 'file') {
-                if ($request->hasFile($fieldName)) {
-                    // hapus file lama jika ada
-                    if (isset($reportData[$fieldName])) {
-                        Storage::delete(str_replace('/storage/', '', $reportData[$fieldName]));
-                    }
-                    $path = $request->file($fieldName)->store('reports/' . Auth::id(), 'public'); // simpan di storage/app/public/reports/{user_id}
-                    $reportData[$fieldName] = $path;
-                }
-                // jika tidak ada file baru dan file tidak lama, biarkan tetap ada
-                // jika tidak ada file baru dan tidak ada file lama, biarkan null
-            } elseif ($field['type'] === 'checkbox') {
+                        if ($field['type'] === 'file') {
+                            if ($request->hasFile($fieldName)) {
+                                // hapus file lama jika ada
+                                if (isset($reportData[$fieldName])) {
+                                    Storage::disk('public')->delete($reportData[$fieldName]);
+                                }
+                                
+                                $file = $request->file($fieldName);
+            
+                                // --- Native GD Compression Logic ---
+                                $originalPath = $file->getRealPath();
+                                $originalExtension = strtolower($file->getClientOriginalExtension());
+            
+                                // Create image resource from uploaded file
+                                $imageResource = null;
+                                switch ($originalExtension) {
+                                    case 'jpg':
+                                    case 'jpeg':
+                                        $imageResource = imagecreatefromjpeg($originalPath);
+                                        break;
+                                    case 'png':
+                                        $imageResource = imagecreatefrompng($originalPath);
+                                        break;
+                                    case 'gif':
+                                        $imageResource = imagecreatefromgif($originalPath);
+                                        break;
+                                }
+            
+                                if ($imageResource) {
+                                    // Generate unique filename with .jpg extension
+                                    $filename = uniqid() . '.jpg';
+                                    $storagePath = 'reports/' . Auth::id() . '/' . $filename;
+                                    $publicPath = storage_path('app/public/' . $storagePath);
+            
+                                    // Ensure directory exists
+                                    if (!file_exists(dirname($publicPath))) {
+                                        mkdir(dirname($publicPath), 0755, true);
+                                    }
+            
+                                    // Save the compressed image as a JPG
+                                    imagejpeg($imageResource, $publicPath, 75); // 75% quality
+            
+                                    // Free up memory
+                                    imagedestroy($imageResource);
+            
+                                    $reportData[$fieldName] = $storagePath;
+                                } else {
+                                    // If file type is not supported, store it without compression
+                                    $reportData[$fieldName] = $file->store('reports/' . Auth::id(), 'public');
+                                }
+                                // --- End of Native GD Logic ---
+                            }
+                            // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
+                        } elseif ($field['type'] === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
