@@ -41,6 +41,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $anggotaRole = Role::firstOrCreate(['name' => 'anggota']);
 
         // Beri hak akses default ke peran
+        $superAdminRole->givePermissionTo(Permission::all());
         $danruRole->givePermissionTo([
             // Reports
             'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore', 'reports:approve', 'reports:reject',

@@ -8,20 +8,6 @@ use Illuminate\Auth\Access\Response;
 class UserPolicy
 {
 
-    public function before(User $user, string $ability): bool|null
-    {
-        if ($user->hasRole('superadmin')) {
-            // SuperAdmin bisa melakukan semua kecuali menghapus atau mereset password dirinya sendiri
-            if (in_array($ability, ['forceDelete']) && $user->id === auth()->user()->id) { // Tambahkan 'forceDelete'
-                return false; // SuperAdmin tidak bisa menghapus/reset password/forceDelete dirinya sendiri
-            }
-            return true;
-        }
-
-        return null; // lanjutkan cek method lain
-    }
-
-
     /**
      * Determine whether the user can view any models.
      */
@@ -51,6 +37,11 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
+        // A superadmin cannot be updated by anyone, not even another superadmin.
+        if ($model->hasRole('superadmin')) {
+            return false;
+        }
+
         return $user->can('users:update');
     }
 
@@ -59,7 +50,16 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        if ($user->id === $model->id) return false; // tidak bisa hapus diri sendiri
+        // A superadmin cannot be deleted.
+        if ($model->hasRole('superadmin')) {
+            return false;
+        }
+
+        // A user cannot delete themselves.
+        if ($user->id === $model->id) {
+            return false;
+        }
+
         return $user->can('users:delete');
     }
 
@@ -76,12 +76,27 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        if ($user->id === $model->id) return false; // tidak bisa hapus diri sendiri
+        // A superadmin cannot be force-deleted.
+        if ($model->hasRole('superadmin')) {
+            return false;
+        }
+
+        // A user cannot force-delete themselves.
+        if ($user->id === $model->id) {
+            return false;
+        }
+
         return $user->can('users:force-delete');
     }
 
+    /**
+     * Determine whether the user can reset the password for the model.
+     */
     public function resetPassword(User $user, User $model): bool
     {
+        // Per the user's request, resetting a superadmin's password is allowed.
+        // The Spatie Gate::before check will grant this to superadmins.
+        // For other roles, it depends on the permission.
         return $user->can('users:reset-password');
     }
 }
