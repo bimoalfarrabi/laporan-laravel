@@ -18,9 +18,9 @@ class DashboardController extends Controller
         $viewData = [];
 
         if ($user->hasRole('danru')) {
-            $viewData['reportsForApproval'] = Report::where('status', 'belum disetujui')->latest()->get();
+            $viewData['reportsForApproval'] = Report::with('user', 'reportType')->where('status', 'belum disetujui')->latest()->get();
         } elseif ($user->hasRole('anggota')) {
-            $viewData['myRecentReports'] = Report::where('user_id', $user->id)
+            $viewData['myRecentReports'] = Report::with('user', 'reportType')->where('user_id', $user->id)
                 ->latest()
                 ->take(5)
                 ->get();
