@@ -45,4 +45,24 @@ class Report extends Model
     {
         return $this->belongsTo(User::class, 'deleted_by_user_id');
     }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (Report $report) {
+            // Get the schema to identify file fields
+            $schema = $report->reportType->fields_schema ?? [];
+
+            foreach ($schema as $field) {
+                // Check if the field is a file type and if a file path exists in the data
+                if ($field['type'] === 'file' && !empty($report->data[$field['name']])) {
+                    $filePath = $report->data[$field['name']];
+                    // Use Storage facade to delete the file from the public disk
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($filePath);
+                }
+            }
+        });
+    }
 }
