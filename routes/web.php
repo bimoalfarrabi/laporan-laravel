@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ForcePasswordChangeController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\RoleController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -48,6 +49,8 @@ Route::middleware('auth')->group(function () {
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
     Route::get('role-permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('role-permissions.edit');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
-});
+
+    // Manajemen Role
+    Route::resource('roles', RoleController::class)->only(['create', 'store']);});
 
 require __DIR__ . '/auth.php';
