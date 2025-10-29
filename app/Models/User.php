@@ -50,4 +50,19 @@ class User extends Authenticatable
             'must_reset_password' => 'boolean',
         ];
     }
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function ($user) {
+            // Before a user is deleted (soft or force), detach all their roles and permissions.
+            // This prevents orphaned records in the Spatie pivot tables.
+            $user->roles()->detach();
+            $user->permissions()->detach();
+        });
+    }
 }
