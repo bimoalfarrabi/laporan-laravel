@@ -9,10 +9,13 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="flex justify-end mb-4">
+                    <div class="flex items-center mb-4 space-x-4">
                         @if(Auth::user()->hasRole('superadmin'))
-                            <a href="{{ route('roles.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('roles.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Buat Role Baru
+                            </a>
+                            <a href="{{ route('roles.archive') }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-400 focus:bg-yellow-400 active:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Lihat Arsip Role
                             </a>
                         @endif
                     </div>
@@ -34,12 +37,23 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($roles as $role)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($role->name) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('role-permissions.edit', $role->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit Hak Akses</a>
-                                        </td>
-                                    </tr>
+                                    @if ($role->name !== 'superadmin')
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($role->name) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{{ route('role-permissions.edit', $role->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit Hak Akses</a>
+                                                <a href="{{ route('roles.edit', $role->id) }}" class="text-blue-600 hover:text-blue-900 mr-2">Edit Nama</a>
+                                                <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900"
+                                                        data-confirm-dialog="true"
+                                                        data-swal-title="Hapus Role?"
+                                                        data-swal-text="Role akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>

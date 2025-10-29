@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
 
     // Manajemen Role
-    Route::resource('roles', RoleController::class)->only(['create', 'store']);});
+    Route::get('roles/archive', [RoleController::class, 'archive'])->name('roles.archive');
+    Route::resource('roles', RoleController::class)->except(['index', 'show']);
+    Route::post('roles/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed();});
 
 require __DIR__ . '/auth.php';
