@@ -93,16 +93,16 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($reports as $report)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $report->id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $report->reportType->name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $report->user->name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 @php
                                                     $bgColor = '';
                                                     if ($report->status == 'belum disetujui') {
@@ -117,10 +117,10 @@
                                                     {{ ucfirst($report->status) }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$report->created_at" />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td class="px-6 py-4 text-sm font-medium">
                                                 <a href="{{ route('reports.show', $report->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
                                                 @can('update', $report)

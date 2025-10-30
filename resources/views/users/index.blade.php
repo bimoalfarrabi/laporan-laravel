@@ -105,28 +105,28 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($users as $user)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->email }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->nik }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->phone_number }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $user->roles->pluck('name')->join(', ') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$user->created_at" />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td class="px-6 py-4 text-sm font-medium">
                                                 @can('update', $user)
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="text-blue-600 hover:text-blue-900 mr-2">Edit

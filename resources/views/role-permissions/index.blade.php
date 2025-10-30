@@ -40,9 +40,9 @@
                                 @foreach ($roles as $role)
                                     @if ($role->name !== 'superadmin')
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($role->name) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$role->created_at" /></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td class="px-6 py-4">{{ ucfirst($role->name) }}</td>
+                                            <td class="px-6 py-4"><x-waktu-dibuat :date="$role->created_at" /></td>
+                                            <td class="px-6 py-4 text-sm font-medium">
                                                 <a href="{{ route('role-permissions.edit', $role->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit Hak Akses</a>
                                                 <a href="{{ route('roles.edit', $role->id) }}" class="text-blue-600 hover:text-blue-900 mr-2">Edit Nama</a>
                                                 <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="inline">

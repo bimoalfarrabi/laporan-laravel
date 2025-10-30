@@ -61,22 +61,22 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($reportTypes as $type)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $type->id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $type->name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $type->slug }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 {{ $type->is_active ? 'Ya' : 'Tidak' }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$type->created_at" />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td class="px-6 py-4 text-sm font-medium">
                                                 <a href="{{ route('report-types.show', $type->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
                                                 @can('update', $type)
