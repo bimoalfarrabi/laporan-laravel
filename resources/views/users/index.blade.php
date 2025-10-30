@@ -126,7 +126,7 @@
                                             <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$user->created_at" />
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-medium">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 @can('update', $user)
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="text-blue-600 hover:text-blue-900 mr-2">Edit
