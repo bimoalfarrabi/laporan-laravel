@@ -9,6 +9,11 @@ use Illuminate\Support\Str;
 
 class ReportTypeController extends Controller
 {
+    public function explanation()
+    {
+        return view('report-types.explanation');
+    }
+
     /**
      * Display a listing of the resource.
      */

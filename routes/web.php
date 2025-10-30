@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Manajemen Jenis Laporan
+    Route::get('report-types/explanation', [ReportTypeController::class, 'explanation'])->name('report-types.explanation');
     Route::resource('report-types', ReportTypeController::class);
 
     // Laporan
