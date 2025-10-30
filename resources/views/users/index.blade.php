@@ -82,6 +82,14 @@
                                         </th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            NIK
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            No. HP
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Peran (Spatie)
                                         </th>
                                         <th scope="col"
@@ -101,6 +109,12 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{ $user->email }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                {{ $user->nik }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                {{ $user->phone_number }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{ $user->roles->pluck('name')->join(', ') }}

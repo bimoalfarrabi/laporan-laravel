@@ -48,6 +48,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string', // pastikan role valid
+            'nik' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:255',
         ]);
 
         if (!Role::where('name', $request->role)->exists()) {
@@ -59,6 +61,8 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role, // simpan role di kolom role juga
+            'nik' => $request->nik,
+            'phone_number' => $request->phone_number,
         ]);
 
         $user->assignRole($request->role); // tugaskan peran menggunakan spatie
@@ -88,6 +92,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string',
+            'nik' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:255',
         ]);
 
         if (!Role::where('name', $request->role)->exists()) {
@@ -96,6 +102,8 @@ class UserController extends Controller
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->nik = $request->nik;
+        $user->phone_number = $request->phone_number;
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }

@@ -28,6 +28,20 @@
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 
+                        <!-- NIK -->
+                        <div class="mt-4">
+                            <x-input-label for="nik" :value="__('NIK')" />
+                            <x-text-input id="nik" class="block mt-1 w-full" type="text" name="nik" :value="old('nik')" autofocus autocomplete="nik" />
+                            <x-input-error :messages="$errors->get('nik')" class="mt-2" />
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mt-4">
+                            <x-input-label for="phone_number" :value="__('No. HP')" />
+                            <x-text-input id="phone_number" class="block mt-1 w-full" type="text" name="phone_number" :value="old('phone_number')" autofocus autocomplete="phone_number" />
+                            <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
+                        </div>
+
                         <!-- Password -->
                         <div class="mt-4">
                             <x-input-label for="password" :value="__('Password')" />

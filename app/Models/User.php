@@ -25,6 +25,8 @@ class User extends Authenticatable
         'password',
         'role',
         'must_reset_password',
+        'nik',
+        'phone_number',
     ];
 
     /**
