@@ -1,7 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Manajemen Pengguna') }}
+            @if(Auth::user()->hasRole('danru'))
+                {{ __('Manajemen Anggota') }}
+            @else
+                {{ __('Manajemen Pengguna') }}
+            @endif
         </h2>
     </x-slot>
 
@@ -13,13 +17,21 @@
                         <div class="flex items-center mb-4 space-x-4"> {{-- Tambahkan space-x-4 --}}
                             <a href="{{ route('users.create') }}"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                Buat Pengguna Baru
+                                @if(Auth::user()->hasRole('danru'))
+                                    Buat Anggota Baru
+                                @else
+                                    Buat Pengguna Baru
+                                @endif
                             </a>
                             @can('viewAny', App\Models\User::class)
                                 {{-- Tombol Arsip Pengguna --}}
                                 <a href="{{ route('users.archive') }}"
                                     class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-400 focus:bg-yellow-400 active:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Lihat Arsip Pengguna
+                                    @if(Auth::user()->hasRole('danru'))
+                                        Lihat Arsip Anggota
+                                    @else
+                                        Lihat Arsip Pengguna
+                                    @endif
                                 </a>
                             @endcan
                         </div>
@@ -94,6 +106,10 @@
                                         </th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Shift
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Waktu Dibuat
                                         </th>
                                         <th scope="col"
@@ -122,6 +138,9 @@
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $user->roles->pluck('name')->join(', ') }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ ucfirst($user->shift) }}
                                             </td>
                                             <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$user->created_at" />

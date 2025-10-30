@@ -23,37 +23,39 @@ class ReportController extends Controller
 
         $query = Report::query()->with('reportType', 'user');
 
-        if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
-            // Danru/SuperAdmin melihat semua pengguna
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('reportType', function ($qr) use ($search) {
-                        $qr->where('name', 'like', '%' . $search . '%');
-                    })->orWhereHas('user', function ($qr) use ($search) {
-                        $qr->where('name', 'like', '%' . $search . '%');
-                    })
-                        // Untuk search di data JSON, ini akan lebih kompleks.
-                        // Contoh sederhana: cari di 'data' yang berupa string.
-                        // Jika ingin search di JSON, bisa menggunakan where('data->your_field', 'like', ...)
-                    ;
-                });
-            }
-            if ($filterReportTypeId) {
-                $query->where('report_type_id', $filterReportTypeId);
-            }
+        if (Auth::user()->hasRole('superadmin')) {
+            // SuperAdmin can see all reports
+        } elseif (Auth::user()->hasRole('danru')) {
+            // Danru only sees reports from their shift
+            $danruShift = Auth::user()->shift;
+            $query->whereHas('user', function ($q) use ($danruShift) {
+                $q->where('shift', $danruShift);
+            });
         } else {
-            // Anggota hanya melihat miliknya
+            // Anggota only sees their own reports
             $query->where('user_id', Auth::id());
-            if ($search) {
+        }
+
+        if ($search) {
+            if (Auth::user()->hasRole('anggota')) {
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('reportType', function ($qr) use ($search) {
                         $qr->where('name', 'like', '%' . $search . '%');
                     });
                 });
+            } else {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('reportType', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    })->orWhereHas('user', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    });
+                });
             }
-            if ($filterReportTypeId) {
-                $query->where('report_type_id', $filterReportTypeId);
-            }
+        }
+
+        if ($filterReportTypeId) {
+            $query->where('report_type_id', $filterReportTypeId);
         }
 
         $reports = $query->latest()->get();

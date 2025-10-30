@@ -35,6 +35,10 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
+        if ($user->hasRole('danru')) {
+            return $user->shift === $report->user->shift;
+        }
+
         if ($user->can('reports:view-any')) {
             return true;
         }
@@ -104,11 +108,17 @@ class ReportPolicy
 
     public function approve(User $user, Report $report): bool
     {
+        if ($user->hasRole('danru')) {
+            return $user->shift === $report->user->shift && $user->can('reports:approve');
+        }
         return $user->can('reports:approve');
     }
 
     public function reject(User $user, Report $report): bool
     {
+        if ($user->hasRole('danru')) {
+            return $user->shift === $report->user->shift && $user->can('reports:reject');
+        }
         return $user->can('reports:reject');
     }
 }

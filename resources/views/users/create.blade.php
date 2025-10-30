@@ -62,6 +62,7 @@
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
 
+                        @if(Auth::user()->hasRole('superadmin'))
                         <!-- Role -->
                         <div class="mt-4">
                             <x-input-label for="role" :value="__('Peran')" />
@@ -78,6 +79,25 @@
                             </select>
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
+                        @else
+                            <input type="hidden" name="role" value="anggota" />
+                        @endif
+
+                        @if(Auth::user()->hasRole('superadmin'))
+                        <!-- Shift -->
+                        <div class="mt-4">
+                            <x-input-label for="shift" :value="__('Shift')" />
+                            <select id="shift" name="shift"
+                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                required>
+                                <option value="">Pilih Shift</option>
+                                <option value="pagi" {{ old('shift') == 'pagi' ? 'selected' : '' }}>Pagi</option>
+                                <option value="sore" {{ old('shift') == 'sore' ? 'selected' : '' }}>Sore</option>
+                                <option value="malam" {{ old('shift') == 'malam' ? 'selected' : '' }}>Malam</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('shift')" class="mt-2" />
+                        </div>
+                        @endif
 
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button class="ms-4">

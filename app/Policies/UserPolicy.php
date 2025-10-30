@@ -29,6 +29,9 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->hasRole('danru')) {
+            return true;
+        }
         return $user->can('users:create');
     }
 
@@ -58,6 +61,11 @@ class UserPolicy
         // A user cannot delete themselves.
         if ($user->id === $model->id) {
             return false;
+        }
+
+        // Danru can delete anggota in the same shift
+        if ($user->hasRole('danru') && $model->hasRole('anggota') && $user->shift === $model->shift) {
+            return true;
         }
 
         return $user->can('users:delete');

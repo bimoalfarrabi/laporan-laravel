@@ -20,9 +20,15 @@ class UserController extends Controller
         if (Auth::user()->hasRole('superadmin')) {
             $users = User::with('roles')->latest()->get();
         } elseif (Auth::user()->hasRole('danru')) {
-            // danru hanya melihat pengguna dengan peran anggota
-            $anggotaRole = Role::where('name', 'anggota')->first();
-            $users = $anggotaRole ? $anggotaRole->users()->with('roles')->latest()->get() : collect();
+            // danru hanya melihat pengguna dengan peran anggota dalam shift yang sama
+            $danruShift = Auth::user()->shift;
+            $users = User::where('shift', $danruShift)
+                ->whereHas('roles', function ($query) {
+                    $query->where('name', 'anggota');
+                })
+                ->with('roles')
+                ->latest()
+                ->get();
         } else {
             $users = collect(); // anggota tidak melihat daftar pengguna
         }
@@ -33,8 +39,11 @@ class UserController extends Controller
 
     public function create()
     {
-        $this->authorize('create', User::class);
-        $roles = Role::all(); // ambil seluruh role dari spatie
+        if (Auth::user()->hasRole('superadmin')) {
+            $roles = Role::all(); // Superadmin can assign any role
+        } else {
+            $roles = Role::where('name', 'anggota')->get(); // Danru can only assign 'anggota'
+        }
         return view('users.create', compact('roles'));
     }
 
@@ -43,27 +52,45 @@ class UserController extends Controller
 
         $this->authorize('create', User::class);
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string', // pastikan role valid
+            'role' => 'required|string',
             'nik' => 'nullable|string|digits:16',
             'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
-        ]);
+        ];
+
+        if (Auth::user()->hasRole('superadmin')) {
+            $rules['shift'] = 'required|in:pagi,sore,malam';
+        }
+
+        $request->validate($rules);
 
         if (!Role::where('name', $request->role)->exists()) {
             return redirect()->back()->withErrors(['role' => 'Peran yang dipilih tidak valid'])->withInput();
         }
 
-        $user = User::create([
+        $userData = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role, // simpan role di kolom role juga
+            'role' => $request->role,
             'nik' => $request->nik,
             'phone_number' => $request->phone_number,
-        ]);
+        ];
+
+        if (Auth::user()->hasRole('superadmin')) {
+            $userData['shift'] = $request->shift;
+        } elseif (Auth::user()->hasRole('danru')) {
+            $userData['shift'] = Auth::user()->shift;
+            // Ensure danru can only create 'anggota'
+            if ($request->role !== 'anggota') {
+                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat membuat pengguna dengan peran anggota.'])->withInput();
+            }
+        }
+
+        $user = User::create($userData);
 
         $user->assignRole($request->role); // tugaskan peran menggunakan spatie
 
@@ -79,7 +106,11 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $this->authorize('update', $user);
-        $roles = Role::all(); // ambil seluruh role dari spatie
+        if (Auth::user()->hasRole('superadmin')) {
+            $roles = Role::all(); // Superadmin can assign any role
+        } else {
+            $roles = Role::where('name', 'anggota')->get(); // Danru can only assign 'anggota'
+        }
         return view('users.edit', compact('user', 'roles'));
     }
 
@@ -87,14 +118,20 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string',
             'nik' => 'nullable|string|digits:16',
             'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
-        ]);
+        ];
+
+        if (Auth::user()->hasRole('superadmin')) {
+            $rules['shift'] = 'required|in:pagi,sore,malam';
+        }
+
+        $request->validate($rules);
 
         if (!Role::where('name', $request->role)->exists()) {
             return redirect()->back()->withErrors(['role' => 'Peran yang dipilih tidak valid'])->withInput();
@@ -108,6 +145,20 @@ class UserController extends Controller
             $user->password = Hash::make($request->password);
         }
         $user->role = $request->role; // perbarui kolom role juga
+
+        if (Auth::user()->hasRole('superadmin')) {
+            $user->shift = $request->shift;
+        } elseif (Auth::user()->hasRole('danru')) {
+            // Ensure danru can only assign 'anggota'
+            if ($request->role !== 'anggota') {
+                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat mengubah pengguna dengan peran anggota.'])->withInput();
+            }
+            // Danru cannot change shift
+            if ($user->shift !== Auth::user()->shift) {
+                abort(403, 'Anda tidak dapat mengubah shift pengguna di luar shift Anda.');
+            }
+        }
+
         $user->save();
 
         // Perbarui peran Spatie

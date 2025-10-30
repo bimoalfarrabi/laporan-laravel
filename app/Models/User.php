@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'shift',
         'must_reset_password',
         'nik',
         'phone_number',
