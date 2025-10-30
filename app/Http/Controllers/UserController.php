@@ -48,8 +48,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string', // pastikan role valid
-            'nik' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|string|max:255',
+            'nik' => 'nullable|string|digits:16',
+            'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
         ]);
 
         if (!Role::where('name', $request->role)->exists()) {
@@ -92,8 +92,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string',
-            'nik' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|string|max:255',
+            'nik' => 'nullable|string|digits:16',
+            'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
         ]);
 
         if (!Role::where('name', $request->role)->exists()) {
