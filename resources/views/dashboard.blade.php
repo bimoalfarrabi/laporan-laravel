@@ -28,7 +28,7 @@
                                             <tr>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->created_at->diffForHumans() }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat & Setujui/Tolak</a>
                                                 </td>
@@ -62,7 +62,7 @@
                                         @foreach ($myRecentReports as $report)
                                             <tr>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->created_at->diffForHumans() }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
                                                         $bgColor = '';
@@ -112,7 +112,7 @@
                                             <tr>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->created_at->diffForHumans() }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
                                                         $bgColor = '';
