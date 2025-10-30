@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/{report}/approve', [ReportController::class, 'approve'])->name('reports.approve');
     Route::post('/reports/{report}/reject', [ReportController::class, 'reject'])->name('reports.reject');
 
+    // Rute untuk export PDF laporan
+    Route::get('/reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+
     // Manajemen User
     Route::get('users/archive', [UserController::class, 'archive'])->name('users.archive');
     Route::resource('users', UserController::class)->withTrashed();

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -405,5 +406,13 @@ class ReportController extends Controller
         }
 
         abort(403, 'Anda tidak memiliki izin untuk menolak laporan ini.');
+    }
+
+    public function exportPdf(Report $report)
+    {
+        $this->authorize('view', $report); // Use the existing view policy
+
+        $pdf = Pdf::loadView('reports.pdf', compact('report'));
+        return $pdf->download('laporan-' . $report->id . '.pdf');
     }
 }

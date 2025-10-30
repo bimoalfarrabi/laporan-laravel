@@ -108,7 +108,7 @@
 
                     {{-- Action Buttons --}}
                     <div class="flex items-center justify-end mt-8 pt-6 border-t">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-4">
                             @if ($report->deleted_at)
                                 @can('restore', $report)
                                     <form action="{{ route('reports.restore', $report->id) }}" method="POST">
@@ -155,8 +155,14 @@
 
                                 @can('update', $report)
                                     <a href="{{ route('reports.edit', $report->id) }}"
-                                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         {{ __('Edit') }}
+                                    </a>
+                                @endcan
+                                @can('view', $report) {{-- Use view policy to check if user can export --}}
+                                    <a href="{{ route('reports.exportPdf', $report->id) }}"
+                                        class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-500 focus:bg-purple-500 active:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        {{ __('Export PDF') }}
                                     </a>
                                 @endcan
                             @endif
