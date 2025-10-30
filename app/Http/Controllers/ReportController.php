@@ -417,6 +417,10 @@ class ReportController extends Controller
         $this->authorize('view', $report); // Use the existing view policy
 
         $pdf = Pdf::loadView('reports.pdf', compact('report'));
-        return $pdf->download('laporan-' . $report->id . '.pdf');
+        $accountName = Str::slug(Auth::user()->name);
+        $reportTypeName = Str::slug($report->reportType->name);
+        $timestamp = $report->created_at->format('YmdHis');
+        $filename = $accountName . '-' . $reportTypeName . '-' . $timestamp . '.pdf';
+        return $pdf->download($filename);
     }
 }
