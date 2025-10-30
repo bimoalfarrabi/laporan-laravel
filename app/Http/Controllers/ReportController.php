@@ -165,8 +165,24 @@ class ReportController extends Controller
                         mkdir(dirname($publicPath), 0755, true);
                     }
 
-                    // Save the compressed image as a JPG
-                    imagejpeg($imageResource, $publicPath, 75); // 75% quality
+                    $quality = 90; // Start with high quality
+                    $maxFileSize = 1024 * 1024; // 1MB in bytes
+                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+                    do {
+                        // Save the image with current quality to a temporary file
+                        imagejpeg($imageResource, $tempPath, $quality);
+                        $fileSize = filesize($tempPath);
+
+                        if ($fileSize > $maxFileSize && $quality > 10) {
+                            $quality -= 5; // Reduce quality
+                        } else {
+                            break; // Exit loop if size is acceptable or quality is too low
+                        }
+                    } while ($quality >= 10);
+
+                    // Move the compressed image from temporary path to public storage
+                    rename($tempPath, $publicPath);
 
                     // Free up memory
                     imagedestroy($imageResource);
@@ -311,8 +327,24 @@ class ReportController extends Controller
                                         mkdir(dirname($publicPath), 0755, true);
                                     }
 
-                                    // Save the compressed image as a JPG
-                                    imagejpeg($imageResource, $publicPath, 75); // 75% quality
+                                    $quality = 90; // Start with high quality
+                                    $maxFileSize = 1024 * 1024; // 1MB in bytes
+                                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+                                    do {
+                                        // Save the image with current quality to a temporary file
+                                        imagejpeg($imageResource, $tempPath, $quality);
+                                        $fileSize = filesize($tempPath);
+
+                                        if ($fileSize > $maxFileSize && $quality > 10) {
+                                            $quality -= 5; // Reduce quality
+                                        } else {
+                                            break; // Exit loop if size is acceptable or quality is too low
+                                        }
+                                    } while ($quality >= 10);
+
+                                    // Move the compressed image from temporary path to public storage
+                                    rename($tempPath, $publicPath);
 
                                     // Free up memory
                                     imagedestroy($imageResource);
