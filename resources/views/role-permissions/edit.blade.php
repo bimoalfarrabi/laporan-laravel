@@ -14,6 +14,34 @@
                         @method('PUT')
 
                         <div class="space-y-10">
+                            @if ($role->name === 'danru')
+                                <div class="bg-blue-50 rounded-lg p-6 shadow-sm border border-blue-200">
+                                    <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-300 pb-3 mb-4">Hak Akses Tambahan untuk Danru (Otomatis)</h3>
+                                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="text-sm text-gray-600">Membuat anggota baru dalam shift-nya</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="text-sm text-gray-600">Menghapus anggota dalam shift-nya</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="text-sm text-gray-600">Melihat laporan dari anggota dalam shift-nya</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="text-sm text-gray-600">Menyetujui laporan dari anggota dalam shift-nya</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="text-sm text-gray-600">Menolak laporan dari anggota dalam shift-nya</span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-4 text-xs text-gray-500">Hak akses ini diatur secara otomatis dalam sistem dan tidak dapat diubah dari halaman ini.</p>
+                                </div>
+                            @endif
                             @foreach ($permissions as $group => $groupPermissions)
                                 <div class="bg-gray-50 rounded-lg p-6 shadow-sm border border-gray-200">
                                     <div class="flex justify-between items-center border-b border-gray-300 pb-3 mb-4">
@@ -33,6 +61,9 @@
                                                     data-group="{{ $group }}"
                                                     {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
                                                 <span class="ms-2 text-sm text-gray-600">{{ $permission->name }}</span>
+                                                @if ($role->name === 'danru' && in_array($permission->name, ['reports:approve', 'reports:reject', 'reports:view-any']))
+                                                    <span class="ms-2 text-xs text-blue-500">(Hanya untuk shift sendiri)</span>
+                                                @endif
                                             </label>
                                         @endforeach
                                     </div>
