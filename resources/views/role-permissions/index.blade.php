@@ -32,6 +32,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Peran</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Dibuat</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
@@ -40,6 +41,7 @@
                                     @if ($role->name !== 'superadmin')
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($role->name) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$role->created_at" /></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('role-permissions.edit', $role->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit Hak Akses</a>
                                                 <a href="{{ route('roles.edit', $role->id) }}" class="text-blue-600 hover:text-blue-900 mr-2">Edit Nama</a>

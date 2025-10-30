@@ -94,6 +94,10 @@
                                         </th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Waktu Dibuat
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Aksi
                                         </th>
                                     </tr>
@@ -118,6 +122,9 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{ $user->roles->pluck('name')->join(', ') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <x-waktu-dibuat :date="$user->created_at" />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 @can('update', $user)
