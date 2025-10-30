@@ -46,13 +46,13 @@
 
                     {{-- Form Search dan Filter --}}
                     <form method="GET" action="{{ route('users.index') }}" class="mb-4">
-                        <div class="flex flex-wrap items-center space-x-8">
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <input type="text" name="search" placeholder="Cari nama atau email..."
                                 value="{{ $search }}"
-                                class="block w-full md:w-1/3 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="block w-full sm:w-auto flex-grow border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             @if (Auth::user()->hasRole('superadmin')) {{-- Hanya SuperAdmin yang bisa filter peran --}}
                                 <select name="role"
-                                    class="block w-full md:w-1/4 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <option value="">Semua Peran</option>
                                     @foreach ($roles as $role)
                                         <option value="{{ $role->name }}"
@@ -62,11 +62,11 @@
                                     @endforeach
                                 </select>
                             @endif
-                            <x-primary-button type="submit">
+                            <x-primary-button type="submit" class="w-full sm:w-auto">
                                 {{ __('Filter') }}
                             </x-primary-button>
                             <a href="{{ route('users.index') }}"
-                                class="inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full sm:w-auto">
                                 {{ __('Reset') }}
                             </a>
                         </div>

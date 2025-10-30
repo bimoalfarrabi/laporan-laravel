@@ -98,6 +98,26 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @can('viewAny', App\Models\ReportType::class)
+                <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
+                    {{ __('Manajemen Jenis Laporan') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('viewAny', App\Models\Report::class)
+                <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                    {{ __('Laporan') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('viewAny', App\Models\User::class)
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('Manajemen Pengguna') }}
+                </x-responsive-nav-link>
+            @endcan
+            @role('superadmin')
+                <x-responsive-nav-link :href="route('role-permissions.index')" :active="request()->routeIs('role-permissions.*')">
+                    {{ __('Manajemen Hak Akses') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
