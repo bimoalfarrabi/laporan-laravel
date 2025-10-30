@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -132,7 +133,7 @@ class ReportController extends Controller
             $fieldName = $field['name'];
             if ($field['type'] === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
-                
+
                 // --- Native GD Compression Logic ---
                 $originalPath = $file->getRealPath();
                 $originalExtension = strtolower($file->getClientOriginalExtension());
@@ -153,8 +154,9 @@ class ReportController extends Controller
                 }
 
                 if ($imageResource) {
-                    // Generate unique filename with .jpg extension
-                    $filename = uniqid() . '.jpg';
+                    $accountName = Str::slug(Auth::user()->name);
+                    $timestamp = now()->format('YmdHis');
+                    $filename = $accountName . '-' . $timestamp . '.jpg';
                     $storagePath = 'reports/' . Auth::id() . '/' . $filename;
                     $publicPath = storage_path('app/public/' . $storagePath);
 
@@ -274,13 +276,13 @@ class ReportController extends Controller
                                 if (isset($reportData[$fieldName])) {
                                     Storage::disk('public')->delete($reportData[$fieldName]);
                                 }
-                                
+
                                 $file = $request->file($fieldName);
-            
+
                                 // --- Native GD Compression Logic ---
                                 $originalPath = $file->getRealPath();
                                 $originalExtension = strtolower($file->getClientOriginalExtension());
-            
+
                                 // Create image resource from uploaded file
                                 $imageResource = null;
                                 switch ($originalExtension) {
@@ -295,24 +297,26 @@ class ReportController extends Controller
                                         $imageResource = imagecreatefromgif($originalPath);
                                         break;
                                 }
-            
+
                                 if ($imageResource) {
                                     // Generate unique filename with .jpg extension
-                                    $filename = uniqid() . '.jpg';
+                                    $accountName = Str::slug(Auth::user()->name);
+                                    $timestamp = now()->format('YmdHis');
+                                    $filename = $accountName . '-' . $timestamp . '.jpg';
                                     $storagePath = 'reports/' . Auth::id() . '/' . $filename;
                                     $publicPath = storage_path('app/public/' . $storagePath);
-            
+
                                     // Ensure directory exists
                                     if (!file_exists(dirname($publicPath))) {
                                         mkdir(dirname($publicPath), 0755, true);
                                     }
-            
+
                                     // Save the compressed image as a JPG
                                     imagejpeg($imageResource, $publicPath, 75); // 75% quality
-            
+
                                     // Free up memory
                                     imagedestroy($imageResource);
-            
+
                                     $reportData[$fieldName] = $storagePath;
                                 } else {
                                     // If file type is not supported, store it without compression
