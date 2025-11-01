@@ -18,7 +18,14 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewData = [];
 
-        $viewData['announcements'] = Announcement::with('user')->latest()->take(5)->get();
+        $viewData['announcements'] = Announcement::with('user')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->latest()
+            ->take(5)
+            ->get();
 
         if ($user->hasRole('danru')) {
             $danruShift = $user->shift;

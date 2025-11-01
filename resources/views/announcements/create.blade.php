@@ -26,6 +26,13 @@
                             <x-input-error :messages="$errors->get('content')" class="mt-2" />
                         </div>
 
+                        <!-- Expires At -->
+                        <div class="mt-4">
+                            <x-input-label for="expires_at" :value="__('Tanggal Kedaluwarsa (Opsional)')" />
+                            <x-text-input id="expires_at" class="block mt-1 w-full" type="datetime-local" name="expires_at" :value="old('expires_at')" />
+                            <x-input-error :messages="$errors->get('expires_at')" class="mt-2" />
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button class="ms-4">
                                 {{ __('Simpan') }}

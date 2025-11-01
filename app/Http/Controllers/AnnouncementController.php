@@ -18,7 +18,13 @@ class AnnouncementController extends Controller
      */
     public function index()
     {
-        $announcements = Announcement::with('user')->latest()->get();
+        $announcements = Announcement::with('user')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->latest()
+            ->get();
         return view('announcements.index', compact('announcements'));
     }
 
@@ -38,11 +44,13 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'expires_at' => 'nullable|date|after:now',
         ]);
 
         Announcement::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
+            'expires_at' => $request->input('expires_at'),
             'user_id' => Auth::id(),
         ]);
 
@@ -73,11 +81,13 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'expires_at' => 'nullable|date|after:now',
         ]);
 
         $announcement->update([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
+            'expires_at' => $request->input('expires_at'),
         ]);
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil diperbarui.');

@@ -19,11 +19,19 @@
                         @if ($announcements->isNotEmpty())
                             <div class="space-y-4">
                                 @foreach ($announcements as $announcement)
-                                    <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 shadow-md rounded-lg">
+                                    <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 shadow-md rounded-lg {{ $announcement->expires_at && $announcement->expires_at->isPast() ? 'opacity-60' : '' }}">
                                         <div class="flex justify-between items-center">
                                             <h4 class="font-bold text-lg">{{ $announcement->title }}</h4>
-                                            <div class="text-sm text-gray-600">
-                                                Dibuat oleh {{ $announcement->user->name }} pada <x-waktu-dibuat :date="$announcement->created_at" />
+                                            <div class="text-sm text-gray-600 text-right">
+                                                Dibuat oleh {{ $announcement->user->name }} pada <x-waktu-dibuat :date="$announcement->created_at" /><br>
+                                                @if ($announcement->expires_at)
+                                                    Berakhir pada <x-waktu-dibuat :date="$announcement->expires_at" />
+                                                    @if ($announcement->expires_at->isPast())
+                                                        <span class="text-red-500 font-semibold">(Kedaluwarsa)</span>
+                                                    @endif
+                                                @else
+                                                    Tidak ada tanggal kedaluwarsa
+                                                @endif
                                                 @if ($announcement->created_at != $announcement->updated_at)
                                                     (diedit pada <x-waktu-dibuat :date="$announcement->updated_at" />)
                                                 @endif

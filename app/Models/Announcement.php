@@ -13,7 +13,12 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'content',
+        'expires_at',
         'user_id',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
     ];
 
     public function user()
