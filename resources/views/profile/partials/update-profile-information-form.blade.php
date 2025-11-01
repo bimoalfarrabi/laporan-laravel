@@ -19,17 +19,29 @@
 
         <div>
             <x-input-label for="name" :value="__('Nama')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-100" :value="old('name', $user->name)" required autofocus autocomplete="name" readonly />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div>
             <x-input-label for="username" :value="__('Username')" />
-            <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" :value="old('username', $user->username)" required autocomplete="username" />
+            <x-text-input id="username" name="username" type="text" class="mt-1 block w-full bg-gray-100" :value="old('username', $user->username)" required autocomplete="username" readonly />
             <x-input-error class="mt-2" :messages="$errors->get('username')" />
         </div>
 
         <div>
+            <x-input-label for="nik" :value="__('NIK')" />
+            <x-text-input id="nik" name="nik" type="text" class="mt-1 block w-full bg-gray-100" :value="old('nik', $user->nik)" required autocomplete="nik" readonly />
+            <x-input-error class="mt-2" :messages="$errors->get('nik')" />
+        </div>
+
+        <div>
+            <x-input-label for="phone_number" :value="__('No. HP')" />
+            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" autocomplete="phone_number" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
+        </div>
+
+        {{-- <div>
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
@@ -51,7 +63,7 @@
                     @endif
                 </div>
             @endif
-        </div>
+        </div> --}}
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Simpan') }}</x-primary-button>
