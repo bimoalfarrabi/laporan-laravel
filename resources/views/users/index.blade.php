@@ -47,7 +47,7 @@
                     {{-- Form Search dan Filter --}}
                     <form method="GET" action="{{ route('users.index') }}" class="mb-4">
                         <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <input type="text" name="search" placeholder="Cari nama atau email..."
+                            <input type="text" name="search" placeholder="Cari nama, username, atau email..."
                                 value="{{ $search }}"
                                 class="block w-full sm:w-auto flex-grow border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             @if (Auth::user()->hasRole('superadmin')) {{-- Hanya SuperAdmin yang bisa filter peran --}}
@@ -81,12 +81,16 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="sticky left-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             ID
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="sticky left-16 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Nama
+                                        </th>
+                                        <th scope="col"
+                                            class="sticky left-48 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Username
                                         </th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -121,11 +125,14 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($users as $user)
                                         <tr>
-                                            <td class="px-6 py-4">
+                                            <td class="sticky left-0 bg-white px-6 py-4">
                                                 {{ $user->id }}
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="sticky left-16 bg-white px-6 py-4">
                                                 {{ $user->name }}
+                                            </td>
+                                            <td class="sticky left-48 bg-white px-6 py-4 whitespace-nowrap">
+                                                {{ $user->username }}
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $user->email }}

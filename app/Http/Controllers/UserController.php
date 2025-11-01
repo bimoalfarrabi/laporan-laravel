@@ -18,7 +18,20 @@ class UserController extends Controller
         $filterRole = $request->query('role');
 
         if (Auth::user()->hasRole('superadmin')) {
-            $users = User::with('roles')->latest()->get();
+            $query = User::with('roles');
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('username', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            }
+            if ($filterRole) {
+                $query->whereHas('roles', function ($q) use ($filterRole) {
+                    $q->where('name', $filterRole);
+                });
+            }
+            $users = $query->latest()->get();
         } elseif (Auth::user()->hasRole('danru')) {
             // danru hanya melihat pengguna dengan peran anggota dalam shift yang sama
             $danruShift = Auth::user()->shift;
@@ -54,7 +67,8 @@ class UserController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
+            'username' => 'required|string|max:255|unique:users,username',
+            'email' => 'nullable|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string',
             'nik' => 'nullable|string|digits:16',
@@ -73,6 +87,7 @@ class UserController extends Controller
 
         $userData = [
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
@@ -120,7 +135,8 @@ class UserController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string',
             'nik' => 'nullable|string|digits:16',
@@ -138,6 +154,7 @@ class UserController extends Controller
         }
 
         $user->name = $request->name;
+        $user->username = $request->username;
         $user->email = $request->email;
         $user->nik = $request->nik;
         $user->phone_number = $request->phone_number;
@@ -205,6 +222,7 @@ class UserController extends Controller
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('username', 'like', '%' . $search . '%')
                         ->orWhere('email', 'like', '%' . $search . '%');
                 });
             }
