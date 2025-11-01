@@ -29,17 +29,15 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
-                        <!-- Fields Schema (JSON) -->
-                        <div class="mt-4">
-                            <x-input-label for="fields_schema" :value="__('Skema Field (JSON)')" />
-                            <textarea id="fields_schema" name="fields_schema" rows="10"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                required>{{ old('fields_schema', json_encode($reportType->fields_schema, JSON_PRETTY_PRINT)) }}</textarea>
-                            <x-input-error :messages="$errors->get('fields_schema')" class="mt-2" />
-                            <p class="text-sm text-gray-600 mt-1">Contoh: `[{"name": "patrol_date", "label": "Tanggal
-                                Patroli", "type": "date",
-                                "required": true}, {"name": "route_name", "label": "Nama Rute", "type": "text",
-                                "required": true}]`</p>
+                        <!-- Dynamic Fields Builder -->
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold mb-3">Field Laporan</h3>
+                            <div id="fields-container" class="space-y-4">
+                                <!-- Field templates will be added here by JavaScript -->
+                            </div>
+                            <button type="button" id="add-field" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                                Tambah Field
+                            </button>
                         </div>
 
                         <!-- Is Active -->
@@ -61,4 +59,73 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fieldsContainer = document.getElementById('fields-container');
+            const addFieldButton = document.getElementById('add-field');
+            let fieldCounter = 0;
+
+            const fieldTypes = @json($fieldTypes);
+            const existingFields = @json($reportType->reportTypeFields);
+
+            function addField(field = {}) {
+                const newFieldId = `field-${fieldCounter++}`;
+                const fieldHtml = `
+                    <div class="field-item p-4 border rounded-md bg-gray-50 relative">
+                        <button type="button" class="remove-field absolute top-1 right-1 text-red-500 hover:text-red-700 z-10">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="${newFieldId}-label" value="Label" />
+                                <x-text-input id="${newFieldId}-label" class="block mt-1 w-full" type="text" name="fields[${newFieldId}][label]" value="${field.label || ''}" required />
+                            </div>
+                            <div>
+                                <x-input-label for="${newFieldId}-name" value="Nama Field (snake_case)" />
+                                <x-text-input id="${newFieldId}-name" class="block mt-1 w-full" type="text" name="fields[${newFieldId}][name]" value="${field.name || ''}" required />
+                            </div>
+                            <div>
+                                <x-input-label for="${newFieldId}-type" value="Tipe Field" />
+                                <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    ${fieldTypes.map(type => `<option value="${type}" ${field.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="flex items-center mt-6">
+                                <input type="checkbox" id="${newFieldId}-required" name="fields[${newFieldId}][required]" value="1" ${field.required ? 'checked' : ''} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <x-input-label for="${newFieldId}-required" value="Wajib Diisi" class="ms-2" />
+                            </div>
+                            <input type="hidden" name="fields[${newFieldId}][order]" class="field-order" value="${field.order || 0}">
+                            ${field.id ? `<input type="hidden" name="fields[${newFieldId}][id]" value="${field.id}">` : ''}
+                        </div>
+                    </div>
+                `;
+                fieldsContainer.insertAdjacentHTML('beforeend', fieldHtml);
+                updateFieldOrder();
+            }
+
+            function updateFieldOrder() {
+                Array.from(fieldsContainer.children).forEach((item, index) => {
+                    item.querySelector('.field-order').value = index;
+                });
+            }
+
+            addFieldButton.addEventListener('click', () => addField());
+
+            fieldsContainer.addEventListener('click', function (event) {
+                if (event.target.closest('.remove-field')) {
+                    event.target.closest('.field-item').remove();
+                    updateFieldOrder();
+                }
+            });
+
+            // Pre-populate fields for edit mode
+            existingFields.forEach(field => addField(field));
+
+            // Initial field order update
+            updateFieldOrder();
+        });
+    </script>
+    @endpush
 </x-app-layout>

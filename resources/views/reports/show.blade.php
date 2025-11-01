@@ -62,35 +62,35 @@
                     <div>
                         <h3 class="font-semibold text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
                         <div class="space-y-4">
-                            @foreach ($report->reportType->fields_schema as $field)
+                            @foreach ($report->reportType->reportTypeFields as $field)
                                 <div class="p-4 border rounded-lg">
-                                    <strong class="text-gray-600">{{ $field['label'] }}:</strong>
+                                    <strong class="text-gray-600">{{ $field->label }}:</strong>
                                     <div class="mt-1 text-gray-900">
-                                        @if ($field['type'] === 'textarea' || $field['type'] === 'text')
-                                            <p class="whitespace-pre-wrap">{{ $report->data[$field['name']] ?? '-' }}
+                                        @if ($field->type === 'textarea' || $field->type === 'text')
+                                            <p class="whitespace-pre-wrap">{{ $report->data[$field->name] ?? '-' }}
                                             </p>
-                                        @elseif ($field['type'] === 'date')
-                                            {{ isset($report->data[$field['name']]) ? Carbon\Carbon::parse($report->data[$field['name']])->format('d-m-Y') : '-' }}
-                                        @elseif ($field['type'] === 'time')
-                                            {{ $report->data[$field['name']] ?? '-' }}
-                                        @elseif ($field['type'] === 'checkbox')
+                                        @elseif ($field->type === 'date')
+                                            {{ isset($report->data[$field->name]) ? Carbon\Carbon::parse($report->data[$field->name])->format('d-m-Y') : '-' }}
+                                        @elseif ($field->type === 'time')
+                                            {{ $report->data[$field->name] ?? '-' }}
+                                        @elseif ($field->type === 'checkbox')
                                             <span
-                                                class="{{ $report->data[$field['name']] ?? false ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $report->data[$field['name']] ?? false ? 'Ya' : 'Tidak' }}
+                                                class="{{ ($report->data[$field->name] ?? false) ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ ($report->data[$field->name] ?? false) ? 'Ya' : 'Tidak' }}
                                             </span>
-                                        @elseif ($field['type'] === 'file')
-                                            @if (isset($report->data[$field['name']]) && $report->data[$field['name']] && Storage::disk('public')->exists($report->data[$field['name']]))
+                                        @elseif ($field->type === 'file')
+                                            @if (isset($report->data[$field->name]) && $report->data[$field->name] && Storage::disk('public')->exists($report->data[$field->name]))
                                                 <div>
-                                                    <a href="{{ Storage::url($report->data[$field['name']]) }}"
+                                                    <a href="{{ Storage::url($report->data[$field->name]) }}"
                                                         target="_blank" class="text-blue-600 hover:underline">Lihat
                                                         File</a>
 
                                                     @php
-                                                        $extension = pathinfo($report->data[$field['name']], PATHINFO_EXTENSION);
+                                                        $extension = pathinfo($report->data[$field->name], PATHINFO_EXTENSION);
                                                     @endphp
                                                     @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg']))
-                                                        <img src="{{ Storage::url($report->data[$field['name']]) }}"
-                                                            alt="{{ $field['label'] }}"
+                                                        <img src="{{ Storage::url($report->data[$field->name]) }}"
+                                                            alt="{{ $field->label }}"
                                                             class="max-w-xs h-auto object-cover rounded-md mt-2 shadow-md">
                                                     @endif
                                                 </div>
@@ -98,7 +98,7 @@
                                                 <p class="text-red-500">foto telah dihapus</p>
                                             @endif
                                         @else
-                                            {{ $report->data[$field['name']] ?? '-' }}
+                                            {{ $report->data[$field->name] ?? '-' }}
                                         @endif
                                     </div>
                                 </div>

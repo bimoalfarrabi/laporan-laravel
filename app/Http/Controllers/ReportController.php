@@ -92,29 +92,29 @@ class ReportController extends Controller
     {
         $this->authorize('create', Report::class); // Otorisasi untuk menyimpan laporan
 
-        $reportType = ReportType::findOrFail($request->report_type_id);
+        $reportType = ReportType::with('reportTypeFields')->findOrFail($request->report_type_id);
 
-        // bangun aturan validasi dinamis berdasarkan fields_schema
+        // bangun aturan validasi dinamis berdasarkan reportTypeFields
         $validationRules = [];
         $reportData = []; // untuk menyimpan data laporan
 
-        foreach ($reportType->fields_schema as $field) {
-            $fieldName = $field['name'];
+        foreach ($reportType->reportTypeFields as $field) {
+            $fieldName = $field->name;
             $rules = [];
 
-            if (isset($field['required']) && $field['required']) {
+            if ($field->required) {
                 $rules[] = 'required';
             } else {
                 $rules[] = 'nullable';
             }
             // tambahkan validasi tipe data jika diperlukan
-            if ($field['type'] === 'date') {
+            if ($field->type === 'date') {
                 $rules[] = 'date';
-            } elseif ($field['type'] === 'time') {
+            } elseif ($field->type === 'time') {
                 $rules[] = 'date_format:H:i';
-            } elseif ($field['type'] === 'number') {
+            } elseif ($field->type === 'number') {
                 $rules[] = 'numeric';
-            } elseif ($field['type'] === 'file') {
+            } elseif ($field->type === 'file') {
                 $rules[] = 'file';
                 $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
             }
@@ -129,14 +129,19 @@ class ReportController extends Controller
         }
 
         // proses upload file dan siapkan data
-        foreach ($reportType->fields_schema as $field) {
-            $fieldName = $field['name'];
-            if ($field['type'] === 'file' && $request->hasFile($fieldName)) {
+        foreach ($reportType->reportTypeFields as $field) {
+            $fieldName = $field->name;
+            if ($field->type === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
 
                 // --- Native GD Compression Logic ---
                 $originalPath = $file->getRealPath();
                 $originalExtension = strtolower($file->getClientOriginalExtension());
+
+                // Generate unique filename with .jpg extension
+                $accountName = Str::slug(Auth::user()->name);
+                $timestamp = now()->format('YmdHis');
+                $filename = $accountName . '-' . $timestamp . '.jpg';
 
                 // Create image resource from uploaded file
                 $imageResource = null;
@@ -154,8 +159,6 @@ class ReportController extends Controller
                 }
 
                 if ($imageResource) {
-                    $accountName = Str::slug(Auth::user()->name);
-                    $timestamp = now()->format('YmdHis');
                     $year = now()->format('Y');
                     $month = now()->format('m');
                     $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
@@ -242,35 +245,34 @@ class ReportController extends Controller
     {
         $this->authorize('update', $report); // Otorisasi untuk memperbarui laporan
 
-        $reportType = $report->reportType;
+        $reportType = ReportType::with('reportTypeFields')->findOrFail($report->report_type_id);
 
         $validationRules = [];
         $reportData = $report->data; // untuk menyimpan data laporan
 
-        // bangun aturan validasi dinamis berdasarkan fields_schema
-        $validationRules = [];
-        foreach ($reportType->fields_schema as $field) {
-            $fieldName = $field['name'];
+        // bangun aturan validasi dinamis berdasarkan reportTypeFields
+        foreach ($reportType->reportTypeFields as $field) {
+            $fieldName = $field->name;
             $rules = [];
 
-            if (isset($field['required']) && $field['required']) {
+            if ($field->required) {
                 // jika required dan type file, hanya required jika tidak ada file lama
-                if ($field['type'] === 'file' && !isset($reportData[$fieldName])) {
+                if ($field->type === 'file' && !isset($reportData[$fieldName])) {
                     $rules[] = 'required';
-                } elseif ($field['type'] !== 'file') {
+                } elseif ($field->type !== 'file') {
                     $rules[] = 'required';
                 } else {
                     $rules[] = 'nullable';
                 }
             }
 
-            if ($field['type'] === 'date') {
+            if ($field->type === 'date') {
                 $rules[] = 'date';
-            } elseif ($field['type'] === 'time') {
+            } elseif ($field->type === 'time') {
                 $rules[] = 'date_format:H:i';
-            } elseif ($field['type'] === 'number') {
+            } elseif ($field->type === 'number') {
                 $rules[] = 'numeric';
-            } elseif ($field['type'] === 'file') {
+            } elseif ($field->type === 'file') {
                 $rules[] = 'file';
                 $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
             }
@@ -285,9 +287,9 @@ class ReportController extends Controller
         }
 
         // proses upload file dan upload data
-        foreach ($reportType->fields_schema as $field) {
-            $fieldName = $field['name'];
-                        if ($field['type'] === 'file') {
+        foreach ($reportType->reportTypeFields as $field) {
+            $fieldName = $field->name;
+                        if ($field->type === 'file') {
                             if ($request->hasFile($fieldName)) {
                                 // hapus file lama jika ada
                                 if (isset($reportData[$fieldName])) {
@@ -299,6 +301,11 @@ class ReportController extends Controller
                                 // --- Native GD Compression Logic ---
                                 $originalPath = $file->getRealPath();
                                 $originalExtension = strtolower($file->getClientOriginalExtension());
+
+                                // Generate unique filename with .jpg extension
+                                $accountName = Str::slug(Auth::user()->name);
+                                $timestamp = now()->format('YmdHis');
+                                $filename = $accountName . '-' . $timestamp . '.jpg';
 
                                 // Create image resource from uploaded file
                                 $imageResource = null;
@@ -316,10 +323,6 @@ class ReportController extends Controller
                                 }
 
                                 if ($imageResource) {
-                                    // Generate unique filename with .jpg extension
-                                    $accountName = Str::slug(Auth::user()->name);
-                                    $timestamp = now()->format('YmdHis');
-                                    $filename = $accountName . '-' . $timestamp . '.jpg';
                                     $year = now()->format('Y');
                                     $month = now()->format('m');
                                     $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
@@ -360,7 +363,7 @@ class ReportController extends Controller
                                 // --- End of Native GD Logic ---
                             }
                             // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
-                        } elseif ($field['type'] === 'checkbox') {
+                        } elseif ($field->type === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
@@ -450,6 +453,8 @@ class ReportController extends Controller
     public function exportPdf(Report $report)
     {
         $this->authorize('view', $report); // Use the existing view policy
+
+        $report->load('reportType.reportTypeFields'); // Eager load fields
 
         $pdf = Pdf::loadView('reports.pdf', compact('report'));
         $accountName = Str::slug(Auth::user()->name);

@@ -30,7 +30,8 @@ class ReportTypeController extends Controller
     public function create()
     {
         $this->authorize('create', ReportType::class); // Otorisasi untuk membuat jenis laporan
-        return view('report-types.create');
+        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
+        return view('report-types.create', compact('fieldTypes'));
     }
 
     /**
@@ -43,19 +44,27 @@ class ReportTypeController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:report_types,name',
             'description' => 'nullable|string',
-            'fields_schema' => 'required|json', // validasi json valid
             'is_active' => 'required|boolean',
+            'fields' => 'array',
+            'fields.*.label' => 'required|string|max:255',
+            'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox',
+            'fields.*.required' => 'boolean',
+            'fields.*.order' => 'required|integer',
         ]);
 
         $reportType = new ReportType();
         $reportType->name = $request->name;
         $reportType->slug = Str::slug($request->name);
         $reportType->description = $request->description;
-        $reportType->fields_schema = json_decode($request->fields_schema, true); // simpan sebagai array
         $reportType->is_active = $request->boolean('is_active');
         $reportType->created_by_user_id = Auth::id();
         $reportType->updated_by_user_id = Auth::id();
         $reportType->save();
+
+        foreach ($request->fields as $fieldData) {
+            $reportType->reportTypeFields()->create($fieldData);
+        }
 
         return redirect()->route('report-types.index')->with('success', 'Report Type created successfully.');
     }
@@ -65,7 +74,8 @@ class ReportTypeController extends Controller
      */
     public function show(ReportType $reportType)
     {
-        $this->authorize('view', ReportType::class); // Otorisasi untuk melihat jenis laporan
+        $this->authorize('view', $reportType); // Otorisasi untuk melihat jenis laporan
+        $reportType->load('reportTypeFields');
         return view('report-types.show', compact('reportType'));
     }
 
@@ -74,8 +84,9 @@ class ReportTypeController extends Controller
      */
     public function edit(ReportType $reportType)
     {
-        $this->authorize('update', ReportType::class); // Otorisasi untuk mengedit jenis laporan
-        return view('report-types.edit', compact('reportType'));
+        $this->authorize('update', $reportType); // Otorisasi untuk mengedit jenis laporan
+        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
+        return view('report-types.edit', compact('reportType', 'fieldTypes'));
     }
 
     /**
@@ -83,22 +94,45 @@ class ReportTypeController extends Controller
      */
     public function update(Request $request, ReportType $reportType)
     {
-        $this->authorize('update', ReportType::class); // Otorisasi untuk memperbarui jenis laporan
+        $this->authorize('update', $reportType); // Otorisasi untuk memperbarui jenis laporan
 
         $request->validate([
             'name' => 'required|string|max:255|unique:report_types,name,' . $reportType->id,
             'description' => 'nullable|string',
-            'fields_schema' => 'required|json', // validasi json valid
             'is_active' => 'required|boolean',
+            'fields' => 'array',
+            'fields.*.label' => 'required|string|max:255',
+            'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox',
+            'fields.*.required' => 'boolean',
+            'fields.*.order' => 'required|integer',
         ]);
 
         $reportType->name = $request->name;
-        // Slug diperbarui hanya jika nama diubah
         $reportType->description = $request->description;
-        $reportType->fields_schema = json_decode($request->fields_schema, true);
         $reportType->is_active = $request->boolean('is_active');
         $reportType->updated_by_user_id = Auth::id();
         $reportType->save();
+
+        // Sync fields
+        $existingFieldIds = $reportType->reportTypeFields->pluck('id')->toArray();
+        $updatedFieldIds = [];
+
+        foreach ($request->fields as $fieldData) {
+            if (isset($fieldData['id'])) {
+                // Update existing field
+                $reportType->reportTypeFields()->where('id', $fieldData['id'])->update($fieldData);
+                $updatedFieldIds[] = $fieldData['id'];
+            } else {
+                // Create new field
+                $newField = $reportType->reportTypeFields()->create($fieldData);
+                $updatedFieldIds[] = $newField->id;
+            }
+        }
+
+        // Delete fields that were removed from the form
+        $fieldsToDelete = array_diff($existingFieldIds, $updatedFieldIds);
+        $reportType->reportTypeFields()->whereIn('id', $fieldsToDelete)->delete();
 
         return redirect()->route('report-types.index')->with('success', 'Report Type updated successfully.');
     }

@@ -13,44 +13,41 @@
                         @csrf
                         <input type="hidden" name="report_type_id" value="{{ $reportType->id }}">
 
-                        @foreach ($reportType->fields_schema as $field)
+                        @foreach ($reportType->reportTypeFields as $field)
                             <div class="mt-4">
-                                <x-input-label for="{{ $field['name'] }}" :value="__($field['label'])" />
+                                <x-input-label for="{{ $field->name }}" :value="__($field->label)" />
 
-                                @if ($field['type'] === 'text' || $field['type'] === 'date' || $field['type'] === 'time' || $field['type'] === 'number')
-                                    <input id="{{ $field['name'] }}"
+                                @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number')
+                                    <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        3 type="{{ $field['type'] }}" 4 name="{{ $field['name'] }}" 5
-                                        value="{{ old($field['name']) }}"
-                                        {{ isset($field['required']) && $field['required'] ? 'required' : '' }} />
-                                @elseif ($field['type'] === 'textarea')
-                                    <textarea id="{{ $field['name'] }}" name="{{ $field['name'] }}"
+                                        type="{{ $field->type }}" name="{{ $field->name }}"
+                                        value="{{ old($field->name) }}"
+                                        {{ $field->required ? 'required' : '' }} />
+                                @elseif ($field->type === 'textarea')
+                                    <textarea id="{{ $field->name }}" name="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        {{ isset($field['required']) && $field['required'] ? 'required' : '' }}>{{ old($field['name']) }}</textarea>
-                                @elseif ($field['type'] === 'select')
-                                    <select id="{{ $field['name'] }}" name="{{ $field['name'] }}"
+                                        {{ $field->required ? 'required' : '' }}>{{ old($field->name) }}</textarea>
+                                @elseif ($field->type === 'select') {{-- Assuming 'select' type will still have options --}}
+                                    {{-- This part needs significant re-evaluation: where do options come from now? --}}
+                                    {{-- For now, commenting out or simplifying --}}
+                                    {{-- You would likely need to store options in ReportTypeField or a related model --}}
+                                    <select id="{{ $field->name }}" name="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        {{ isset($field['required']) && $field['required'] ? 'required' : '' }}>
-                                        <option value="">Pilih {{ $field['label'] }}</option>
-                                        @foreach ($field['options'] as $option)
-                                            <option value="{{ $option['value'] }}"
-                                                {{ old($field['name']) == $option['value'] ? 'selected' : '' }}>
-                                                {{ $option['label'] }}
-                                            </option>
-                                        @endforeach
+                                        {{ $field->required ? 'required' : '' }}>
+                                        <option value="">Pilih {{ $field->label }}</option>
+                                        
                                     </select>
-                                @elseif ($field['type'] === 'checkbox')
-                                    <input type="checkbox" id="{{ $field['name'] }}" name="{{ $field['name'] }}"
-                                        value="1" {{ old($field['name']) ? 'checked' : '' }}
+                                @elseif ($field->type === 'checkbox')
+                                    <input type="checkbox" id="{{ $field->name }}" name="{{ $field->name }}"
+                                        value="1" {{ old($field->name) ? 'checked' : '' }}
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                @elseif ($field['type'] === 'file')
-                                    {{-- Tambahkan kondisi untuk type file --}}
-                                    <input id="{{ $field['name'] }}"
+                                @elseif ($field->type === 'file')
+                                    <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="file" name="{{ $field['name'] }}"
-                                        {{ isset($field['required']) && $field['required'] ? 'required' : '' }} />
+                                        type="file" name="{{ $field->name }}"
+                                        {{ $field->required ? 'required' : '' }} />
                                 @endif
-                                <x-input-error :messages="$errors->get($field['name'])" class="mt-2" />
+                                <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
                             </div>
                         @endforeach
 

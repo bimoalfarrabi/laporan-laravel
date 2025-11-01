@@ -54,34 +54,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($report->reportType->fields_schema as $field)
+                    @foreach ($report->reportType->reportTypeFields as $field)
                         <tr>
-                            <td><strong>{{ $field['label'] }}</strong></td>
+                            <td><strong>{{ $field->label }}</strong></td>
                             <td>
-                                @if ($field['type'] === 'textarea' || $field['type'] === 'text')
-                                    <p style="white-space: pre-wrap;">{{ $report->data[$field['name']] ?? '-' }}</p>
-                                @elseif ($field['type'] === 'date')
-                                    {{ isset($report->data[$field['name']]) ? \Carbon\Carbon::parse($report->data[$field['name']])->format('d-m-Y') : '-' }}
-                                @elseif ($field['type'] === 'time')
-                                    {{ $report->data[$field['name']] ?? '-' }}
-                                @elseif ($field['type'] === 'checkbox')
-                                    {{ $report->data[$field['name']] ?? false ? 'Ya' : 'Tidak' }}
-                                @elseif ($field['type'] === 'file')
-                                    @if (isset($report->data[$field['name']]) && $report->data[$field['name']])
+                                @if ($field->type === 'textarea' || $field->type === 'text')
+                                    <p style="white-space: pre-wrap;">{{ $report->data[$field->name] ?? '-' }}</p>
+                                @elseif ($field->type === 'date')
+                                    {{ isset($report->data[$field->name]) ? \Carbon\Carbon::parse($report->data[$field->name])->format('d-m-Y') : '-' }}
+                                @elseif ($field->type === 'time')
+                                    {{ $report->data[$field->name] ?? '-' }}
+                                @elseif ($field->type === 'checkbox')
+                                    {{ ($report->data[$field->name] ?? false) ? 'Ya' : 'Tidak' }}
+                                @elseif ($field->type === 'file')
+                                    @if (isset($report->data[$field->name]) && $report->data[$field->name])
                                         @php
-                                            $imagePath = storage_path('app/public/' . $report->data[$field['name']]);
+                                            $imagePath = storage_path('app/public/' . $report->data[$field->name]);
                                             $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
                                         @endphp
                                         @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg']) && file_exists($imagePath))
-                                            <img src="{{ $imagePath }}" alt="{{ $field['label'] }}" class="img-fluid">
+                                            <img src="data:image/jpeg;base64,{{ base64_encode(file_get_contents($imagePath)) }}" alt="{{ $field->label }}" class="img-fluid">
                                         @else
-                                            <a href="{{ storage_path('app/public/' . $report->data[$field['name']]) }}">{{ $report->data[$field['name']] }}</a>
+                                            <p style="color: red;">foto telah dihapus</p>
                                         @endif
                                     @else
                                         -
                                     @endif
                                 @else
-                                    {{ $report->data[$field['name']] ?? '-' }}
+                                    {{ $report->data[$field->name] ?? '-' }}
                                 @endif
                             </td>
                         </tr>

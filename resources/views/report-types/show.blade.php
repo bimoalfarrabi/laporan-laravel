@@ -38,8 +38,22 @@
                     </div>
 
                     <div class="mb-4">
-                        <strong>Skema Field (JSON):</strong>
-                        <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto">{{ json_encode($reportType->fields_schema, JSON_PRETTY_PRINT) }}</pre>
+                        <strong>Field Laporan:</strong>
+                        @if ($reportType->reportTypeFields->isNotEmpty())
+                            <div class="mt-2 space-y-2">
+                                @foreach ($reportType->reportTypeFields as $field)
+                                    <div class="p-3 border rounded-md bg-gray-50">
+                                        <p><strong>Label:</strong> {{ $field->label }}</p>
+                                        <p><strong>Nama Field:</strong> {{ $field->name }}</p>
+                                        <p><strong>Tipe:</strong> {{ $field->type }}</p>
+                                        <p><strong>Wajib Diisi:</strong> {{ $field->required ? 'Ya' : 'Tidak' }}</p>
+                                        <p><strong>Urutan:</strong> {{ $field->order }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p>Tidak ada field laporan yang ditentukan.</p>
+                        @endif
                     </div>
 
                     <div class="flex items-center justify-start mt-6">

@@ -17,16 +17,19 @@ class ReportType extends Model
         'name',
         'slug',
         'description',
-        'fields_schema',
         'is_active',
         'created_by_user_id',
         'updated_by_user_id',
     ];
 
     protected $casts = [
-        'fields_schema' => 'array', // mengubah JSON menjadi array otomatis
         'is_active' => 'boolean',
     ];
+
+    public function reportTypeFields()
+    {
+        return $this->hasMany(ReportTypeField::class)->orderBy('order');
+    }
 
     protected static function boot()
     {
