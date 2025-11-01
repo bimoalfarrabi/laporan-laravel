@@ -57,6 +57,13 @@ Route::middleware('auth')->group(function () {
     // Manajemen Role
     Route::get('roles/archive', [RoleController::class, 'archive'])->name('roles.archive');
     Route::resource('roles', RoleController::class)->except(['index', 'show']);
-    Route::post('roles/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed();});
+    Route::post('roles/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed();
+
+    // Announcements
+    Route::get('announcements/archive', [App\Http\Controllers\AnnouncementController::class, 'archive'])->name('announcements.archive');
+    Route::resource('announcements', 'App\Http\Controllers\AnnouncementController')->withTrashed();
+    Route::post('announcements/{id}/restore', [App\Http\Controllers\AnnouncementController::class, 'restore'])->name('announcements.restore');
+    Route::delete('announcements/{id}/force-delete', [App\Http\Controllers\AnnouncementController::class, 'forceDelete'])->name('announcements.forceDelete');
+});
 
 require __DIR__ . '/auth.php';

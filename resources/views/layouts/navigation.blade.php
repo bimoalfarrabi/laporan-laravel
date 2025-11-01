@@ -30,6 +30,11 @@
                             {{ __('Manajemen Pengguna') }}
                         </x-nav-link>
                     @endcan
+                    @can('announcements:view-any')
+                        <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
+                            {{ __('Pengumuman') }}
+                        </x-nav-link>
+                    @endcan
                     @role('superadmin')
                         <x-nav-link :href="route('role-permissions.index')" :active="request()->routeIs('role-permissions.*')">
                             {{ __('Manajemen Hak Akses') }}
@@ -111,6 +116,11 @@
             @can('viewAny', App\Models\User::class)
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('Manajemen Pengguna') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('announcements:view-any')
+                <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
+                    {{ __('Pengumuman') }}
                 </x-responsive-nav-link>
             @endcan
             @role('superadmin')

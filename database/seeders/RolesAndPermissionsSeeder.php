@@ -29,6 +29,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Users
             'users:view-any', 'users:view', 'users:create', 'users:update', 'users:delete', 'users:restore', 'users:force-delete', 'users:reset-password',
+
+            // Announcements
+            'announcements:view-any', 'announcements:create', 'announcements:update', 'announcements:delete', 'announcements:force-delete', 'announcements:restore',
         ];
 
         foreach ($permissions as $permission) {
@@ -47,6 +50,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore', 'reports:approve', 'reports:reject',
             // Users
             'users:view-any', 'users:view',
+            // Announcements
+            'announcements:view-any', 'announcements:create', 'announcements:update', 'announcements:delete', 'announcements:restore',
         ]);
 
         $anggotaRole->givePermissionTo([

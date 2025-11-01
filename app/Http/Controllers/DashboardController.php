@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\Announcement;
 
 class DashboardController extends Controller
 {
@@ -16,6 +17,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $viewData = [];
+
+        $viewData['announcements'] = Announcement::with('user')->latest()->take(5)->get();
 
         if ($user->hasRole('danru')) {
             $danruShift = $user->shift;

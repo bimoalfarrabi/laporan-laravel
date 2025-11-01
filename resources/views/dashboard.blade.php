@@ -9,6 +9,35 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.136A1.76 1.76 0 015.882 11H11m0-5.118a1.76 1.76 0 00-3.417-.592l-2.147 6.136A1.76 1.76 0 005.882 13H11m0-7.118l1.559 4.454a1.76 1.76 0 01.592 3.417l-6.136 2.147A1.76 1.76 0 013 15.882V5.882a1.76 1.76 0 011.76-1.76h.002c.636 0 1.21.322 1.559.832l1.441 2.162z" />
+                            </svg>
+                            Pengumuman Penting
+                        </h3>
+                        @if ($announcements->isNotEmpty())
+                            <div class="space-y-4">
+                                @foreach ($announcements as $announcement)
+                                    <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 shadow-md rounded-lg">
+                                        <div class="flex justify-between items-center">
+                                            <h4 class="font-bold text-lg">{{ $announcement->title }}</h4>
+                                            <div class="text-sm text-gray-600">
+                                                Dibuat oleh {{ $announcement->user->name }} pada <x-waktu-dibuat :date="$announcement->created_at" />
+                                                @if ($announcement->created_at != $announcement->updated_at)
+                                                    (diedit pada <x-waktu-dibuat :date="$announcement->updated_at" />)
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <p class="mt-2">{{ $announcement->content }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p>Tidak ada pengumuman saat ini.</p>
+                        @endif
+                    </div>
+
                     {{-- DANRU DASHBOARD --}}
                     @if (Auth::user()->hasRole('danru'))
                         <h3 class="text-lg font-semibold mb-4">Laporan Menunggu Persetujuan</h3>
