@@ -41,8 +41,8 @@ class AnnouncementController extends Controller
         ]);
 
         Announcement::create([
-            'title' => $request->title,
-            'content' => $request->content,
+            'title' => $request->input('title'),
+            'content' => $request->input('content'),
             'user_id' => Auth::id(),
         ]);
 
@@ -76,8 +76,8 @@ class AnnouncementController extends Controller
         ]);
 
         $announcement->update([
-            'title' => $request->title,
-            'content' => $request->content,
+            'title' => $request->input('title'),
+            'content' => $request->input('content'),
         ]);
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil diperbarui.');
