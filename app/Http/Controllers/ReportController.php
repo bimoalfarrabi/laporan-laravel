@@ -156,8 +156,9 @@ class ReportController extends Controller
                 if ($imageResource) {
                     $accountName = Str::slug(Auth::user()->name);
                     $timestamp = now()->format('YmdHis');
-                    $filename = $accountName . '-' . $timestamp . '.jpg';
-                    $storagePath = 'reports/' . Auth::id() . '/' . $filename;
+                    $year = now()->format('Y');
+                    $month = now()->format('m');
+                    $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
                     $publicPath = storage_path('app/public/' . $storagePath);
 
                     // Ensure directory exists
@@ -319,7 +320,9 @@ class ReportController extends Controller
                                     $accountName = Str::slug(Auth::user()->name);
                                     $timestamp = now()->format('YmdHis');
                                     $filename = $accountName . '-' . $timestamp . '.jpg';
-                                    $storagePath = 'reports/' . Auth::id() . '/' . $filename;
+                                    $year = now()->format('Y');
+                                    $month = now()->format('m');
+                                    $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
                                     $publicPath = storage_path('app/public/' . $storagePath);
 
                                     // Ensure directory exists

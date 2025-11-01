@@ -79,7 +79,7 @@
                                                 {{ $report->data[$field['name']] ?? false ? 'Ya' : 'Tidak' }}
                                             </span>
                                         @elseif ($field['type'] === 'file')
-                                            @if (isset($report->data[$field['name']]) && $report->data[$field['name']])
+                                            @if (isset($report->data[$field['name']]) && $report->data[$field['name']] && Storage::disk('public')->exists($report->data[$field['name']]))
                                                 <div>
                                                     <a href="{{ Storage::url($report->data[$field['name']]) }}"
                                                         target="_blank" class="text-blue-600 hover:underline">Lihat
@@ -95,7 +95,7 @@
                                                     @endif
                                                 </div>
                                             @else
-                                                -
+                                                <p class="text-red-500">foto telah dihapus</p>
                                             @endif
                                         @else
                                             {{ $report->data[$field['name']] ?? '-' }}
