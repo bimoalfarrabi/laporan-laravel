@@ -84,6 +84,38 @@
                             <p>Anda belum membuat laporan.</p>
                         @endif
 
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">Laporan Lain yang Disetujui</h3>
+                            @if ($approvedReports->isNotEmpty())
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Laporan</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dibuat Oleh</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Dibuat</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach ($approvedReports as $report)
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <p>Tidak ada laporan lain yang disetujui untuk ditampilkan.</p>
+                            @endif
+                        </div>
+
                     {{-- SUPERADMIN DASHBOARD --}}
                     @elseif (Auth::user()->hasRole('superadmin'))
                         <h3 class="text-lg font-semibold mb-4">Statistik Sistem</h3>

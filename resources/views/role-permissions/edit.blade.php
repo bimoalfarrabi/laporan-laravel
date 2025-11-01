@@ -63,6 +63,8 @@
                                                 <span class="ms-2 text-sm text-gray-600">{{ $permission->name }}</span>
                                                 @if ($role->name === 'danru' && in_array($permission->name, ['reports:approve', 'reports:reject', 'reports:view-any']))
                                                     <span class="ms-2 text-xs text-blue-500">(Hanya untuk shift sendiri)</span>
+                                                @elseif ($role->name === 'anggota' && $permission->name === 'view approved reports')
+                                                    <span class="ms-2 text-xs text-blue-500">(Melihat laporan disetujui dari anggota lain)</span>
                                                 @endif
                                             </label>
                                         @endforeach

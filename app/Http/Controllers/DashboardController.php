@@ -31,6 +31,11 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(5)
                 ->get();
+            $viewData['approvedReports'] = Report::with('user', 'reportType')
+                ->where('status', 'disetujui')
+                ->where('user_id', '!=', $user->id)
+                ->latest()
+                ->get();
         } elseif ($user->hasRole('superadmin')) {
             $viewData['totalUsers'] = User::count();
             $viewData['reportStats'] = Report::query()

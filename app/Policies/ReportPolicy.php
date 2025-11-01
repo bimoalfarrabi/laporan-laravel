@@ -35,6 +35,11 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
+        // Allow viewing approved reports if the user has the permission
+        if ($user->can('view approved reports') && $report->status === 'disetujui') {
+            return true;
+        }
+
         if ($user->hasRole('danru')) {
             return $user->shift === $report->user->shift;
         }
