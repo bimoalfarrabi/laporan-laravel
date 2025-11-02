@@ -20,10 +20,16 @@ class Report extends Model
         'status',
         'last_edited_by_user_id',
         'deleted_by_user_id',
+        'approved_by_user_id',
+        'approved_at',
+        'rejected_by_user_id',
+        'rejected_at',
     ];
 
     protected $casts = [
         'data' => 'array',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function reportType(): BelongsTo
@@ -44,6 +50,16 @@ class Report extends Model
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by_user_id');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_user_id');
     }
 
     /**

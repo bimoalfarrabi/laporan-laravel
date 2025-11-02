@@ -444,6 +444,8 @@ class ReportController extends Controller
 
         if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
             $report->status = 'disetujui';
+            $report->approved_by_user_id = Auth::id();
+            $report->approved_at = now();
             $report->save();
             return redirect()->back()->with('success', 'Laporan disetujui.');
         }
@@ -457,6 +459,8 @@ class ReportController extends Controller
 
         if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
             $report->status = 'ditolak';
+            $report->rejected_by_user_id = Auth::id();
+            $report->rejected_at = now();
             $report->save();
             return redirect()->back()->with('success', 'Laporan ditolak.');
         }

@@ -45,6 +45,14 @@
                                 <p><strong>Dibuat Pada:</strong> {{ $report->created_at->format('d-m-Y H:i') }}</p>
                                 <p><strong>Terakhir Diperbarui:</strong> {{ $report->updated_at->format('d-m-Y H:i') }}
                                 </p>
+                                @if ($report->approvedBy)
+                                    <p><strong>Disetujui Oleh:</strong> {{ $report->approvedBy->name }} pada
+                                        {{ $report->approved_at->format('d-m-Y H:i') }}</p>
+                                @endif
+                                @if ($report->rejectedBy)
+                                    <p><strong>Ditolak Oleh:</strong> {{ $report->rejectedBy->name }} pada
+                                        {{ $report->rejected_at->format('d-m-Y H:i') }}</p>
+                                @endif
                                 @if ($report->deleted_at)
                                     <div class="text-red-600">
                                         <p><strong>Dihapus Oleh:</strong> {{ $report->deletedBy->name ?? 'N/A' }}</p>
