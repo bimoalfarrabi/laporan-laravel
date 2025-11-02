@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReportType;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -31,7 +32,16 @@ class ReportTypeController extends Controller
     {
         $this->authorize('create', ReportType::class); // Otorisasi untuk membuat jenis laporan
         $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
-        return view('report-types.create', compact('fieldTypes'));
+
+        $defaultFields = [
+            ['label' => 'Nama', 'name' => 'nama', 'type' => 'text', 'required' => true, 'order' => 1],
+            ['label' => 'Tanggal', 'name' => 'tanggal', 'type' => 'date', 'required' => true, 'order' => 2],
+            ['label' => 'Waktu', 'name' => 'waktu', 'type' => 'time', 'required' => true, 'order' => 3],
+            ['label' => 'Upload Gambar', 'name' => 'upload_gambar', 'type' => 'file', 'required' => false, 'order' => 4],
+        ];
+
+        $roles = Role::all();
+        return view('report-types.create', compact('fieldTypes', 'defaultFields', 'roles'));
     }
 
     /**
@@ -48,9 +58,10 @@ class ReportTypeController extends Controller
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
-            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox,role_specific_text',
             'fields.*.required' => 'boolean',
             'fields.*.order' => 'required|integer',
+            'fields.*.role_id' => 'nullable|exists:roles,id',
         ]);
 
         $reportType = new ReportType();
@@ -63,6 +74,9 @@ class ReportTypeController extends Controller
         $reportType->save();
 
         foreach ($request->fields as $fieldData) {
+            if ($fieldData['type'] !== 'role_specific_text') {
+                $fieldData['role_id'] = null;
+            }
             $reportType->reportTypeFields()->create($fieldData);
         }
 
@@ -86,7 +100,8 @@ class ReportTypeController extends Controller
     {
         $this->authorize('update', $reportType); // Otorisasi untuk mengedit jenis laporan
         $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
-        return view('report-types.edit', compact('reportType', 'fieldTypes'));
+        $roles = Role::all();
+        return view('report-types.edit', compact('reportType', 'fieldTypes', 'roles'));
     }
 
     /**
@@ -103,9 +118,10 @@ class ReportTypeController extends Controller
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
-            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox,role_specific_text',
             'fields.*.required' => 'boolean',
             'fields.*.order' => 'required|integer',
+            'fields.*.role_id' => 'nullable|exists:roles,id',
         ]);
 
         $reportType->name = $request->name;
@@ -119,6 +135,10 @@ class ReportTypeController extends Controller
         $updatedFieldIds = [];
 
         foreach ($request->fields as $fieldData) {
+            if ($fieldData['type'] !== 'role_specific_text') {
+                $fieldData['role_id'] = null;
+            }
+
             if (isset($fieldData['id'])) {
                 // Update existing field
                 $reportType->reportTypeFields()->where('id', $fieldData['id'])->update($fieldData);

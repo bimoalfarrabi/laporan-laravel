@@ -16,6 +16,7 @@ class ReportTypeField extends Model
         'type',
         'required',
         'order',
+        'role_id',
     ];
 
     public function reportType()

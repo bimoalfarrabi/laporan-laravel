@@ -18,10 +18,10 @@
                             <div class="mt-4">
                                 <x-input-label for="{{ $field->name }}" :value="__($field->label)" />
 
-                                @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number')
+                                @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number' || $field->type === 'role_specific_text')
                                     <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="{{ $field->type }}" name="{{ $field->name }}"
+                                        type="text" name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')

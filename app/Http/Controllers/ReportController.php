@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\ReportType;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -82,6 +83,14 @@ class ReportController extends Controller
         }
 
         $reportType = ReportType::findOrFail($reportTypeId);
+
+        $reportType->reportTypeFields = $reportType->reportTypeFields->filter(function ($field) {
+            if ($field->type === 'role_specific_text' && $field->role_id) {
+                return Auth::user()->hasRole(Role::find($field->role_id)->name);
+            }
+            return true;
+        });
+
         return view('reports.create', compact('reportType'));
     }
 
@@ -128,8 +137,13 @@ class ReportController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // proses upload file dan siapkan data
         foreach ($reportType->reportTypeFields as $field) {
+            if ($field->type === 'role_specific_text' && $field->role_id) {
+                if (!Auth::user()->hasRole(Role::find($field->role_id)->name)) {
+                    continue; // skip this field if user does not have the role
+                }
+            }
+
             $fieldName = $field->name;
             if ($field->type === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);

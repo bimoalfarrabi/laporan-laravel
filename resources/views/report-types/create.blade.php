@@ -67,6 +67,9 @@
             let fieldCounter = 0;
 
             const fieldTypes = @json($fieldTypes);
+            const roles = @json($roles);
+
+            fieldTypes.push('role_specific_text');
 
             function addField(field = {}) {
                 const newFieldId = `field-${fieldCounter++}`;
@@ -88,6 +91,13 @@
                                 <x-input-label for="${newFieldId}-type" value="Tipe Field" />
                                 <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     ${fieldTypes.map(type => `<option value="${type}" ${field.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div id="${newFieldId}-role-container" class="role-container" style="display: none;">
+                                <x-input-label for="${newFieldId}-role" value="Pilih Role" />
+                                <select id="${newFieldId}-role" name="fields[${newFieldId}][role_id]" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">Pilih Role</option>
+                                    ${roles.map(role => `<option value="${role.id}" ${field.role_id == role.id ? 'selected' : ''}>${role.name}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="flex items-center mt-6">
@@ -118,8 +128,26 @@
                 }
             });
 
+            fieldsContainer.addEventListener('change', function(event) {
+                if (event.target.matches('select[name$="[type]"]')) {
+                    const fieldItem = event.target.closest('.field-item');
+                    const roleContainer = fieldItem.querySelector('.role-container');
+                    if (event.target.value === 'role_specific_text') {
+                        roleContainer.style.display = 'block';
+                    } else {
+                        roleContainer.style.display = 'none';
+                    }
+                }
+            });
+
             // Initial fields for edit mode (if any)
             // This part will be populated in the edit view
+
+            @if(isset($defaultFields))
+                @foreach($defaultFields as $field)
+                    addField(@json($field));
+                @endforeach
+            @endif
         });
     </script>
     @endpush
