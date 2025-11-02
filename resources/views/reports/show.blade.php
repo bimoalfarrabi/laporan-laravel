@@ -132,7 +132,7 @@
                                     </form>
                                 @endcan
                             @else
-                                @if (($report->status == 'belum disetujui') && (Auth::user()->can('reports:approve') || Auth::user()->can('reports:reject')))
+                                @if (($report->status == 'belum disetujui') && (Auth::user()->can('reports:approve') || Auth::user()->can('reports:reject')) && (Auth::id() !== $report->user_id))
                                     @can('approve', $report)
                                         <form action="{{ route('reports.approve', $report->id) }}" method="POST">
                                             @csrf
