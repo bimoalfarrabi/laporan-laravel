@@ -87,11 +87,12 @@
                                                 {{ ($report->data[$field->name] ?? false) ? 'Ya' : 'Tidak' }}
                                             </span>
                                         @elseif ($field->type === 'file')
-                                            @if (isset($report->data[$field->name]) && $report->data[$field->name] && Storage::disk('public')->exists($report->data[$field->name]))
-                                                <div>
-                                                    <a href="{{ Storage::url($report->data[$field->name]) }}"
-                                                        target="_blank" class="text-blue-600 hover:underline">Lihat
-                                                        File</a>
+                                            @if (!empty($report->data[$field->name]))
+                                                @if (Storage::disk('public')->exists($report->data[$field->name]))
+                                                    <div>
+                                                        <a href="{{ Storage::url($report->data[$field->name]) }}"
+                                                            target="_blank" class="text-blue-600 hover:underline">Lihat
+                                                            File</a>
 
                                                     @php
                                                         $extension = pathinfo($report->data[$field->name], PATHINFO_EXTENSION);
@@ -102,8 +103,11 @@
                                                             class="max-w-xs h-auto object-cover rounded-md mt-2 shadow-md">
                                                     @endif
                                                 </div>
+                                                @else
+                                                    <p class="text-red-500">File telah dihapus dari storage.</p>
+                                                @endif
                                             @else
-                                                <p class="text-red-500">foto telah dihapus</p>
+                                                <p class="text-gray-500">Tidak ada file yang diunggah.</p>
                                             @endif
                                         @else
                                             {{ $report->data[$field->name] ?? '-' }}
