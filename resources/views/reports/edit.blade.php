@@ -21,7 +21,7 @@
                                 @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number' || $field->type === 'role_specific_text')
                                     <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="text" name="{{ $field->name }}"
+                                        type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}" name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
