@@ -28,6 +28,13 @@ class ReportController extends Controller
 
         if (Auth::user()->hasRole('superadmin')) {
             // SuperAdmin can see all reports
+        } elseif (Auth::user()->hasRole('manajemen')) {
+            // Manajemen only sees reports from danru
+            $query->whereHas('user', function ($q) {
+                $q->whereHas('roles', function ($qr) {
+                    $qr->where('name', 'danru');
+                });
+            });
         } elseif (Auth::user()->hasRole('danru')) {
             // Danru only sees reports from their shift
             $danruShift = Auth::user()->shift;
@@ -440,9 +447,7 @@ class ReportController extends Controller
 
     public function approve(Report $report)
     {
-        $this->authorize('approve', $report); // Menggunakan policy approve
-
-        if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
+        if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
             $report->status = 'disetujui';
             $report->approved_by_user_id = Auth::id();
             $report->approved_at = now();
@@ -457,7 +462,7 @@ class ReportController extends Controller
     {
         $this->authorize('reject', $report); // Menggunakan policy reject
 
-        if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin')) {
+        if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
             $report->status = 'ditolak';
             $report->rejected_by_user_id = Auth::id();
             $report->rejected_at = now();

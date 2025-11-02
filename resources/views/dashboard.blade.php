@@ -47,7 +47,7 @@
                     </div>
 
                     {{-- DANRU DASHBOARD --}}
-                    @if (Auth::user()->hasRole('danru'))
+                    @if (Auth::user()->hasRole(['danru', 'manajemen']))
                         <h3 class="text-lg font-semibold mb-4">Laporan Menunggu Persetujuan</h3>
                         @if ($reportsForApproval->isNotEmpty())
                             <div class="overflow-x-auto">

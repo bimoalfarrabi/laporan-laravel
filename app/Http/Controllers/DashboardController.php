@@ -36,6 +36,16 @@ class DashboardController extends Controller
                 })
                 ->latest()
                 ->get();
+        } elseif ($user->hasRole('manajemen')) {
+            $viewData['reportsForApproval'] = Report::with('user', 'reportType')
+                ->where('status', 'belum disetujui')
+                ->whereHas('user', function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'danru');
+                    });
+                })
+                ->latest()
+                ->get();
         } elseif ($user->hasRole('anggota')) {
             $viewData['myRecentReports'] = Report::with('user', 'reportType')->where('user_id', $user->id)
                 ->latest()
