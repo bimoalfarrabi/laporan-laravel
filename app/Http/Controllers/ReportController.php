@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -495,6 +496,33 @@ class ReportController extends Controller
         $reportTypeName = Str::slug($report->reportType->name);
         $timestamp = $report->created_at->format('YmdHis');
         $filename = $accountName . '-' . $reportTypeName . '-' . $timestamp . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    public function exportMonthlyPdf(Request $request, $year, $month)
+    {
+        $this->authorize('exportMonthly', Report::class); // New policy method for authorization
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+        $reports = Report::with('reportType', 'user')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('user', function ($query) {
+                $query->whereHas('roles', function ($q) {
+                    $q->where('name', 'anggota');
+                });
+            })
+            ->latest()
+            ->get();
+
+        if ($reports->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada laporan anggota yang ditemukan untuk bulan ini.');
+        }
+
+        $pdf = Pdf::loadView('reports.monthly-pdf', compact('reports', 'year', 'month'));
+        $filename = 'Laporan_Anggota_Bulan_' . $month . '_' . $year . '.pdf';
+
         return $pdf->download($filename);
     }
 }

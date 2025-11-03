@@ -61,7 +61,7 @@
                                                     data-group="{{ $group }}"
                                                     {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
                                                 <span class="ms-2 text-sm text-gray-600">{{ $permission->name }}</span>
-                                                @if ($role->name === 'danru' && in_array($permission->name, ['reports:approve', 'reports:reject', 'reports:view-any']))
+                                                @if ($role->name === 'danru' && in_array($permission->name, ['reports:approve', 'reports:reject', 'reports:view-any', 'reports:export-monthly']))
                                                     <span class="ms-2 text-xs text-blue-500">(Berlaku untuk semua anggota)</span>
                                                 @elseif ($role->name === 'anggota' && $permission->name === 'view approved reports')
                                                     <span class="ms-2 text-xs text-blue-500">(Melihat laporan disetujui dari anggota lain)</span>

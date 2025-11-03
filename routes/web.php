@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
     // Rute untuk export PDF laporan
     Route::get('/reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
+    // Rute untuk export PDF laporan bulanan
+    Route::get('/reports/export-monthly-pdf/{year}/{month}', [ReportController::class, 'exportMonthlyPdf'])->name('reports.exportMonthlyPdf');
+
     // Manajemen User
     Route::get('users/archive', [UserController::class, 'archive'])->name('users.archive');
     Route::resource('users', UserController::class)->withTrashed();

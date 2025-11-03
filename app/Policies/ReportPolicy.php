@@ -112,6 +112,11 @@ class ReportPolicy
         return $user->can('reports:force-delete');
     }
 
+    public function exportMonthly(User $user): bool
+    {
+        return $user->hasRole('danru') && $user->can('reports:export-monthly');
+    }
+
     public function approve(User $user, Report $report): bool
     {
         if ($user->hasRole('danru')) {
