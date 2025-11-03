@@ -34,7 +34,7 @@ class ReportTypeController extends Controller
         $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
 
         $defaultFields = [
-            ['label' => 'Nama', 'name' => 'nama', 'type' => 'text', 'required' => true, 'order' => 1],
+            ['label' => 'Deskripsi', 'name' => 'deskripsi', 'type' => 'textarea', 'required' => true, 'order' => 1],
             ['label' => 'Tanggal', 'name' => 'tanggal', 'type' => 'date', 'required' => true, 'order' => 2],
             ['label' => 'Waktu', 'name' => 'waktu', 'type' => 'time', 'required' => true, 'order' => 3],
             ['label' => 'Upload Gambar', 'name' => 'upload_gambar', 'type' => 'file', 'required' => false, 'order' => 4],
