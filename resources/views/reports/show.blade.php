@@ -122,8 +122,8 @@
                     </div>
 
                     {{-- Action Buttons --}}
-                    <div class="flex items-center justify-end mt-8 pt-6 border-t">
-                        <div class="flex items-center space-x-4">
+                    <div class="mt-8 pt-6 border-t">
+                        <div class="flex flex-wrap items-center justify-start sm:justify-end gap-4">
                             @if ($report->deleted_at)
                                 @can('restore', $report)
                                     <form action="{{ route('reports.restore', $report->id) }}" method="POST">
