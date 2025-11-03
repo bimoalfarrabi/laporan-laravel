@@ -18,6 +18,9 @@
                                 <p><strong>ID Laporan:</strong> {{ $report->id }}</p>
                                 <p><strong>Jenis Laporan:</strong> {{ $report->reportType->name }}</p>
                                 <p><strong>Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                @if ($report->shift)
+                                    <p><strong>Shift:</strong> {{ $report->shift }}</p>
+                                @endif
                                 @if ($report->lastEditedBy)
                                     <p><strong>Terakhir Diperbarui Oleh:</strong> {{ $report->lastEditedBy->name }}</p>
                                 @endif
