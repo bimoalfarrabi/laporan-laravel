@@ -91,6 +91,11 @@ class ReportController extends Controller
 
         $reportType = ReportType::findOrFail($reportTypeId);
 
+        // Restrict 'Laporan Harian Jaga (LHJ) / Shift Report' to danru only
+        if ($reportType->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && !Auth::user()->hasRole('danru')) {
+            return redirect()->route('reports.create')->with('error', 'Hanya Danru yang dapat membuat Laporan Harian Jaga.');
+        }
+
         $reportType->reportTypeFields = $reportType->reportTypeFields->filter(function ($field) {
             if ($field->type === 'role_specific_text' && $field->role_id) {
                 return Auth::user()->hasRole(Role::find($field->role_id)->name);
@@ -232,6 +237,11 @@ class ReportController extends Controller
         $report->data = $reportData; // simpan data
         $report->status = 'belum disetujui'; // default status
         $report->last_edited_by_user_id = Auth::id();
+
+        // Automatically record danru's shift for LHJ reports
+        if ($reportType->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && Auth::user()->hasRole('danru')) {
+            $report->shift = Auth::user()->shift;
+        }
         $report->save();
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');

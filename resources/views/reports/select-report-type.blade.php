@@ -16,6 +16,9 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach ($reportTypes as $type)
+                                @if ($type->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && !Auth::user()->hasRole('danru'))
+                                    @continue
+                                @endif
                                 <a href="{{ route('reports.create', ['report_type_id' => $type->id]) }}"
                                     class="block p-6 bg-gray-100 rounded-lg shadow hover:bg-gray-200 transition duration-150 ease-in-out">
                                     <h4 class="text-xl font-semibold text-gray-900">{{ $type->name }}</h4>

@@ -24,6 +24,7 @@ class Report extends Model
         'approved_at',
         'rejected_by_user_id',
         'rejected_at',
+        'shift',
     ];
 
     protected $casts = [
