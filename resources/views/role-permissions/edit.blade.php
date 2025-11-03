@@ -20,23 +20,23 @@
                                     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span class="text-sm text-gray-600">Membuat anggota baru dalam shift-nya</span>
+                                            <span class="text-sm text-gray-600">Membuat anggota baru</span>
                                         </div>
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span class="text-sm text-gray-600">Menghapus anggota dalam shift-nya</span>
+                                            <span class="text-sm text-gray-600">Menghapus anggota</span>
                                         </div>
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span class="text-sm text-gray-600">Melihat laporan dari anggota dalam shift-nya</span>
+                                            <span class="text-sm text-gray-600">Melihat semua laporan dari anggota</span>
                                         </div>
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span class="text-sm text-gray-600">Menyetujui laporan dari anggota dalam shift-nya</span>
+                                            <span class="text-sm text-gray-600">Menyetujui laporan dari anggota</span>
                                         </div>
                                         <div class="flex items-center">
                                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span class="text-sm text-gray-600">Menolak laporan dari anggota dalam shift-nya</span>
+                                            <span class="text-sm text-gray-600">Menolak laporan dari anggota</span>
                                         </div>
                                     </div>
                                     <p class="mt-4 text-xs text-gray-500">Hak akses ini diatur secara otomatis dalam sistem dan tidak dapat diubah dari halaman ini.</p>
@@ -62,7 +62,7 @@
                                                     {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
                                                 <span class="ms-2 text-sm text-gray-600">{{ $permission->name }}</span>
                                                 @if ($role->name === 'danru' && in_array($permission->name, ['reports:approve', 'reports:reject', 'reports:view-any']))
-                                                    <span class="ms-2 text-xs text-blue-500">(Hanya untuk shift sendiri)</span>
+                                                    <span class="ms-2 text-xs text-blue-500">(Berlaku untuk semua anggota)</span>
                                                 @elseif ($role->name === 'anggota' && $permission->name === 'view approved reports')
                                                     <span class="ms-2 text-xs text-blue-500">(Melihat laporan disetujui dari anggota lain)</span>
                                                 @endif

@@ -36,10 +36,11 @@ class ReportController extends Controller
                 });
             });
         } elseif (Auth::user()->hasRole('danru')) {
-            // Danru only sees reports from their shift
-            $danruShift = Auth::user()->shift;
-            $query->whereHas('user', function ($q) use ($danruShift) {
-                $q->where('shift', $danruShift);
+            // Danru only sees reports from anggota
+            $query->whereHas('user', function ($q) {
+                $q->whereHas('roles', function ($qr) {
+                    $qr->where('name', 'anggota');
+                });
             });
         } else {
             // Anggota only sees their own reports

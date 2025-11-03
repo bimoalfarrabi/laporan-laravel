@@ -30,11 +30,12 @@ class DashboardController extends Controller
             ->get();
 
         if ($user->hasRole('danru')) {
-            $danruShift = $user->shift;
             $viewData['reportsForApproval'] = Report::with('user', 'reportType')
                 ->where('status', 'belum disetujui')
-                ->whereHas('user', function ($query) use ($danruShift) {
-                    $query->where('shift', $danruShift);
+                ->whereHas('user', function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'anggota');
+                    });
                 })
                 ->latest()
                 ->get();
