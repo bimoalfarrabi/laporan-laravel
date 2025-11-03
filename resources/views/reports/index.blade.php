@@ -97,7 +97,10 @@
                                                 {{ $report->id }}
                                             </td>
                                             <td class="px-6 py-4">
-                                                {{ $report->reportType->name }}
+                                                <div class="font-medium">{{ $report->reportType->name }}</div>
+                                                @if (isset($report->data['deskripsi']))
+                                                    <div class="text-sm text-gray-500 mt-1">{{ Str::limit($report->data['deskripsi'], 100) }}</div>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $report->user->name }}
