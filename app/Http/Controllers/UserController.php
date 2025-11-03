@@ -33,10 +33,8 @@ class UserController extends Controller
             }
             $users = $query->latest()->get();
         } elseif (Auth::user()->hasRole('danru')) {
-            // danru hanya melihat pengguna dengan peran anggota dalam shift yang sama
-            $danruShift = Auth::user()->shift;
-            $users = User::where('shift', $danruShift)
-                ->whereHas('roles', function ($query) {
+            // danru hanya melihat pengguna dengan peran anggota
+            $users = User::whereHas('roles', function ($query) {
                     $query->where('name', 'anggota');
                 })
                 ->with('roles')
