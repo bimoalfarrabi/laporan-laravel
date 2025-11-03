@@ -108,10 +108,10 @@
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Peran (Spatie)
                                         </th>
-                                        <th scope="col"
+                                        {{-- <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Shift
-                                        </th>
+                                        </th> --}}
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Waktu Dibuat
@@ -146,9 +146,9 @@
                                             <td class="px-6 py-4">
                                                 {{ $user->roles->pluck('name')->join(', ') }}
                                             </td>
-                                            <td class="px-6 py-4">
+                                            {{-- <td class="px-6 py-4">
                                                 {{ ucfirst($user->shift) }}
-                                            </td>
+                                            </td> --}}
                                             <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$user->created_at" />
                                             </td>

@@ -91,7 +91,7 @@
                             <input type="hidden" name="role" value="anggota" />
                         @endif
 
-                        @if(Auth::user()->hasRole('superadmin'))
+                        {{-- @if(Auth::user()->hasRole('superadmin'))
                         <!-- Shift -->
                         <div class="mt-4">
                             <x-input-label for="shift" :value="__('Shift')" />
@@ -105,7 +105,7 @@
                             </select>
                             <x-input-error :messages="$errors->get('shift')" class="mt-2" />
                         </div>
-                        @endif
+                        @endif --}}
 
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button class="ms-4">
