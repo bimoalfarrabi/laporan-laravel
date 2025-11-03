@@ -26,6 +26,13 @@
                             <x-input-error :messages="$errors->get('content')" class="mt-2" />
                         </div>
 
+                        <!-- Starts At -->
+                        <div class="mt-4">
+                            <x-input-label for="starts_at" :value="__('Berlaku pada Tanggal (Opsional)')" />
+                            <x-text-input id="starts_at" class="block mt-1 w-full" type="datetime-local" name="starts_at" :value="old('starts_at')" />
+                            <x-input-error :messages="$errors->get('starts_at')" class="mt-2" />
+                        </div>
+
                         <!-- Expires At -->
                         <div class="mt-4">
                             <x-input-label for="expires_at" :value="__('Tanggal Kedaluwarsa (Opsional)')" />

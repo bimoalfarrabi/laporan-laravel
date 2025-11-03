@@ -15,10 +15,12 @@ class Announcement extends Model
         'content',
         'expires_at',
         'user_id',
+        'starts_at',
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'starts_at' => 'datetime',
     ];
 
     public function user()

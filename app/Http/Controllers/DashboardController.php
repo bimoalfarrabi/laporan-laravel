@@ -20,8 +20,10 @@ class DashboardController extends Controller
 
         $viewData['announcements'] = Announcement::with('user')
             ->where(function ($query) {
-                $query->whereNull('expires_at')
-                      ->orWhere('expires_at', '>', now());
+                $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
             })
             ->latest()
             ->take(5)

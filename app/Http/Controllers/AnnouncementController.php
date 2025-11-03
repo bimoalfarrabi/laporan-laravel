@@ -20,8 +20,10 @@ class AnnouncementController extends Controller
     {
         $announcements = Announcement::with('user')
             ->where(function ($query) {
-                $query->whereNull('expires_at')
-                      ->orWhere('expires_at', '>', now());
+                $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
             })
             ->latest()
             ->get();
@@ -44,12 +46,14 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'expires_at' => 'nullable|date|after:now',
+            'starts_at' => 'nullable|date',
+            'expires_at' => 'nullable|date|after:starts_at',
         ]);
 
         Announcement::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
+            'starts_at' => $request->input('starts_at'),
             'expires_at' => $request->input('expires_at'),
             'user_id' => Auth::id(),
         ]);
@@ -81,12 +85,14 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'expires_at' => 'nullable|date|after:now',
+            'starts_at' => 'nullable|date',
+            'expires_at' => 'nullable|date|after:starts_at',
         ]);
 
         $announcement->update([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
+            'starts_at' => $request->input('starts_at'),
             'expires_at' => $request->input('expires_at'),
         ]);
 

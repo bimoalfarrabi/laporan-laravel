@@ -24,6 +24,9 @@
                                             <h4 class="font-bold text-lg">{{ $announcement->title }}</h4>
                                             <div class="text-sm text-gray-600 text-right">
                                                 Dibuat oleh {{ $announcement->user->name }} pada <x-waktu-dibuat :date="$announcement->created_at" /><br>
+                                                @if ($announcement->starts_at)
+                                                    Berlaku pada <x-waktu-dibuat :date="$announcement->starts_at" /><br>
+                                                @endif
                                                 @if ($announcement->expires_at)
                                                     Berakhir pada <x-waktu-dibuat :date="$announcement->expires_at" />
                                                     @if ($announcement->expires_at->isPast())

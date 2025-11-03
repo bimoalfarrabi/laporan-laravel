@@ -26,6 +26,7 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dibuat Oleh</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Starts At</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires At</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
@@ -37,6 +38,13 @@
                                         <tr class="{{ $announcement->expires_at && $announcement->expires_at->isPast() ? 'bg-red-100 text-red-700' : '' }}">
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $announcement->title }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $announcement->user->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if ($announcement->starts_at)
+                                                    <x-waktu-dibuat :date="$announcement->starts_at" />
+                                                @else
+                                                    Langsung Aktif
+                                                @endif
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 @if ($announcement->expires_at)
                                                     <x-waktu-dibuat :date="$announcement->expires_at" />
