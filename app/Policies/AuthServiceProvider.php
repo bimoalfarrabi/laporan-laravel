@@ -11,6 +11,8 @@ use App\Policies\ReportTypePolicy;
 use App\Policies\ReportPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use App\Listeners\UpdateLastLoginAt;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,17 @@ class AuthServiceProvider extends ServiceProvider
         ReportType::class => ReportTypePolicy::class,
         Report::class => ReportPolicy::class,
         User::class => UserPolicy::class,
+    ];
+
+    /**
+     * The event listener mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        Login::class => [
+            UpdateLastLoginAt::class,
+        ],
     ];
 
     /**
