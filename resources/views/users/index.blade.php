@@ -164,6 +164,9 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{{ route('users.show', $user->id) }}"
+                                                    class="text-indigo-600 hover:text-indigo-900 mr-2">Show
+                                                </a>
                                                 @can('update', $user)
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="text-blue-600 hover:text-blue-900 mr-2">Edit
