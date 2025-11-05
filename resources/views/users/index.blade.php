@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            @if(Auth::user()->hasRole('danru'))
+            @if (Auth::user()->hasRole('danru'))
                 {{ __('Manajemen Anggota') }}
             @else
                 {{ __('Manajemen Pengguna') }}
@@ -17,7 +17,7 @@
                         <div class="flex items-center mb-4 space-x-4"> {{-- Tambahkan space-x-4 --}}
                             <a href="{{ route('users.create') }}"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                @if(Auth::user()->hasRole('danru'))
+                                @if (Auth::user()->hasRole('danru'))
                                     Buat Anggota Baru
                                 @else
                                     Buat Pengguna Baru
@@ -27,7 +27,7 @@
                                 {{-- Tombol Arsip Pengguna --}}
                                 <a href="{{ route('users.archive') }}"
                                     class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-400 focus:bg-yellow-400 active:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    @if(Auth::user()->hasRole('danru'))
+                                    @if (Auth::user()->hasRole('danru'))
                                         Lihat Arsip Anggota
                                     @else
                                         Lihat Arsip Pengguna
@@ -46,7 +46,8 @@
 
                     {{-- Form Search dan Filter --}}
                     <form method="GET" action="{{ route('users.index') }}" class="mb-4">
-                        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div
+                            class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <input type="text" name="search" placeholder="Cari nama, username, atau email..."
                                 value="{{ $search }}"
                                 class="block w-full sm:w-auto flex-grow border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -81,125 +82,15 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         @php
-                                            $columns = [
-                                                'id' => 'ID',
-                                                'name' => 'Nama',
-                                                'username' => 'Username',
-                                                'email' => 'Email',
-                                                'nik' => 'NIK',
-                                                'phone_number' => 'No. HP',
-                                                'created_at' => 'Waktu Dibuat',
-                                                'last_login_at' => 'Terakhir Login',
-                                            ];
-                                        @endphp
-
-                                        @foreach ($columns as $column => $title)
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                <a href="{{ route('users.index', [
-                                                    'sort_by' => $column,
-                                                    'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
-                                                    'search' => $search,
-                                                    'role' => $filterRole,
-                                                ]) }}">
-                                                    {{ $title }}
-                                                    @if ($sortBy == $column)
-                                                        @if ($sortDirection == 'asc')
-                                                            <span>&#9650;</span>
-                                                        @else
-                                                            <span>&#9660;</span>
-                                                        @endif
-                                                    @endif
-                                                </a>
-                                            </th>
-                                        @endforeach
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Peran (Spatie)
-                                        </th>
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Aksi
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($users as $user)
-                                        <tr>
-                                            <td class="sticky left-0 bg-white px-6 py-4 border-r">
-                                                {{ $user->id }}
-                                            </td>
-                                            <td class="sticky left-16 bg-white px-6 py-4 border-r">
-                                                {{ $user->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                {{ $user->username }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $user->email }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $user->nik }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $user->phone_number }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $user->roles->pluck('name')->join(', ') }}
-                                            </td>
-                                            {{-- <td class="px-6 py-4">
-                                                {{ ucfirst($user->shift) }}
-                                            </td> --}}
-                                            <td class="px-6 py-4">
-                                                <x-waktu-dibuat :date="$user->created_at" />
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if ($user->last_login_at)
-                                                    <x-waktu-dibuat :date="$user->last_login_at" />
-                                                @else
-                                                    Belum pernah login
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('users.show', $user->id) }}"
-                                                    class="text-indigo-600 hover:text-indigo-900 mr-2">Show
-                                                </a>
-                                                @can('update', $user)
-                                                    <a href="{{ route('users.edit', $user->id) }}"
-                                                        class="text-blue-600 hover:text-blue-900 mr-2">Edit
-                                                    </a>
-                                                @endcan
-                                                @can('resetPassword', $user)
-                                                    {{-- Tombol Reset Password --}}
-                                                    <form action="{{ route('users.resetPassword', $user->id) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="text-yellow-600 hover:text-yellow-900 mr-2"
-                                                            data-confirm-dialog="true"
-                                                            data-swal-title="Reset Password?"
-                                                            data-swal-text="Password untuk {{ $user->name }} akan direset menjadi '123456'."
-                                                            >Reset
-                                                            Pass</button>
-                                                    </form>
-                                                @endcan
-                                                @can('delete', $user)
-                                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST"
-                                                        class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900"
-                                                            data-confirm-dialog="true"
-                                                            data-swal-title="Hapus Pengguna?"
-                                                            data-swal-text="Pengguna akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
-                                                    </form>
-                                                @endcan
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
+                                        $columns = [
+                                        'id' => 'ID',
+                                        'name' => 'Nama',
+                                        'username' => 'Username',
+                                        'email' => 'Email',
+                                        'nik' => 'NIK',
+                                        'phone_number' => 'No. HP',
+                                        'created_at' => 'Waktu Dibuat',
+                                        'last_login_at' => 'Terakhir Login',
                             </table>
                         </div>
                     @endif

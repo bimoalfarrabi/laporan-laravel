@@ -255,9 +255,9 @@ class ReportController extends Controller
         $report->last_edited_by_user_id = Auth::id();
 
         // Automatically record danru's shift for LHJ reports
-        if ($reportType->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && Auth::user()->hasRole('danru')) {
-            $report->shift = Auth::user()->shift;
-        }
+        // if ($reportType->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && Auth::user()->hasRole('danru')) {
+        //     $report->shift = Auth::user()->shift;
+        // }
         $report->save();
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');

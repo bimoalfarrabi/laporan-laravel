@@ -111,9 +111,6 @@
                                                 'status' => 'Status',
                                                 'created_at' => 'Waktu Dibuat',
                                             ];
-                                            if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('danru')) {
-                                                $columns['shift'] = 'Shift';
-                                            }
                                         @endphp
 
                                         @foreach ($columns as $column => $title)
@@ -176,11 +173,6 @@
                                             <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$report->created_at" />
                                             </td>
-                                            @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('danru'))
-                                                <td class="px-6 py-4">
-                                                    {{ $report->shift ? ucfirst($report->shift) : '-' }}
-                                                </td>
-                                            @endif
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('reports.show', $report->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>

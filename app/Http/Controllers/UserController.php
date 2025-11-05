@@ -75,9 +75,9 @@ class UserController extends Controller
             'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
         ];
 
-        if (Auth::user()->hasRole('superadmin')) {
-            $rules['shift'] = 'required|in:pagi,sore,malam';
-        }
+        // if (Auth::user()->hasRole('superadmin')) {
+        //     $rules['shift'] = 'required|in:pagi,sore,malam';
+        // }
 
         $request->validate($rules);
 
@@ -95,15 +95,15 @@ class UserController extends Controller
             'phone_number' => $request->phone_number,
         ];
 
-        if (Auth::user()->hasRole('superadmin')) {
-            $userData['shift'] = $request->shift;
-        } elseif (Auth::user()->hasRole('danru')) {
-            $userData['shift'] = Auth::user()->shift;
+        // if (Auth::user()->hasRole('superadmin')) {
+        //     $userData['shift'] = $request->shift;
+        // } elseif (Auth::user()->hasRole('danru')) {
+        //     $userData['shift'] = Auth::user()->shift;
             // Ensure danru can only create 'anggota'
             if ($request->role !== 'anggota') {
                 return redirect()->back()->withErrors(['role' => 'Anda hanya dapat membuat pengguna dengan peran anggota.'])->withInput();
             }
-        }
+        // }
 
         $user = User::create($userData);
 
@@ -123,7 +123,8 @@ class UserController extends Controller
         $this->authorize('update', $user);
         if (Auth::user()->hasRole('superadmin')) {
             $roles = Role::all(); // Superadmin can assign any role
-        } else {
+        }
+        else {
             $roles = Role::where('name', 'anggota')->get(); // Danru can only assign 'anggota'
         }
         return view('users.edit', compact('user', 'roles'));
@@ -143,9 +144,9 @@ class UserController extends Controller
             'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
         ];
 
-        if (Auth::user()->hasRole('superadmin')) {
-            $rules['shift'] = 'required|in:pagi,sore,malam';
-        }
+        // if (Auth::user()->hasRole('superadmin')) {
+        //     $rules['shift'] = 'required|in:pagi,sore,malam';
+        // }
 
         $request->validate($rules);
 
@@ -163,18 +164,18 @@ class UserController extends Controller
         }
         $user->role = $request->role; // perbarui kolom role juga
 
-        if (Auth::user()->hasRole('superadmin')) {
-            $user->shift = $request->shift;
-        } elseif (Auth::user()->hasRole('danru')) {
+        // if (Auth::user()->hasRole('superadmin')) {
+        //     $user->shift = $request->shift;
+        // } elseif (Auth::user()->hasRole('danru')) {
             // Ensure danru can only assign 'anggota'
             if ($request->role !== 'anggota') {
                 return redirect()->back()->withErrors(['role' => 'Anda hanya dapat mengubah pengguna dengan peran anggota.'])->withInput();
             }
             // Danru cannot change shift
-            if ($user->shift !== Auth::user()->shift) {
-                abort(403, 'Anda tidak dapat mengubah shift pengguna di luar shift Anda.');
-            }
-        }
+            // if ($user->shift !== Auth::user()->shift) {
+            //     abort(403, 'Anda tidak dapat mengubah shift pengguna di luar shift Anda.');
+            // }
+        // }
 
         $user->save();
 
