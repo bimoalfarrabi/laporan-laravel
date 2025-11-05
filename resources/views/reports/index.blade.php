@@ -103,26 +103,40 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ID
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Jenis Laporan
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Dibuat Oleh
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Waktu Dibuat
-                                        </th>
+                                        @php
+                                            $columns = [
+                                                'id' => 'ID',
+                                                'report_type_name' => 'Jenis Laporan',
+                                                'user_name' => 'Dibuat Oleh',
+                                                'status' => 'Status',
+                                                'created_at' => 'Waktu Dibuat',
+                                            ];
+                                            if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('danru')) {
+                                                $columns['shift'] = 'Shift';
+                                            }
+                                        @endphp
+
+                                        @foreach ($columns as $column => $title)
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <a href="{{ route('reports.index', [
+                                                    'sort_by' => $column,
+                                                    'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
+                                                    'search' => $search,
+                                                    'report_type_id' => $filterReportTypeId,
+                                                ]) }}">
+                                                    {{ $title }}
+                                                    @if ($sortBy == $column)
+                                                        @if ($sortDirection == 'asc')
+                                                            <span>&#9650;</span>
+                                                        @else
+                                                            <span>&#9660;</span>
+                                                        @endif
+                                                    @endif
+                                                </a>
+                                            </th>
+                                        @endforeach
+
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Aksi
@@ -162,6 +176,11 @@
                                             <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$report->created_at" />
                                             </td>
+                                            @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('danru'))
+                                                <td class="px-6 py-4">
+                                                    {{ $report->shift ? ucfirst($report->shift) : '-' }}
+                                                </td>
+                                            @endif
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('reports.show', $report->id) }}"
                                                     class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>

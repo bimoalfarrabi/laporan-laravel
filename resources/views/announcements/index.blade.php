@@ -24,13 +24,40 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dibuat Oleh</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Starts At</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires At</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                        @php
+                                            $columns = [
+                                                'title' => 'Judul',
+                                                'user_name' => 'Dibuat Oleh',
+                                                'starts_at' => 'Starts At',
+                                                'expires_at' => 'Expires At',
+                                                'created_at' => 'Created At',
+                                                'updated_at' => 'Updated At',
+                                            ];
+                                        @endphp
+
+                                        @foreach ($columns as $column => $title)
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <a href="{{ route('announcements.index', [
+                                                    'sort_by' => $column,
+                                                    'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
+                                                ]) }}">
+                                                    {{ $title }}
+                                                    @if ($sortBy == $column)
+                                                        @if ($sortDirection == 'asc')
+                                                            <span>&#9650;</span>
+                                                        @else
+                                                            <span>&#9660;</span>
+                                                        @endif
+                                                    @endif
+                                                </a>
+                                            </th>
+                                        @endforeach
+
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Aksi
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">

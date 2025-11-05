@@ -16,18 +16,30 @@ class AnnouncementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $announcements = Announcement::with('user')
+        $sortBy = $request->query('sort_by', 'created_at');
+        $sortDirection = $request->query('sort_direction', 'desc');
+
+        $query = Announcement::with('user')
             ->where(function ($query) {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
             })
             ->where(function ($query) {
                 $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            })
-            ->latest()
-            ->get();
-        return view('announcements.index', compact('announcements'));
+            });
+
+        if ($sortBy == 'user_name') {
+            $query->join('users', 'announcements.user_id', '=', 'users.id')
+                  ->orderBy('users.name', $sortDirection)
+                  ->select('announcements.*'); // Hindari ambiguitas kolom
+        } else {
+            $query->orderBy($sortBy, $sortDirection);
+        }
+
+        $announcements = $query->get();
+
+        return view('announcements.index', compact('announcements', 'sortBy', 'sortDirection'));
     }
 
     /**

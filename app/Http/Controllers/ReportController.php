@@ -24,6 +24,8 @@ class ReportController extends Controller
 
         $search = $request->query('search');
         $filterReportTypeId = $request->query('report_type_id');
+        $sortBy = $request->query('sort_by', 'created_at');
+        $sortDirection = $request->query('sort_direction', 'desc');
 
         $query = Report::query()->with('reportType', 'user');
 
@@ -70,10 +72,22 @@ class ReportController extends Controller
             $query->where('report_type_id', $filterReportTypeId);
         }
 
-        $reports = $query->latest()->get();
+        if ($sortBy == 'report_type_name') {
+            $query->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
+                ->orderBy('report_types.name', $sortDirection)
+                ->select('reports.*');
+        } elseif ($sortBy == 'user_name') {
+            $query->join('users', 'reports.user_id', '=', 'users.id')
+                ->orderBy('users.name', $sortDirection)
+                ->select('reports.*');
+        } else {
+            $query->orderBy($sortBy, $sortDirection);
+        }
+
+        $reports = $query->get();
         $reportTypes = ReportType::where('is_active', true)->get(); // Untuk filter dropdown
 
-        return view('reports.index', compact('reports', 'search', 'filterReportTypeId', 'reportTypes'));
+        return view('reports.index', compact('reports', 'search', 'filterReportTypeId', 'reportTypes', 'sortBy', 'sortDirection'));
     }
 
     /**

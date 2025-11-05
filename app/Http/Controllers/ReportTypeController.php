@@ -18,11 +18,16 @@ class ReportTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', ReportType::class); // Otorisasi untuk melihat daftar jenis laporan
-        $reportTypes = ReportType::latest()->get();
-        return view('report-types.index', compact('reportTypes'));
+
+        $sortBy = $request->query('sort_by', 'created_at');
+        $sortDirection = $request->query('sort_direction', 'desc');
+
+        $reportTypes = ReportType::orderBy($sortBy, $sortDirection)->get();
+
+        return view('report-types.index', compact('reportTypes', 'sortBy', 'sortDirection'));
     }
 
     /**

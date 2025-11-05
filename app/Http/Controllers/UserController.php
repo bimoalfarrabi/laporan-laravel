@@ -16,6 +16,8 @@ class UserController extends Controller
 
         $search = $request->query('search');
         $filterRole = $request->query('role');
+        $sortBy = $request->query('sort_by', 'created_at');
+        $sortDirection = $request->query('sort_direction', 'desc');
 
         if (Auth::user()->hasRole('superadmin')) {
             $query = User::with('roles');
@@ -31,21 +33,21 @@ class UserController extends Controller
                     $q->where('name', $filterRole);
                 });
             }
-            $users = $query->latest()->get();
+            $users = $query->orderBy($sortBy, $sortDirection)->get();
         } elseif (Auth::user()->hasRole('danru')) {
             // danru hanya melihat pengguna dengan peran anggota
             $users = User::whereHas('roles', function ($query) {
-                    $query->where('name', 'anggota');
-                })
+                $query->where('name', 'anggota');
+            })
                 ->with('roles')
-                ->latest()
+                ->orderBy($sortBy, $sortDirection)
                 ->get();
         } else {
             $users = collect(); // anggota tidak melihat daftar pengguna
         }
 
         $roles = Role::all();
-        return view('users.index', compact('users', 'roles', 'search', 'filterRole'));
+        return view('users.index', compact('users', 'roles', 'search', 'filterRole', 'sortBy', 'sortDirection'));
     }
 
     public function create()

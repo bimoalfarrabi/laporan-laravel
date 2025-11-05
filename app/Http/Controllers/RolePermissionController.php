@@ -17,11 +17,17 @@ class RolePermissionController extends Controller
     /**
      * Menampilkan daftar peran yang bisa diatur.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $sortBy = $request->query('sort_by', 'name');
+        $sortDirection = $request->query('sort_direction', 'asc');
+
         // Ambil peran selain superadmin
-        $roles = Role::where('name', '!=', 'superadmin')->get();
-        return view('role-permissions.index', compact('roles'));
+        $roles = Role::where('name', '!=', 'superadmin')
+            ->orderBy($sortBy, $sortDirection)
+            ->get();
+
+        return view('role-permissions.index', compact('roles', 'sortBy', 'sortDirection'));
     }
 
     /**

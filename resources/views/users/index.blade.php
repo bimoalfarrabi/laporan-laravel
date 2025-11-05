@@ -80,46 +80,45 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col"
-                                            class="sticky left-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                                            ID
-                                        </th>
-                                        <th scope="col"
-                                            class="sticky left-16 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                                            Nama
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Username
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            NIK
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            No. HP
-                                        </th>
+                                        @php
+                                            $columns = [
+                                                'id' => 'ID',
+                                                'name' => 'Nama',
+                                                'username' => 'Username',
+                                                'email' => 'Email',
+                                                'nik' => 'NIK',
+                                                'phone_number' => 'No. HP',
+                                                'created_at' => 'Waktu Dibuat',
+                                                'last_login_at' => 'Terakhir Login',
+                                            ];
+                                        @endphp
+
+                                        @foreach ($columns as $column => $title)
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <a href="{{ route('users.index', [
+                                                    'sort_by' => $column,
+                                                    'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
+                                                    'search' => $search,
+                                                    'role' => $filterRole,
+                                                ]) }}">
+                                                    {{ $title }}
+                                                    @if ($sortBy == $column)
+                                                        @if ($sortDirection == 'asc')
+                                                            <span>&#9650;</span>
+                                                        @else
+                                                            <span>&#9660;</span>
+                                                        @endif
+                                                    @endif
+                                                </a>
+                                            </th>
+                                        @endforeach
+
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Peran (Spatie)
                                         </th>
-                                        {{-- <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Shift
-                                        </th> --}}
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Waktu Dibuat
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Terakhir Login
-                                        </th>
+
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Aksi
