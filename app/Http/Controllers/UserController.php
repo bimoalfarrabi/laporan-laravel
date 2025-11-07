@@ -76,7 +76,7 @@ class UserController extends Controller
         ];
 
         if (Auth::user()->hasRole('superadmin')) {
-            $rules['shift'] = 'required|in:pagi,sore,malam';
+            $rules['shift'] = 'in:pagi,sore,malam';
         }
 
         $request->validate($rules);
@@ -145,7 +145,7 @@ class UserController extends Controller
         ];
 
         if (Auth::user()->hasRole('superadmin')) {
-            $rules['shift'] = 'required|in:pagi,sore,malam';
+            $rules['shift'] = 'in:pagi,sore,malam';
         }
 
         $request->validate($rules);
