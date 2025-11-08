@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ForcePasswordChangeController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AttendanceController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -67,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('announcements', 'App\Http\Controllers\AnnouncementController')->withTrashed();
     Route::post('announcements/{id}/restore', [App\Http\Controllers\AnnouncementController::class, 'restore'])->name('announcements.restore');
     Route::delete('announcements/{id}/force-delete', [App\Http\Controllers\AnnouncementController::class, 'forceDelete'])->name('announcements.forceDelete');
+
+    // Absensi
+    Route::resource('attendances', AttendanceController::class);
 });
 
 require __DIR__ . '/auth.php';

@@ -10,6 +10,8 @@ use App\Policies\LaporanHarianJagaPolicy;
 use App\Policies\ReportTypePolicy;
 use App\Policies\ReportPolicy;
 use App\Policies\UserPolicy;
+use App\Models\Attendance;
+use App\Policies\AttendancePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Auth\Events\Login;
 use App\Listeners\UpdateLastLoginAt;
@@ -27,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         ReportType::class => ReportTypePolicy::class,
         Report::class => ReportPolicy::class,
         User::class => UserPolicy::class,
+        Attendance::class => AttendancePolicy::class,
     ];
 
     /**
