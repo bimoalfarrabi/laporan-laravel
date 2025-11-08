@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AttendanceController extends Controller
 {
@@ -60,7 +61,15 @@ class AttendanceController extends Controller
             'longitude' => 'required|numeric',
         ]);
 
-        $path = $request->file('photo')->store('attendances', 'public');
+        $file = $request->file('photo');
+        $accountName = Str::slug(Auth::user()->name);
+        $timestamp = now()->format('YmdHis');
+        $filename = $accountName . '-' . $timestamp . '.' . $file->getClientOriginalExtension();
+
+        $year = now()->format('Y');
+        $month = now()->format('m');
+
+        $path = $file->storeAs('attendances/' . $year . '/' . $month, $filename, 'public');
 
         Attendance::create([
             'user_id' => Auth::id(),

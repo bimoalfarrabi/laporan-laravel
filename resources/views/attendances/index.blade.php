@@ -38,9 +38,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $attendance->user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->created_at->format('d M Y, H:i') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="{{ asset('storage/' . $attendance->photo_path) }}" target="_blank">
-                                                <img src="{{ asset('storage/' . $attendance->photo_path) }}" alt="Foto Absensi" class="h-10 w-10 rounded-full object-cover">
-                                            </a>
+                                            @if($attendance->photo_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_path))
+                                                <a href="{{ asset('storage/' . $attendance->photo_path) }}" target="_blank">
+                                                    <img src="{{ asset('storage/' . $attendance->photo_path) }}" alt="Foto Absensi" class="h-10 w-10 rounded-full object-cover">
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">Foto tidak tersedia</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude }}&mlon={{ $attendance->longitude }}#map=16/{{ $attendance->latitude }}/{{ $attendance->longitude }}" target="_blank" class="text-blue-500 hover:underline">
