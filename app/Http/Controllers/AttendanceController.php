@@ -62,18 +62,77 @@ class AttendanceController extends Controller
         ]);
 
         $file = $request->file('photo');
+        $photoPath = null;
+
+        // --- Native GD Compression Logic ---
+        $originalPath = $file->getRealPath();
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        // Generate unique filename with .jpg extension
         $accountName = Str::slug(Auth::user()->name);
         $timestamp = now()->format('YmdHis');
-        $filename = $accountName . '-' . $timestamp . '.' . $file->getClientOriginalExtension();
+        $filename = $accountName . '-' . $timestamp . '.jpg';
 
-        $year = now()->format('Y');
-        $month = now()->format('m');
+        // Create image resource from uploaded file
+        $imageResource = null;
+        switch ($originalExtension) {
+            case 'jpg':
+            case 'jpeg':
+                $imageResource = imagecreatefromjpeg($originalPath);
+                break;
+            case 'png':
+                $imageResource = imagecreatefrompng($originalPath);
+                break;
+            case 'gif':
+                $imageResource = imagecreatefromgif($originalPath);
+                break;
+        }
 
-        $path = $file->storeAs('attendances/' . $year . '/' . $month, $filename, 'public');
+        if ($imageResource) {
+            $year = now()->format('Y');
+            $month = now()->format('m');
+            $storagePath = 'attendances/' . $year . '/' . $month . '/' . $filename;
+            $publicPath = storage_path('app/public/' . $storagePath);
+
+            // Ensure directory exists
+            if (!file_exists(dirname($publicPath))) {
+                mkdir(dirname($publicPath), 0755, true);
+            }
+
+            $quality = 90; // Start with high quality
+            $maxFileSize = 1024 * 1024; // 1MB in bytes
+            $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+            do {
+                // Save the image with current quality to a temporary file
+                imagejpeg($imageResource, $tempPath, $quality);
+                $fileSize = filesize($tempPath);
+
+                if ($fileSize > $maxFileSize && $quality > 10) {
+                    $quality -= 5; // Reduce quality
+                } else {
+                    break; // Exit loop if size is acceptable or quality is too low
+                }
+            } while ($quality >= 10);
+
+            // Move the compressed image from temporary path to public storage
+            rename($tempPath, $publicPath);
+
+            // Free up memory
+            imagedestroy($imageResource);
+
+            $photoPath = $storagePath;
+        } else {
+            // Fallback for unsupported image types (e.g., webp, heic)
+            $year = now()->format('Y');
+            $month = now()->format('m');
+            $photoPath = $file->store('attendances/' . $year . '/' . $month, 'public');
+        }
+        // --- End of Native GD Logic ---
 
         Attendance::create([
             'user_id' => Auth::id(),
-            'photo_path' => $path,
+            'photo_path' => $photoPath,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
         ]);
