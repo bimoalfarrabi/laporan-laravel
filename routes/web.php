@@ -10,6 +10,7 @@ use App\Http\Controllers\ForcePasswordChangeController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\SettingController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -71,6 +72,12 @@ Route::middleware('auth')->group(function () {
 
     // Absensi
     Route::resource('attendances', AttendanceController::class);
+
+    // Location Settings
+    Route::middleware('role:superadmin')->group(function () {
+        Route::get('/settings/location', [SettingController::class, 'locationSettings'])->name('settings.location');
+        Route::post('/settings/location', [SettingController::class, 'updateLocationSettings'])->name('settings.location.update');
+    });
 });
 
 require __DIR__ . '/auth.php';

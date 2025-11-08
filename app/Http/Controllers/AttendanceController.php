@@ -1,12 +1,10 @@
-<?php
-
-namespace App\Http\Controllers;
-
 use App\Models\Attendance;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AttendanceController extends Controller
 {
@@ -60,6 +58,26 @@ class AttendanceController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ]);
+
+        // Location validation
+        $settingKeys = ['center_latitude', 'center_longitude', 'allowed_radius_meters'];
+        $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
+
+        if ($settings->has($settingKeys)) {
+            $centerLat = $settings['center_latitude'];
+            $centerLon = $settings['center_longitude'];
+            $allowedRadius = $settings['allowed_radius_meters'];
+            $userLat = $request->latitude;
+            $userLon = $request->longitude;
+
+            $distance = $this->calculateDistance($centerLat, $centerLon, $userLat, $userLon);
+
+            if ($distance > $allowedRadius) {
+                throw ValidationException::withMessages([
+                    'location' => 'Anda berada di luar radius lokasi yang diizinkan untuk absensi. Jarak Anda: ' . round($distance) . ' meter dari pusat.',
+                ]);
+            }
+        }
 
         $file = $request->file('photo');
         $photoPath = null;
@@ -141,6 +159,26 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Calculate the distance between two points on Earth.
+     * @return float Distance in meters
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000; // meters
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+           cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+           sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)
@@ -172,3 +210,4 @@ class AttendanceController extends Controller
         //
     }
 }
+

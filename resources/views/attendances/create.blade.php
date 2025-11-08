@@ -13,6 +13,9 @@
                     <form action="{{ route('attendances.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
+                        <!-- General Location Error -->
+                        <x-input-error :messages="$errors->get('location')" class="mt-2 mb-4" />
+
                         <!-- Photo -->
                         <div class="mb-4">
                             <x-input-label for="photo" :value="__('Ambil Foto Absensi')" />
