@@ -38,7 +38,8 @@ class ReportController extends Controller
         } elseif (Auth::user()->hasRole('danru')) {
             $baseQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
         } else {
-            $baseQuery->where('user_id', Auth::id());
+            // Anggota can see all reports from other 'anggota'
+            $baseQuery->whereHas('user.roles', fn($q) => $q->where('name', 'anggota'));
         }
 
         // Apply search and filter to the base query

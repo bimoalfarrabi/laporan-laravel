@@ -35,22 +35,26 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
-        // Allow viewing approved reports if the user has the permission
-        if ($user->can('view approved reports') && $report->status === 'disetujui') {
-            return true;
-        }
-
-        if ($user->hasRole('danru')) {
-            // Danru can view reports from 'anggota' and other 'danru'
-            return $report->user->hasRole(['anggota', 'danru']);
+        if ($user->hasRole('anggota')) {
+            return $report->user->hasRole('anggota');
         }
 
         if ($user->can('reports:view-any')) {
+            // If user is danru, they can only view reports from anggota
+            if ($user->hasRole('danru')) {
+                return $report->user->hasRole(['anggota', 'danru']);
+            }
+            // Other roles with view-any can see everything
             return true;
         }
 
         if ($user->can('reports:view-own')) {
             return $user->id === $report->user_id;
+        }
+
+        // Allow viewing approved reports if the user has the permission
+        if ($user->can('view approved reports') && $report->status === 'disetujui') {
+            return true;
         }
 
         return false;
