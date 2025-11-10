@@ -120,7 +120,7 @@ class ReportPolicy
     public function approve(User $user, Report $report): bool
     {
         if ($user->hasRole('danru')) {
-            return $report->user->hasRole('anggota') && $user->can('reports:approve');
+            return $report->user->hasRole('anggota') && $user->id !== $report->user_id && $user->can('reports:approve');
         }
         return $user->can('reports:approve');
     }
@@ -128,7 +128,7 @@ class ReportPolicy
     public function reject(User $user, Report $report): bool
     {
         if ($user->hasRole('danru')) {
-            return $report->user->hasRole('anggota') && $user->can('reports:reject');
+            return $report->user->hasRole('anggota') && $user->id !== $report->user_id && $user->can('reports:reject');
         }
         return $user->can('reports:reject');
     }
