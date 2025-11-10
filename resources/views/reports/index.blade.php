@@ -96,9 +96,19 @@
                     </form>
                     {{-- End Form Search dan Filter --}}
 
-                    @if ($reports->isEmpty())
-                        <p class="mt-4">Belum ada Laporan Dinamis yang dibuat.</p>
+                    @if (empty($reportsByDate) && $currentDate)
+                        <div class="text-center py-10">
+                            <p class="text-gray-500">Tidak ada laporan yang ditemukan untuk tanggal <span class="font-semibold">{{ \Carbon\Carbon::parse($currentDate)->isoFormat('D MMMM YYYY') }}</span>.</p>
+                        </div>
+                    @elseif (empty($reportsByDate))
+                        <div class="text-center py-10">
+                            <p class="text-gray-500">Tidak ada laporan yang ditemukan.</p>
+                        </div>
                     @else
+                        <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">
+                            Menampilkan Laporan untuk Tanggal: {{ \Carbon\Carbon::parse($currentDate)->isoFormat('D MMMM YYYY') }}
+                        </h3>
+
                         <div class="mt-6 overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -116,12 +126,10 @@
                                         @foreach ($columns as $column => $title)
                                             <th scope="col"
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                <a href="{{ route('reports.index', [
+                                                <a href="{{ route('reports.index', array_merge(request()->query(), [
                                                     'sort_by' => $column,
                                                     'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
-                                                    'search' => $search,
-                                                    'report_type_id' => $filterReportTypeId,
-                                                ]) }}">
+                                                ])) }}">
                                                     {{ $title }}
                                                     @if ($sortBy == $column)
                                                         @if ($sortDirection == 'asc')
@@ -141,7 +149,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($reports as $report)
+                                    @foreach ($reportsByDate as $report)
                                         <tr>
                                             <td class="px-6 py-4">
                                                 {{ $report->id }}
@@ -197,8 +205,9 @@
                                 </tbody>
                             </table>
                         </div>
+
                         <div class="mt-4">
-                            {{ $reports->appends(request()->query())->links() }}
+                            {{ $datesPaginator->appends(request()->query())->links() }}
                         </div>
                     @endif
                 </div>
