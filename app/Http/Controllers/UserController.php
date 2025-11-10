@@ -33,7 +33,7 @@ class UserController extends Controller
                     $q->where('name', $filterRole);
                 });
             }
-            $users = $query->orderBy($sortBy, $sortDirection)->get();
+            $users = $query->orderBy($sortBy, $sortDirection)->paginate(15);
         } elseif (Auth::user()->hasRole('danru')) {
             // danru hanya melihat pengguna dengan peran anggota
             $users = User::whereHas('roles', function ($query) {
@@ -41,7 +41,7 @@ class UserController extends Controller
             })
                 ->with('roles')
                 ->orderBy($sortBy, $sortDirection)
-                ->get();
+                ->paginate(15);
         } else {
             $users = collect(); // anggota tidak melihat daftar pengguna
         }

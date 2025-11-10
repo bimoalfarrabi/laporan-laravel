@@ -25,7 +25,7 @@ class ReportTypeController extends Controller
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDirection = $request->query('sort_direction', 'desc');
 
-        $reportTypes = ReportType::orderBy($sortBy, $sortDirection)->get();
+        $reportTypes = ReportType::orderBy($sortBy, $sortDirection)->paginate(15);
 
         return view('report-types.index', compact('reportTypes', 'sortBy', 'sortDirection'));
     }

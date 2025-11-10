@@ -25,7 +25,7 @@ class RolePermissionController extends Controller
         // Ambil peran selain superadmin
         $roles = Role::where('name', '!=', 'superadmin')
             ->orderBy($sortBy, $sortDirection)
-            ->get();
+            ->paginate(15);
 
         return view('role-permissions.index', compact('roles', 'sortBy', 'sortDirection'));
     }

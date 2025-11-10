@@ -84,7 +84,7 @@ class ReportController extends Controller
             $query->orderBy($sortBy, $sortDirection);
         }
 
-        $reports = $query->get();
+        $reports = $query->paginate(15);
         $reportTypes = ReportType::where('is_active', true)->get(); // Untuk filter dropdown
 
         return view('reports.index', compact('reports', 'search', 'filterReportTypeId', 'reportTypes', 'sortBy', 'sortDirection'));

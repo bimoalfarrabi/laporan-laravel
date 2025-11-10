@@ -37,7 +37,7 @@ class AnnouncementController extends Controller
             $query->orderBy($sortBy, $sortDirection);
         }
 
-        $announcements = $query->get();
+        $announcements = $query->paginate(15);
 
         return view('announcements.index', compact('announcements', 'sortBy', 'sortDirection'));
     }
