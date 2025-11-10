@@ -39,10 +39,10 @@ class ReportController extends Controller
                 });
             });
         } elseif (Auth::user()->hasRole('danru')) {
-            // Danru only sees reports from anggota
+            // Danru only sees reports from anggota and other danru
             $query->whereHas('user', function ($q) {
                 $q->whereHas('roles', function ($qr) {
-                    $qr->where('name', 'anggota');
+                    $qr->whereIn('name', ['anggota', 'danru']);
                 });
             });
         } else {

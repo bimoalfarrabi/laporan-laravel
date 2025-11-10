@@ -41,8 +41,8 @@ class ReportPolicy
         }
 
         if ($user->hasRole('danru')) {
-            // Danru can view reports from 'anggota'
-            return $report->user->hasRole('anggota');
+            // Danru can view reports from 'anggota' and other 'danru'
+            return $report->user->hasRole(['anggota', 'danru']);
         }
 
         if ($user->can('reports:view-any')) {
