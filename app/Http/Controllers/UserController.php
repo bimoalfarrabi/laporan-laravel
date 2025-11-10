@@ -71,7 +71,7 @@ class UserController extends Controller
             'email' => 'nullable|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string',
-            'nik' => 'nullable|string|digits:16',
+            'nik' => 'required|string|digits:16',
             'phone_number' => ['nullable', 'string', 'regex:/^(08|\\+628)[0-9]{8,11}$/'],
         ];
 
@@ -230,8 +230,21 @@ class UserController extends Controller
             if ($filterRole) {
                 $query->role($filterRole);
             }
+        } elseif (Auth::user()->hasRole('danru')) {
+            // Danru hanya bisa melihat anggota di arsip
+            $query->whereHas('roles', function ($q) {
+                $q->where('name', 'anggota');
+            });
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('username', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            }
         } else {
-            // Danru tidak bisa melihat arsip pengguna
+            // Selain superadmin dan danru, tidak bisa melihat arsip pengguna
             abort(403, 'Anda tidak memiliki akses ke arsip pengguna.');
         }
 
