@@ -17,50 +17,16 @@
 
                         <a href="{{ route('report-types.explanation') }}"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Lihat Penjelasan Jenis Laporan
+                            Lihat Penjelasan
                         </a>
 
-                        {{-- @if (Auth::user()->hasRole('danru') || Auth::user()->hasRole('superadmin'))
-                            <a href="{{ route('reports.archive') }}"
-                                class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-400 focus:bg-yellow-400 active:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                Lihat Arsip Laporan
+                        @can('exportMonthly', App\Models\Report::class)
+                            <a href="{{ route('reports.export') }}"
+                                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Export Laporan
                             </a>
-                        @endif --}}
+                        @endcan
                     </div>
-
-                    @can('exportMonthly', App\Models\Report::class)
-                        <div class="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Export Laporan Bulanan Anggota</h3>
-                            <form action="{{ route('reports.exportMonthlyPdf', ['year' => 'YEAR_PLACEHOLDER', 'month' => 'MONTH_PLACEHOLDER']) }}" method="GET" id="monthlyExportForm">
-                                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                                    <select name="month" id="exportMonth" class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        @foreach (range(1, 12) as $m)
-                                            <option value="{{ sprintf('%02d', $m) }}" {{ date('m') == $m ? 'selected' : '' }}>
-                                                {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <select name="year" id="exportYear" class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        @foreach (range(date('Y'), date('Y') - 5) as $y)
-                                            <option value="{{ $y }}" {{ date('Y') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-primary-button type="submit" class="w-full sm:w-auto">
-                                        Export PDF Bulanan
-                                    </x-primary-button>
-                                </div>
-                            </form>
-                        </div>
-                        <script>
-                            document.getElementById('monthlyExportForm').addEventListener('submit', function(e) {
-                                e.preventDefault();
-                                const month = document.getElementById('exportMonth').value;
-                                const year = document.getElementById('exportYear').value;
-                                const url = this.action.replace('YEAR_PLACEHOLDER', year).replace('MONTH_PLACEHOLDER', month);
-                                window.location.href = url;
-                            });
-                        </script>
-                    @endcan
 
                     @if (session('success'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4"

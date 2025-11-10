@@ -526,6 +526,12 @@ class ReportController extends Controller
         return $pdf->download($filename);
     }
 
+    public function showExportForm()
+    {
+        $this->authorize('exportMonthly', Report::class); // Re-use existing policy
+        return view('reports.export');
+    }
+
     public function exportMonthlyPdf(Request $request, $year, $month)
     {
         $this->authorize('exportMonthly', Report::class); // New policy method for authorization

@@ -33,6 +33,11 @@ Route::middleware('auth')->group(function () {
 
     // Laporan
     Route::get('/reports/archive', [ReportController::class, 'archive'])->name('reports.archive');
+    Route::get('/reports/export', [ReportController::class, 'showExportForm'])->name('reports.export');
+    Route::get('/reports/export-monthly-pdf/{year}/{month}', [ReportController::class, 'exportMonthlyPdf'])->name('reports.exportMonthlyPdf');
+    Route::get('/reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+    Route::post('/reports/{report}/approve', [ReportController::class, 'approve'])->name('reports.approve');
+    Route::post('/reports/{report}/reject', [ReportController::class, 'reject'])->name('reports.reject');
     Route::resource('reports', ReportController::class)->withTrashed();
     Route::post('/reports/{id}/restore', [ReportController::class, 'restore'])->name('reports.restore');
     Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
@@ -42,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/{report}/reject', [ReportController::class, 'reject'])->name('reports.reject');
 
     // Rute untuk export PDF laporan
+    Route::get('/reports/export', [ReportController::class, 'showExportForm'])->name('reports.export');
     Route::get('/reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
     // Rute untuk export PDF laporan bulanan
