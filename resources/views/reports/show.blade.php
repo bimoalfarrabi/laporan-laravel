@@ -70,7 +70,7 @@
                     <hr class="my-6">
 
                     {{-- Report Data --}}
-                    <div>
+                    <div x-data>
                         <h3 class="font-semibold text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
                         <div class="space-y-4">
                             @foreach ($report->reportType->reportTypeFields as $field)
@@ -86,31 +86,49 @@
                                             {{ $report->data[$field->name] ?? '-' }}
                                         @elseif ($field->type === 'checkbox')
                                             <span
-                                                class="{{ ($report->data[$field->name] ?? false) ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ ($report->data[$field->name] ?? false) ? 'Ya' : 'Tidak' }}
+                                                class="{{ $report->data[$field->name] ?? false ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ $report->data[$field->name] ?? false ? 'Ya' : 'Tidak' }}
                                             </span>
                                         @elseif ($field->type === 'file')
-                                            @if (!empty($report->data[$field->name]))
-                                                @if (Storage::disk('public')->exists($report->data[$field->name]))
-                                                    <div>
-                                                        <a href="{{ Storage::url($report->data[$field->name]) }}"
-                                                            target="_blank" class="text-blue-600 hover:underline">Lihat
-                                                            File</a>
+                                            @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
+                                                @php
+                                                    $imageUrl = Storage::url($report->data[$field->name]);
+                                                    $isImage = in_array(
+                                                        strtolower(pathinfo($imageUrl, PATHINFO_EXTENSION)),
+                                                        ['jpg', 'jpeg', 'png', 'gif', 'svg'],
+                                                    );
+                                                @endphp
 
-                                                    @php
-                                                        $extension = pathinfo($report->data[$field->name], PATHINFO_EXTENSION);
-                                                    @endphp
-                                                    @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg']))
-                                                        <img src="{{ Storage::url($report->data[$field->name]) }}"
-                                                            alt="{{ $field->label }}"
-                                                            class="max-w-xs h-auto object-cover rounded-md mt-2 shadow-md">
-                                                    @endif
-                                                </div>
+                                                @if ($isImage)
+                                                    <a href="#"
+                                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
+                                                        class="block group w-max">
+
+                                                        <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
+                                                            class="max-w-xs h-auto object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity">
+
+                                                        <span
+                                                            class="text-blue-600 group-hover:underline mt-2 text-sm block">Lihat
+                                                            Gambar Penuh</span>
+
+                                                    </a>
                                                 @else
-                                                    <p class="text-red-500">File telah dihapus dari storage.</p>
+                                                    <a href="{{ $imageUrl }}" target="_blank"
+                                                        class="text-blue-600 hover:underline">
+
+                                                        Lihat File
+                                                        ({{ strtoupper(pathinfo($imageUrl, PATHINFO_EXTENSION)) }})
+
+                                                    </a>
                                                 @endif
                                             @else
-                                                <p class="text-gray-500">Tidak ada file yang diunggah.</p>
+                                                <p class="text-gray-500">
+                                                    @if (!empty($report->data[$field->name]))
+                                                        File telah dihapus atau tidak dapat ditemukan.
+                                                    @else
+                                                        Tidak ada file yang diunggah.
+                                                    @endif
+                                                </p>
                                             @endif
                                         @else
                                             {{ $report->data[$field->name] ?? '-' }}
@@ -147,7 +165,10 @@
                                     </form>
                                 @endcan
                             @else
-                                @if (($report->status == 'belum disetujui') && (Auth::user()->can('reports:approve') || Auth::user()->can('reports:reject')) && (Auth::id() !== $report->user_id))
+                                @if (
+                                    $report->status == 'belum disetujui' &&
+                                        (Auth::user()->can('reports:approve') || Auth::user()->can('reports:reject')) &&
+                                        Auth::id() !== $report->user_id)
                                     @can('approve', $report)
                                         <form action="{{ route('reports.approve', $report->id) }}" method="POST">
                                             @csrf
@@ -191,4 +212,5 @@
             </div>
         </div>
     </div>
+    <x-image-modal />
 </x-app-layout>
