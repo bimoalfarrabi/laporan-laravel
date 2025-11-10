@@ -66,6 +66,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'superadmin@example.com'],
             [
                 'name' => 'Super Admin',
+                'username' => 'superadmin',
                 'password' => Hash::make('password'),
                 'role' => 'superadmin', // Tetap pertahankan untuk konsistensi atau jika masih ada logika lama yang memakainya
             ]
@@ -77,6 +78,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'danrua@example.com'],
             [
                 'name' => 'Danru A',
+                'username' => 'danru',
                 'password' => Hash::make('password'),
                 'role' => 'danru',
             ]
@@ -88,6 +90,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'anggota1@example.com'],
             [
                 'name' => 'Anggota 1',
+                'username' => 'anggota1',
                 'password' => Hash::make('password'),
                 'role' => 'anggota',
             ]
@@ -99,6 +102,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'anggota2@example.com'],
             [
                 'name' => 'Anggota 2',
+                'username' => 'anggota2',
                 'password' => Hash::make('password'),
                 'role' => 'anggota',
             ]
