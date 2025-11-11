@@ -10,11 +10,17 @@ use App\Http\Controllers\ForcePasswordChangeController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\SettingController;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+// Route untuk menyajikan file dari storage
+Route::get('storage/files/{filePath}', [FileController::class, 'serve'])
+    ->where('filePath', '.*')
+    ->name('files.serve');
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 

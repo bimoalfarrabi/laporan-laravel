@@ -92,9 +92,10 @@
                                         @elseif ($field->type === 'file')
                                             @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
                                                 @php
-                                                    $imageUrl = Storage::url($report->data[$field->name]);
+                                                    $filePath = $report->data[$field->name];
+                                                    $imageUrl = route('files.serve', ['filePath' => $filePath]);
                                                     $isImage = in_array(
-                                                        strtolower(pathinfo($imageUrl, PATHINFO_EXTENSION)),
+                                                        strtolower(pathinfo($filePath, PATHINFO_EXTENSION)),
                                                         ['jpg', 'jpeg', 'png', 'gif', 'svg'],
                                                     );
                                                 @endphp
@@ -117,7 +118,7 @@
                                                         class="text-blue-600 hover:underline">
 
                                                         Lihat File
-                                                        ({{ strtoupper(pathinfo($imageUrl, PATHINFO_EXTENSION)) }})
+                                                        ({{ strtoupper(pathinfo($filePath, PATHINFO_EXTENSION)) }})
 
                                                     </a>
                                                 @endif
