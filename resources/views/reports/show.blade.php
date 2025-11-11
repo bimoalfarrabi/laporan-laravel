@@ -10,24 +10,20 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    {{-- Report Metadata --}}
+                    {{-- Simplified Report Metadata --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <h3 class="font-semibold text-lg text-gray-800">Informasi Laporan</h3>
                             <div class="mt-4 space-y-2 text-gray-900">
                                 <p><strong>ID Laporan:</strong> {{ $report->id }}</p>
                                 <p><strong>Jenis Laporan:</strong> {{ $report->reportType->name }}</p>
-                                <p><strong>Dibuat Oleh:</strong> {{ $report->user->name }}</p>
                                 @if ($report->shift)
                                     <p><strong>Shift:</strong> {{ $report->shift }}</p>
-                                @endif
-                                @if ($report->lastEditedBy)
-                                    <p><strong>Terakhir Diperbarui Oleh:</strong> {{ $report->lastEditedBy->name }}</p>
                                 @endif
                             </div>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-lg text-gray-800">Status & Waktu</h3>
+                            <h3 class="font-semibold text-lg text-gray-800">Status</h3>
                             <div class="mt-4 space-y-2 text-gray-900">
                                 <p><strong>Status:</strong>
                                     @php
@@ -45,34 +41,16 @@
                                         {{ ucfirst($report->status) }}
                                     </span>
                                 </p>
-                                <p><strong>Dibuat Pada:</strong> {{ $report->created_at->format('d-m-Y H:i') }}</p>
-                                <p><strong>Terakhir Diperbarui:</strong> {{ $report->updated_at->format('d-m-Y H:i') }}
-                                </p>
-                                @if ($report->approvedBy)
-                                    <p><strong>Disetujui Oleh:</strong> {{ $report->approvedBy->name }} pada
-                                        {{ $report->approved_at->format('d-m-Y H:i') }}</p>
-                                @endif
-                                @if ($report->rejectedBy)
-                                    <p><strong>Ditolak Oleh:</strong> {{ $report->rejectedBy->name }} pada
-                                        {{ $report->rejected_at->format('d-m-Y H:i') }}</p>
-                                @endif
-                                @if ($report->deleted_at)
-                                    <div class="text-red-600">
-                                        <p><strong>Dihapus Oleh:</strong> {{ $report->deletedBy->name ?? 'N/A' }}</p>
-                                        <p><strong>Waktu Dihapus:</strong>
-                                            {{ $report->deleted_at->format('d-m-Y H:i') }}</p>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
 
                     <hr class="my-6">
 
-                    {{-- Report Data --}}
+                    {{-- Report Data (2-column layout) --}}
                     <div x-data>
                         <h3 class="font-semibold text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             @foreach ($report->reportType->reportTypeFields as $field)
                                 <div class="p-4 border rounded-lg">
                                     <strong class="text-gray-600">{{ $field->label }}:</strong>
@@ -139,6 +117,40 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Signature/History Block --}}
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-4">Riwayat Laporan</h3>
+                        <div class="flex flex-col md:flex-row md:justify-between text-sm text-gray-600 space-y-2 md:space-y-0">
+                            {{-- Left Side --}}
+                            <div class="space-y-2">
+                                <p><strong>Dibuat oleh:</strong> {{ $report->user->name }} pada
+                                    {{ $report->created_at->format('d-m-Y H:i') }}</p>
+                                @if ($report->lastEditedBy && $report->updated_at != $report->created_at)
+                                    <p><strong>Terakhir diperbarui oleh:</strong> {{ $report->lastEditedBy->name }} pada
+                                        {{ $report->updated_at->format('d-m-Y H:i') }}</p>
+                                @endif
+                            </div>
+
+                            {{-- Right Side --}}
+                            <div class="space-y-2 md:text-right">
+                                @if ($report->approvedBy)
+                                    <p><strong>Disetujui oleh:</strong> {{ $report->approvedBy->name }} pada
+                                        {{ $report->approved_at->format('d-m-Y H:i') }}</p>
+                                @endif
+                                @if ($report->rejectedBy)
+                                    <p><strong>Ditolak oleh:</strong> {{ $report->rejectedBy->name }} pada
+                                        {{ $report->rejected_at->format('d-m-Y H:i') }}</p>
+                                @endif
+                                @if ($report->deleted_at)
+                                    <p class="text-red-700"><strong>Dihapus oleh:</strong>
+                                        {{ $report->deletedBy->name ?? 'N/A' }} pada
+                                        {{ $report->deleted_at->format('d-m-Y H:i') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
 
                     {{-- Action Buttons --}}
                     <div class="mt-8 pt-6 border-t">
