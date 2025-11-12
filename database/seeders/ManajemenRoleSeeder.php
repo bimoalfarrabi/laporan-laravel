@@ -14,10 +14,10 @@ class ManajemenRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::create(['name' => 'manajemen']);
+        $role = Role::firstOrCreate(['name' => 'manajemen']);
 
         $permissions = [
-            'reports:view',
+            'reports:view-any',
             'reports:approve',
             'reports:reject',
         ];
