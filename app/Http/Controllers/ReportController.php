@@ -486,15 +486,13 @@ class ReportController extends Controller
 
     public function approve(Report $report)
     {
-        if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
-            $report->status = 'disetujui';
-            $report->approved_by_user_id = Auth::id();
-            $report->approved_at = now();
-            $report->save();
-            return redirect()->back()->with('success', 'Laporan disetujui.');
-        }
+        $this->authorize('approve', $report); // Menggunakan policy approve
 
-        abort(403, 'Anda tidak memiliki izin untuk menyetujui laporan ini.');
+        $report->status = 'disetujui';
+        $report->approved_by_user_id = Auth::id();
+        $report->approved_at = now();
+        $report->save();
+        return redirect()->back()->with('success', 'Laporan disetujui.');
     }
 
     public function reject(Report $report)
