@@ -51,19 +51,20 @@
                     <div x-data>
                         <h3 class="font-semibold text-base sm:text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
                         @php
-                            // Get the value of the 'time' field to merge it with the 'date' field.
-                            $timeFieldValue = $report->data['time'] ?? null;
+                            // Get the value of the 'time' or 'waktu' field to merge it with the 'date' or 'tanggal' field.
+                            $timeFieldValue = $report->data['time'] ?? $report->data['waktu'] ?? null;
                         @endphp
                         <div class="grid grid-cols-2 gap-4">
                             @foreach ($report->reportType->reportTypeFields->unique('name') as $field)
-                                {{-- Skip rendering the 'time' field as it's merged with the 'date' field --}}
-                                @if ($field->name !== 'time')
+                                {{-- Skip rendering the 'time' or 'waktu' field as it's merged with the 'date' or 'tanggal' field --}}
+                                @if (!in_array($field->name, ['time', 'waktu']))
                                     <div class="p-3 border rounded-lg">
                                         <strong class="text-gray-600">{{ $field->label }}:</strong>
                                         <div class="mt-1 text-gray-900">
-                                            @if ($field->name === 'date')
+                                            @if ($field->name === 'date' || $field->name === 'tanggal')
                                                 @php
-                                                    $dateValue = isset($report->data['date']) ? Carbon\Carbon::parse($report->data['date'])->format('d-m-Y') : null;
+                                                    $dateData = $report->data['date'] ?? $report->data['tanggal'] ?? null;
+                                                    $dateValue = $dateData ? Carbon\Carbon::parse($dateData)->format('d-m-Y') : null;
                                                 @endphp
                                                 {{ $dateValue ?? '-' }}
                                                 @if ($timeFieldValue)
