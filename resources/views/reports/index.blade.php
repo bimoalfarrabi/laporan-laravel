@@ -36,44 +36,54 @@
                     @endif
 
                     {{-- Form Search dan Filter --}}
-                    <form method="GET" action="{{ route('reports.index') }}" class="mb-4">
-                        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <input type="text" name="search" placeholder="Cari Jenis/Pembuat Laporan..."
-                                value="{{ $search }}"
-                                class="block w-full sm:w-auto flex-grow border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            <select name="report_type_id"
-                                class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="">Semua Jenis Laporan</option>
-                                @foreach ($reportTypes as $reportType)
-                                    <option value="{{ $reportType->id }}"
-                                        {{ $filterReportTypeId == $reportType->id ? 'selected' : '' }}>
-                                        {{ $reportType->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            <select name="filter_by_status"
-                                class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="">Semua Status</option>
-                                <option value="belum disetujui" {{ $filterByStatus == 'belum disetujui' ? 'selected' : '' }}>Belum Disetujui</option>
-                                <option value="disetujui" {{ $filterByStatus == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                                <option value="ditolak" {{ $filterByStatus == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                            </select>
-
-                            <label for="filter_by_user" class="flex items-center">
-                                <input type="checkbox" name="filter_by_user" id="filter_by_user" value="1" {{ $filterByUser ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                <span class="ml-2 text-sm text-gray-600">Laporan Saya</span>
-                            </label>
-                            <x-primary-button type="submit" class="w-full sm:w-auto">
-                                {{ __('Filter') }}
-                            </x-primary-button>
-                            <a href="{{ route('reports.index') }}"
-                                class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full sm:w-auto">
-                                {{ __('Reset') }}
-                            </a>
-                        </div>
-                    </form>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <form method="GET" action="{{ route('reports.index') }}">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
+                                <div class="lg:col-span-1">
+                                    <input type="text" name="search" placeholder="Cari Jenis/Pembuat Laporan..."
+                                        value="{{ $search }}"
+                                        class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                </div>
+                                <div class="lg:col-span-1">
+                                    <select name="report_type_id"
+                                        class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <option value="">Semua Jenis Laporan</option>
+                                        @foreach ($reportTypes as $reportType)
+                                            <option value="{{ $reportType->id }}"
+                                                {{ $filterReportTypeId == $reportType->id ? 'selected' : '' }}>
+                                                {{ $reportType->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="lg:col-span-1">
+                                    <select name="filter_by_status"
+                                        class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <option value="">Semua Status</option>
+                                        <option value="belum disetujui" {{ $filterByStatus == 'belum disetujui' ? 'selected' : '' }}>Belum Disetujui</option>
+                                        <option value="disetujui" {{ $filterByStatus == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                                        <option value="ditolak" {{ $filterByStatus == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="lg:col-span-1 flex items-center">
+                                    <label for="filter_by_user" class="flex items-center">
+                                        <input type="checkbox" name="filter_by_user" id="filter_by_user" value="1" {{ $filterByUser ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                        <span class="ml-2 text-sm text-gray-600">Laporan Saya</span>
+                                    </label>
+                                </div>
+                                <div class="lg:col-span-1 flex space-x-2">
+                                    <x-primary-button type="submit" class="w-full justify-center">
+                                        {{ __('Filter') }}
+                                    </x-primary-button>
+                                    <a href="{{ route('reports.index') }}"
+                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full">
+                                        {{ __('Reset') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     {{-- End Form Search dan Filter --}}
 
                     @if (empty($reportsByDate) && $currentDate)
