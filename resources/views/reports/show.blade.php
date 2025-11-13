@@ -47,84 +47,88 @@
 
                     <hr class="my-6">
 
-                    {{-- Report Data (2-column layout) --}}
+                    {{-- Report Data (single-column with dividers) --}}
                     <div x-data>
                         <h3 class="font-semibold text-base sm:text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
                         @php
                             // Get the value of the 'time' or 'waktu' field to merge it with the 'date' or 'tanggal' field.
                             $timeFieldValue = $report->data['time'] ?? $report->data['waktu'] ?? null;
+                            $fields = $report->reportType->reportTypeFields->unique('name')->filter(function ($field) {
+                                return !in_array($field->name, ['time', 'waktu']);
+                            });
                         @endphp
-                        <div class="grid grid-cols-2 gap-4">
-                            @foreach ($report->reportType->reportTypeFields->unique('name') as $field)
+                        <div class="space-y-6">
+                            @foreach ($fields as $field)
                                 {{-- Skip rendering the 'time' or 'waktu' field as it's merged with the 'date' or 'tanggal' field --}}
-                                @if (!in_array($field->name, ['time', 'waktu']))
-                                    <div class="p-3 border rounded-lg">
-                                        <strong class="text-gray-600">{{ $field->label }}:</strong>
-                                        <div class="mt-1 text-gray-900">
-                                            @if ($field->name === 'date' || $field->name === 'tanggal')
+                                <div>
+                                    <strong class="text-gray-600">{{ $field->label }}:</strong>
+                                    <div class="mt-1 text-gray-900">
+                                        @if ($field->name === 'date' || $field->name === 'tanggal')
+                                            @php
+                                                $dateData = $report->data['date'] ?? $report->data['tanggal'] ?? null;
+                                                $dateValue = $dateData ? Carbon\Carbon::parse($dateData)->format('d-m-Y') : null;
+                                            @endphp
+                                            {{ $dateValue ?? '-' }}
+                                            @if ($timeFieldValue)
+                                                <span class="ml-2">{{ $timeFieldValue }}</span>
+                                            @endif
+                                        @elseif ($field->type === 'textarea' || $field->type === 'text')
+                                            <p class="whitespace-pre-wrap">{{ $report->data[$field->name] ?? '-' }}</p>
+                                        @elseif ($field->type === 'checkbox')
+                                            <span
+                                                class="{{ $report->data[$field->name] ?? false ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ $report->data[$field->name] ?? false ? 'Ya' : 'Tidak' }}
+                                            </span>
+                                        @elseif ($field->type === 'file')
+                                            @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
                                                 @php
-                                                    $dateData = $report->data['date'] ?? $report->data['tanggal'] ?? null;
-                                                    $dateValue = $dateData ? Carbon\Carbon::parse($dateData)->format('d-m-Y') : null;
+                                                    $filePath = $report->data[$field->name];
+                                                    $imageUrl = route('files.serve', ['filePath' => $filePath]);
+                                                    $isImage = in_array(
+                                                        strtolower(pathinfo($filePath, PATHINFO_EXTENSION)),
+                                                        ['jpg', 'jpeg', 'png', 'gif', 'svg'],
+                                                    );
                                                 @endphp
-                                                {{ $dateValue ?? '-' }}
-                                                @if ($timeFieldValue)
-                                                    <span class="ml-2">{{ $timeFieldValue }}</span>
-                                                @endif
-                                            @elseif ($field->type === 'textarea' || $field->type === 'text')
-                                                <p class="whitespace-pre-wrap">{{ $report->data[$field->name] ?? '-' }}</p>
-                                            @elseif ($field->type === 'checkbox')
-                                                <span
-                                                    class="{{ $report->data[$field->name] ?? false ? 'text-green-600' : 'text-red-600' }}">
-                                                    {{ $report->data[$field->name] ?? false ? 'Ya' : 'Tidak' }}
-                                                </span>
-                                            @elseif ($field->type === 'file')
-                                                @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
-                                                    @php
-                                                        $filePath = $report->data[$field->name];
-                                                        $imageUrl = route('files.serve', ['filePath' => $filePath]);
-                                                        $isImage = in_array(
-                                                            strtolower(pathinfo($filePath, PATHINFO_EXTENSION)),
-                                                            ['jpg', 'jpeg', 'png', 'gif', 'svg'],
-                                                        );
-                                                    @endphp
 
-                                                    @if ($isImage)
-                                                        <a href="#"
-                                                            @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
-                                                            class="block group w-max">
+                                                @if ($isImage)
+                                                    <a href="#"
+                                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
+                                                        class="block group w-max">
 
-                                                            <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
-                                                                class="hidden sm:block max-w-xs h-auto object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity">
+                                                        <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
+                                                            class="hidden sm:block max-w-xs h-auto object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity">
 
-                                                            <span
-                                                                class="text-blue-600 group-hover:underline mt-2 text-sm block">Lihat
-                                                                Gambar Penuh</span>
+                                                        <span
+                                                            class="text-blue-600 group-hover:underline mt-2 text-sm block">Lihat
+                                                            Gambar Penuh</span>
 
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ $imageUrl }}" target="_blank"
-                                                            class="text-blue-600 hover:underline">
-
-                                                            Lihat File
-                                                            ({{ strtoupper(pathinfo($filePath, PATHINFO_EXTENSION)) }})
-
-                                                        </a>
-                                                    @endif
+                                                    </a>
                                                 @else
-                                                    <p class="text-gray-500">
-                                                        @if (!empty($report->data[$field->name]))
-                                                            File telah dihapus atau tidak dapat ditemukan.
-                                                        @else
-                                                            Tidak ada file yang diunggah.
-                                                        @endif
-                                                    </p>
+                                                    <a href="{{ $imageUrl }}" target="_blank"
+                                                        class="text-blue-600 hover:underline">
+
+                                                        Lihat File
+                                                        ({{ strtoupper(pathinfo($filePath, PATHINFO_EXTENSION)) }})
+
+                                                    </a>
                                                 @endif
                                             @else
-                                                {{-- Fallback for any other field type --}}
-                                                {{ $report->data[$field->name] ?? '-' }}
+                                                <p class="text-gray-500">
+                                                    @if (!empty($report->data[$field->name]))
+                                                        File telah dihapus atau tidak dapat ditemukan.
+                                                    @else
+                                                        Tidak ada file yang diunggah.
+                                                    @endif
+                                                </p>
                                             @endif
-                                        </div>
+                                        @else
+                                            {{-- Fallback for any other field type --}}
+                                            {{ $report->data[$field->name] ?? '-' }}
+                                        @endif
                                     </div>
+                                </div>
+                                @if (!$loop->last)
+                                    <hr>
                                 @endif
                             @endforeach
                         </div>
