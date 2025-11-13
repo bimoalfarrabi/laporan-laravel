@@ -51,6 +51,20 @@
                                     </option>
                                 @endforeach
                             </select>
+
+                            <select name="filter_by_status"
+                                class="block w-full sm:w-auto border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="">Semua Status</option>
+                                <option value="belum disetujui" {{ $filterByStatus == 'belum disetujui' ? 'selected' : '' }}>Belum Disetujui</option>
+                                <option value="disetujui" {{ $filterByStatus == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                                <option value="ditolak" {{ $filterByStatus == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            </select>
+
+                            <label for="filter_by_user" class="flex items-center">
+                                <input type="checkbox" name="filter_by_user" id="filter_by_user" value="1" {{ $filterByUser ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span class="ml-2 text-sm text-gray-600">Laporan Saya</span>
+                            </label>
                             <x-primary-button type="submit" class="w-full sm:w-auto">
                                 {{ __('Filter') }}
                             </x-primary-button>

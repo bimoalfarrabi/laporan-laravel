@@ -25,6 +25,8 @@ class ReportController extends Controller
 
         $search = $request->query('search');
         $filterReportTypeId = $request->query('report_type_id');
+        $filterByUser = $request->query('filter_by_user');
+        $filterByStatus = $request->query('filter_by_status');
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDirection = $request->query('sort_direction', 'desc');
 
@@ -54,6 +56,14 @@ class ReportController extends Controller
 
         if ($filterReportTypeId) {
             $baseQuery->where('report_type_id', $filterReportTypeId);
+        }
+
+        if ($filterByUser) {
+            $baseQuery->where('user_id', Auth::id());
+        }
+
+        if ($filterByStatus) {
+            $baseQuery->where('status', $filterByStatus);
         }
 
         // 1. Get a paginated list of distinct dates from the filtered query.
@@ -99,7 +109,9 @@ class ReportController extends Controller
             'filterReportTypeId',
             'reportTypes',
             'sortBy',
-            'sortDirection'
+            'sortDirection',
+            'filterByUser',
+            'filterByStatus'
         ));
     }
 
