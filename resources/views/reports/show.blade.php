@@ -11,7 +11,7 @@
                 <div class="p-6 bg-white border-b border-gray-200">
 
                     {{-- Simplified Report Metadata --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-6 mb-6">
                         <div>
                             <h3 class="font-semibold text-base sm:text-lg text-gray-800">Informasi Laporan</h3>
                             <div class="mt-4 space-y-2 text-gray-900">
@@ -20,11 +20,6 @@
                                 @if ($report->shift)
                                     <p><strong>Shift:</strong> {{ $report->shift }}</p>
                                 @endif
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-base sm:text-lg text-gray-800">Status</h3>
-                            <div class="mt-4 space-y-2 text-gray-900">
                                 <p><strong>Status:</strong>
                                     @php
                                         $bgColor = '';
