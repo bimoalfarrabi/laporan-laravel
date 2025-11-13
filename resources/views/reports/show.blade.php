@@ -13,9 +13,8 @@
                     {{-- Simplified Report Metadata --}}
                     <div class="space-y-6 mb-6">
                         <div>
-                            <h3 class="font-semibold text-base sm:text-lg text-gray-800">Informasi Laporan</h3>
                             <div class="mt-4 space-y-2 text-gray-900">
-                                <p><strong>ID Laporan:</strong> {{ $report->id }}</p>
+                                <p><strong>ID Laporan:</strong> #{{ $report->id }}</p>
                                 <p><strong>Jenis Laporan:</strong> {{ $report->reportType->name }}</p>
                                 @if ($report->shift)
                                     <p><strong>Shift:</strong> {{ $report->shift }}</p>
@@ -44,7 +43,6 @@
 
                     {{-- Report Data (single-column with dividers) --}}
                     <div x-data>
-                        <h3 class="font-semibold text-base sm:text-lg text-gray-800 leading-tight mb-4">Data Laporan</h3>
                         @php
                             // Get the value of the 'time' or 'waktu' field to merge it with the 'date' or 'tanggal' field.
                             $timeFieldValue = $report->data['time'] ?? $report->data['waktu'] ?? null;
@@ -56,7 +54,15 @@
                             @foreach ($fields as $field)
                                 {{-- Skip rendering the 'time' or 'waktu' field as it's merged with the 'date' or 'tanggal' field --}}
                                 <div>
-                                    <strong class="text-gray-600">{{ $field->label }}:</strong>
+                                    <strong class="text-gray-600">
+                                        @if ($field->name === 'date' || $field->name === 'tanggal')
+                                            Waktu:
+                                        @elseif ($field->type === 'file')
+                                            Lampiran Gambar:
+                                        @else
+                                            {{ $field->label }}:
+                                        @endif
+                                    </strong>
                                     <div class="mt-1 text-gray-900">
                                         @if ($field->name === 'date' || $field->name === 'tanggal')
                                             @php
@@ -65,7 +71,7 @@
                                             @endphp
                                             {{ $dateValue ?? '-' }}
                                             @if ($timeFieldValue)
-                                                <span class="ml-2">{{ $timeFieldValue }}</span>
+                                                <span class="ml-2">{{ $timeFieldValue }} WIB</span>
                                             @endif
                                         @elseif ($field->type === 'textarea' || $field->type === 'text')
                                             <p class="whitespace-pre-wrap">{{ $report->data[$field->name] ?? '-' }}</p>
