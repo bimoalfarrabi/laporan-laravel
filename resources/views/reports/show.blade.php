@@ -93,10 +93,10 @@
                                                 @if ($isImage)
                                                     <a href="#"
                                                         @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
-                                                        class="block group w-max">
+                                                        class="block group w-32 h-24 flex-shrink-0">
 
                                                         <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
-                                                            class="hidden sm:block max-w-xs h-auto object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity">
+                                                            class="w-full h-full object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity">
 
                                                         <span
                                                             class="text-blue-600 group-hover:underline mt-2 text-sm block">Lihat
