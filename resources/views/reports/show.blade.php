@@ -160,10 +160,9 @@
                                         {{ $report->rejected_at->format('d-m-Y H:i') }}</p>
                                 @endif
                                 @if ($report->deleted_at)
-                                    <p class="text-red-700"><strong>Dihapus oleh:</strong>
-                                        {{ $report->deletedBy?->name ?? 'N/A' }} pada
-                                        {{ $report->deleted_at->format('d-m-Y H:i') }}</p>
-                                @endif
+                                                                         <p class="text-red-700"><strong>Dihapus oleh:</strong>
+                                                                            {{ $report->deletedBy?->name ?? 'Pengguna telah dihapus' }} pada
+                                                                             {{ $report->deleted_at->format('d-m-Y H:i') }}</p>                                @endif
                             </div>
                         </div>
                     </div>
