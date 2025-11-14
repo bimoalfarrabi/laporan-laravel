@@ -104,13 +104,19 @@
                                                 @if ($isImage)
                                                     <a href="#"
                                                         @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
-                                                        class="flex flex-col group w-24 flex-shrink-0">
+                                                        class="flex flex-col group flex-shrink-0 mt-2 gap-2">
 
-                                                        <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
-                                                            class="w-full h-32 object-cover rounded-md mt-2 shadow-md group-hover:opacity-75 transition-opacity transform rotate-90">
+                                                        <!-- Outer Wrapper (final visual size) -->
+                                                        <div class="w-32 h-40 overflow-hidden rounded-md shadow-md group-hover:opacity-75 transition-opacity">
+                                                            <!-- Inner Wrapper (pre-rotated size, then rotated and shifted) -->
+                                                            <div class="w-40 h-32 transform rotate-90 -translate-x-4 translate-y-4">
+                                                                <img src="{{ $imageUrl }}" alt="{{ $field->label }}"
+                                                                    class="w-full h-full object-cover">
+                                                            </div>
+                                                        </div>
 
                                                         <span
-                                                            class="text-blue-600 group-hover:underline mt-2 text-sm block">Lihat
+                                                            class="text-blue-600 group-hover:underline text-sm block">Lihat
                                                             Gambar Penuh</span>
 
                                                     </a>
