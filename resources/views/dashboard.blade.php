@@ -114,6 +114,9 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="mt-4">
+                                    {{ $approvedReports->links() }}
+                                </div>
                             @else
                                 <p>Tidak ada laporan lain yang disetujui untuk ditampilkan.</p>
                             @endif
@@ -188,6 +191,9 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="mt-4">
+                                    {{ $approvedReports->links() }}
                                 </div>
                             @else
                                 <p>Tidak ada laporan lain yang disetujui untuk ditampilkan.</p>
