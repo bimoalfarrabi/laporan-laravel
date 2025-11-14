@@ -1,8 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Detail Laporan: ') . $report->reportType->name }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Detail Laporan: ') . $report->reportType->name }}
+            </h2>
+            <button id="share-button"
+                class="inline-flex items-center px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-400 focus:bg-gray-400 active:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                {{ __('Share') }}
+            </button>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -246,4 +252,40 @@
         </div>
     </div>
     <x-image-modal />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButton = document.getElementById('share-button');
+            if (shareButton) {
+                shareButton.addEventListener('click', async () => {
+                    const reportUrl = window.location.href;
+                    const reportTitle = 'Laporan';
+                    const reportText = 'Lihat detail laporan:';
+
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: reportTitle,
+                                text: reportText,
+                                url: reportUrl,
+                            });
+                        } catch (error) {
+                            // Ignore abort errors
+                            if (error.name !== 'AbortError') {
+                                console.error('Error sharing:', error);
+                            }
+                        }
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(reportUrl);
+                            alert('Link laporan telah disalin ke clipboard!');
+                        } catch (error) {
+                            console.error('Error copying to clipboard:', error);
+                            alert('Gagal menyalin link.');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>
