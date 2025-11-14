@@ -33,7 +33,7 @@
         x-transition:leave-end="opacity-0 transform scale-95"
         class="relative z-10"
     >
-        <img :src="imageUrl" alt="Image" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
+        <img :src="imageUrl" alt="Image" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg transform rotate-90">
 
         <button @click="show = false" class="absolute top-2 right-2 text-white bg-gray-800 rounded-full p-1 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
