@@ -41,9 +41,8 @@ class DashboardController extends Controller
                 ->get();
             $viewData['approvedReports'] = Report::with('user', 'reportType')
                 ->where('status', 'disetujui')
-                ->where('user_id', '!=', $user->id)
                 ->latest()
-                ->get();
+                ->paginate(5);
         } elseif ($user->hasRole('manajemen')) {
             $viewData['reportsForApproval'] = Report::with('user', 'reportType')
                 ->where('status', 'belum disetujui')
@@ -61,9 +60,8 @@ class DashboardController extends Controller
                 ->get();
             $viewData['approvedReports'] = Report::with('user', 'reportType')
                 ->where('status', 'disetujui')
-                ->where('user_id', '!=', $user->id)
                 ->latest()
-                ->get();
+                ->paginate(5);
         } elseif ($user->hasRole('superadmin')) {
             $viewData['totalUsers'] = User::count();
             $viewData['reportStats'] = Report::query()
