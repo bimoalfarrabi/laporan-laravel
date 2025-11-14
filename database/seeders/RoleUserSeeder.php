@@ -17,6 +17,7 @@ class RoleUserSeeder extends Seeder
         // Membuat user dengan role 'super_admin'
         User::create([
             'name' => 'Super Admin',
+            'username' => 'superadmin',
             'email' => 'superadmin@example.com',
             'password' => Hash::make('password123'), // Ganti dengan password yang diinginkan
             'role' => 'superadmin',
@@ -25,6 +26,7 @@ class RoleUserSeeder extends Seeder
         // Membuat user dengan role 'danru'
         User::create([
             'name' => 'Danru A',
+            'username' => 'danrua',
             'email' => 'danrua@example.com',
             'password' => Hash::make('password123'), // Ganti dengan password yang diinginkan
             'role' => 'danru',
@@ -33,6 +35,7 @@ class RoleUserSeeder extends Seeder
         // Membuat user dengan role 'anggota'
         User::create([
             'name' => 'Anggota 1',
+            'username' => 'anggota1',
             'email' => 'anggota1@example.com',
             'password' => Hash::make('password123'), // Ganti dengan password yang diinginkan
             'role' => 'anggota',
@@ -40,6 +43,7 @@ class RoleUserSeeder extends Seeder
 
         User::create([
             'name' => 'Anggota 2',
+            'username' => 'anggota2',
             'email' => 'anggota2@example.com',
             'password' => Hash::make('password123'), // Ganti dengan password yang diinginkan
             'role' => 'anggota',

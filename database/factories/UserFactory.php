@@ -26,9 +26,14 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'username' => fake()->unique()->userName(),
-            'email' => fake()->optional()->safeEmail(),
+            'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'anggota', // default role
+            'nik' => fake()->unique()->numerify('################'),
+            'phone_number' => fake()->phoneNumber(),
+            'shift' => fake()->randomElement(['pagi', 'sore', 'malam']),
+            'must_reset_password' => false,
         ];
     }
 

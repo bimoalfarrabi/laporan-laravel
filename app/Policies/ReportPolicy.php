@@ -35,6 +35,11 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
+        // danru, manajemen, and anggota can view any approved report
+        if ($report->status === 'disetujui' && $user->hasRole(['danru', 'manajemen', 'anggota'])) {
+            return true;
+        }
+
         if ($user->hasRole('anggota')) {
             return $report->user->hasRole('anggota');
         }
