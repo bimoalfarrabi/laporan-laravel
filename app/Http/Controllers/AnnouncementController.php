@@ -10,7 +10,12 @@ class AnnouncementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('role:danru|superadmin')->except(['show']);
+        $this->middleware('permission:announcements:view-any')->only(['index', 'archive']);
+        $this->middleware('permission:announcements:create')->only(['create', 'store']);
+        $this->middleware('permission:announcements:update')->only(['edit', 'update']);
+        $this->middleware('permission:announcements:delete')->only('destroy');
+        $this->middleware('permission:announcements:restore')->only('restore');
+        $this->middleware('permission:announcements:force-delete')->only('forceDelete');
     }
 
     /**

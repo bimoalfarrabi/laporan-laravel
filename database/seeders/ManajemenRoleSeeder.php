@@ -18,14 +18,14 @@ class ManajemenRoleSeeder extends Seeder
 
         $permissions = [
             'reports:view-any',
-            'reports:approve',
-            'reports:reject',
+            'users:view-any',
+            'announcements:view-any',
         ];
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission);
         }
 
-        $role->givePermissionTo($permissions);
+        $role->syncPermissions($permissions);
     }
 }

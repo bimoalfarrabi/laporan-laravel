@@ -36,7 +36,7 @@ class ReportController extends Controller
         if (Auth::user()->hasRole('superadmin')) {
             // SuperAdmin can see all reports
         } elseif (Auth::user()->hasRole('manajemen')) {
-            $baseQuery->whereHas('user.roles', fn($q) => $q->where('name', 'danru'));
+            $baseQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['danru', 'anggota']));
         } elseif (Auth::user()->hasRole('danru')) {
             $baseQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
         } else {
