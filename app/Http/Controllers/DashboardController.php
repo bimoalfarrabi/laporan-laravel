@@ -53,6 +53,10 @@ class DashboardController extends Controller
                 })
                 ->latest()
                 ->get();
+            $viewData['approvedReports'] = Report::with('user', 'reportType')
+                ->where('status', 'disetujui')
+                ->latest()
+                ->paginate(5);
         } elseif ($user->hasRole('anggota')) {
             $viewData['myRecentReports'] = Report::with('user', 'reportType')->where('user_id', $user->id)
                 ->latest()
