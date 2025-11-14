@@ -22,12 +22,18 @@
                                 <p><strong>Status:</strong>
                                     @php
                                         $bgColor = '';
-                                        if ($report->status == 'belum disetujui') {
-                                            $bgColor = 'bg-yellow-200 text-yellow-800';
-                                        } elseif ($report->status == 'disetujui') {
-                                            $bgColor = 'bg-green-200 text-green-800';
-                                        } elseif ($report->status == 'ditolak') {
-                                            $bgColor = 'bg-red-200 text-red-800';
+                                        switch ($report->status) {
+                                            case 'belum disetujui':
+                                                $bgColor = 'bg-yellow-200 text-yellow-800';
+                                                break;
+                                            case 'disetujui':
+                                                $bgColor = 'bg-green-200 text-green-800';
+                                                break;
+                                            case 'ditolak':
+                                                $bgColor = 'bg-red-200 text-red-800';
+                                                break;
+                                            default:
+                                                break;
                                         }
                                     @endphp
                                     <span
@@ -46,9 +52,7 @@
                         @php
                             // Get the value of the 'time' or 'waktu' field to merge it with the 'date' or 'tanggal' field.
                             $timeFieldValue = $report->data['time'] ?? $report->data['waktu'] ?? null;
-                            $fields = $report->reportType->reportTypeFields->unique('name')->filter(function ($field) {
-                                return !in_array($field->name, ['time', 'waktu']);
-                            });
+                            $fields = $report->reportType->reportTypeFields->unique('name')->filter(fn ($field) => !in_array($field->name, ['time', 'waktu']));
                         @endphp
                         <div class="space-y-6">
                             @foreach ($fields as $field)
