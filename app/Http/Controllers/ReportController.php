@@ -31,22 +31,22 @@ class ReportController extends Controller
         $sortDirection = $request->query('sort_direction', 'desc');
 
         // Base query with role-based restrictions
-        $baseQuery = Report::query();
+        $query = Report::query()->with(['reportType', 'user']);
 
         if (Auth::user()->hasRole('superadmin')) {
             // SuperAdmin can see all reports
         } elseif (Auth::user()->hasRole('manajemen')) {
-            $baseQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['danru', 'anggota']));
+            $query->whereHas('user.roles', fn($q) => $q->whereIn('name', ['danru', 'anggota']));
         } elseif (Auth::user()->hasRole('danru')) {
-            $baseQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
+            $query->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
         } else {
             // Anggota can see all reports from other 'anggota'
-            $baseQuery->whereHas('user.roles', fn($q) => $q->where('name', 'anggota'));
+            $query->whereHas('user.roles', fn($q) => $q->where('name', 'anggota'));
         }
 
         // Apply search and filter to the base query
         if ($search) {
-            $baseQuery->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->whereHas('reportType', fn($qr) => $qr->where('name', 'like', '%' . $search . '%'));
                 if (!Auth::user()->hasRole('anggota')) {
                     $q->orWhereHas('user', fn($qr) => $qr->where('name', 'like', '%' . $search . '%'));
@@ -55,56 +55,37 @@ class ReportController extends Controller
         }
 
         if ($filterReportTypeId) {
-            $baseQuery->where('report_type_id', $filterReportTypeId);
+            $query->where('report_type_id', $filterReportTypeId);
         }
 
         if ($filterByUser) {
-            $baseQuery->where('user_id', Auth::id());
+            $query->where('user_id', Auth::id());
         }
 
         if ($filterByStatus) {
-            $baseQuery->where('status', $filterByStatus);
+            $query->where('status', $filterByStatus);
         }
 
-        // 1. Get a paginated list of distinct dates from the filtered query.
-        $datesQuery = $baseQuery->clone()
-            ->selectRaw('DATE(created_at) as report_date')
-            ->distinct()
-            ->orderBy('report_date', 'desc');
-
-        $datesPaginator = $datesQuery->paginate(1, ['*'], 'page');
-
-        // 2. Get the date for the current page.
-        $currentDate = $datesPaginator->items()[0]->report_date ?? null;
-
-        // 3. Fetch all reports for that specific date.
-        $reportsByDate = [];
-        if ($currentDate) {
-            $reportsQuery = $baseQuery->clone()
-                ->with(['reportType', 'user'])
-                ->whereDate('created_at', $currentDate);
-
-            if ($sortBy == 'report_type_name') {
-                $reportsQuery->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
-                    ->orderBy('report_types.name', $sortDirection)
-                    ->select('reports.*');
-            } elseif ($sortBy == 'user_name') {
-                $reportsQuery->join('users', 'reports.user_id', '=', 'users.id')
-                    ->orderBy('users.name', $sortDirection)
-                    ->select('reports.*');
-            } else {
-                $reportsQuery->orderBy($sortBy, $sortDirection);
-            }
-
-            $reportsByDate = $reportsQuery->get();
+        // Apply sorting
+        if ($sortBy == 'report_type_name') {
+            $query->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
+                ->orderBy('report_types.name', $sortDirection)
+                ->select('reports.*');
+        } elseif ($sortBy == 'user_name') {
+            $query->join('users', 'reports.user_id', '=', 'users.id')
+                ->orderBy('users.name', $sortDirection)
+                ->select('reports.*');
+        } else {
+            $query->orderBy($sortBy, $sortDirection);
         }
+
+        // Paginate the results
+        $reports = $query->paginate(15)->appends($request->query());
 
         $reportTypes = ReportType::where('is_active', true)->get();
 
         return view('reports.index', compact(
-            'reportsByDate',
-            'datesPaginator',
-            'currentDate',
+            'reports',
             'search',
             'filterReportTypeId',
             'reportTypes',

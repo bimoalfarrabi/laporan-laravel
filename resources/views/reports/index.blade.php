@@ -86,19 +86,11 @@
                     </div>
                     {{-- End Form Search dan Filter --}}
 
-                    @if (empty($reportsByDate) && $currentDate)
-                        <div class="text-center py-10">
-                            <p class="text-gray-500">Tidak ada laporan yang ditemukan untuk tanggal <span class="font-semibold">{{ \Carbon\Carbon::parse($currentDate)->isoFormat('D MMMM YYYY') }}</span>.</p>
-                        </div>
-                    @elseif (empty($reportsByDate))
+                    @if ($reports->isEmpty())
                         <div class="text-center py-10">
                             <p class="text-gray-500">Tidak ada laporan yang ditemukan.</p>
                         </div>
                     @else
-                        <h3 class="text-lg font-semibold text-center text-gray-700 mb-4">
-                            Menampilkan Laporan untuk Tanggal: {{ \Carbon\Carbon::parse($currentDate)->isoFormat('D MMMM YYYY') }}
-                        </h3>
-
                         <div class="mt-6 overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -139,7 +131,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($reportsByDate as $report)
+                                    @foreach ($reports as $report)
                                         <tr>
                                             <td class="px-6 py-4">
                                                 {{ $report->id }}
@@ -197,7 +189,7 @@
                         </div>
 
                         <div class="mt-4">
-                            {{ $datesPaginator->appends(request()->query())->links() }}
+                            {{ $reports->links() }}
                         </div>
                     @endif
                 </div>
