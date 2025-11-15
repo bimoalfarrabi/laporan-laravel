@@ -17,11 +17,10 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
-/vendor/
+/
 node_modules/
 npm-debug.log
 yarn-error.log
