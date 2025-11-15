@@ -200,71 +200,7 @@ class ReportController extends Controller
             $fieldName = $field->name;
             if ($field->type === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
-
-                // --- Native GD Compression Logic ---
-                $originalPath = $file->getRealPath();
-                $originalExtension = strtolower($file->getClientOriginalExtension());
-
-                // Generate unique filename with .jpg extension
-                $accountName = Str::slug(Auth::user()->name);
-                $timestamp = now()->format('YmdHis');
-                $filename = $accountName . '-' . $timestamp . '.jpg';
-
-                // Create image resource from uploaded file
-                $imageResource = null;
-                switch ($originalExtension) {
-                    case 'jpg':
-                    case 'jpeg':
-                        $imageResource = imagecreatefromjpeg($originalPath);
-                        break;
-                    case 'png':
-                        $imageResource = imagecreatefrompng($originalPath);
-                        break;
-                    case 'gif':
-                        $imageResource = imagecreatefromgif($originalPath);
-                        break;
-                }
-
-                if ($imageResource) {
-                    $year = now()->format('Y');
-                    $month = now()->format('m');
-                    $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
-                    $publicPath = storage_path('app/public/' . $storagePath);
-
-                    // Ensure directory exists
-                    if (!file_exists(dirname($publicPath))) {
-                        mkdir(dirname($publicPath), 0755, true);
-                    }
-
-                    $quality = 90; // Start with high quality
-                    $maxFileSize = 1024 * 1024; // 1MB in bytes
-                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
-
-                    do {
-                        // Save the image with current quality to a temporary file
-                        imagejpeg($imageResource, $tempPath, $quality);
-                        $fileSize = filesize($tempPath);
-
-                        if ($fileSize > $maxFileSize && $quality > 10) {
-                            $quality -= 5; // Reduce quality
-                        } else {
-                            break; // Exit loop if size is acceptable or quality is too low
-                        }
-                    } while ($quality >= 10);
-
-                    // Move the compressed image from temporary path to public storage
-                    rename($tempPath, $publicPath);
-
-                    // Free up memory
-                    imagedestroy($imageResource);
-
-                    $reportData[$fieldName] = $storagePath;
-                } else {
-                    // If file type is not supported, store it without compression
-                    $reportData[$fieldName] = $file->store('reports/' . Auth::id(), 'public');
-                }
-                // --- End of Native GD Logic ---
-
+                $reportData[$fieldName] = $this->compressAndStoreImage($file);
             } elseif ($field['type'] === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
             } else {
@@ -369,70 +305,7 @@ class ReportController extends Controller
                                 }
 
                                 $file = $request->file($fieldName);
-
-                                // --- Native GD Compression Logic ---
-                                $originalPath = $file->getRealPath();
-                                $originalExtension = strtolower($file->getClientOriginalExtension());
-
-                                // Generate unique filename with .jpg extension
-                                $accountName = Str::slug(Auth::user()->name);
-                                $timestamp = now()->format('YmdHis');
-                                $filename = $accountName . '-' . $timestamp . '.jpg';
-
-                                // Create image resource from uploaded file
-                                $imageResource = null;
-                                switch ($originalExtension) {
-                                    case 'jpg':
-                                    case 'jpeg':
-                                        $imageResource = imagecreatefromjpeg($originalPath);
-                                        break;
-                                    case 'png':
-                                        $imageResource = imagecreatefrompng($originalPath);
-                                        break;
-                                    case 'gif':
-                                        $imageResource = imagecreatefromgif($originalPath);
-                                        break;
-                                }
-
-                                if ($imageResource) {
-                                    $year = now()->format('Y');
-                                    $month = now()->format('m');
-                                    $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
-                                    $publicPath = storage_path('app/public/' . $storagePath);
-
-                                    // Ensure directory exists
-                                    if (!file_exists(dirname($publicPath))) {
-                                        mkdir(dirname($publicPath), 0755, true);
-                                    }
-
-                                    $quality = 90; // Start with high quality
-                                    $maxFileSize = 1024 * 1024; // 1MB in bytes
-                                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
-
-                                    do {
-                                        // Save the image with current quality to a temporary file
-                                        imagejpeg($imageResource, $tempPath, $quality);
-                                        $fileSize = filesize($tempPath);
-
-                                        if ($fileSize > $maxFileSize && $quality > 10) {
-                                            $quality -= 5; // Reduce quality
-                                        } else {
-                                            break; // Exit loop if size is acceptable or quality is too low
-                                        }
-                                    } while ($quality >= 10);
-
-                                    // Move the compressed image from temporary path to public storage
-                                    rename($tempPath, $publicPath);
-
-                                    // Free up memory
-                                    imagedestroy($imageResource);
-
-                                    $reportData[$fieldName] = $storagePath;
-                                } else {
-                                    // If file type is not supported, store it without compression
-                                    $reportData[$fieldName] = $file->store('reports/' . Auth::id(), 'public');
-                                }
-                                // --- End of Native GD Logic ---
+                                $reportData[$fieldName] = $this->compressAndStoreImage($file);
                             }
                             // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
                         } elseif ($field->type === 'checkbox') {
@@ -566,6 +439,250 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.monthly-pdf', compact('reports', 'year', 'month'));
         $filename = 'Laporan_Anggota_Bulan_' . $month . '_' . $year . '.pdf';
 
-        return $pdf->download($filename);
-    }
-}
+                return $pdf->download($filename);
+
+            }
+
+        
+
+            /**
+
+             * Helper method to compress and store an image.
+
+             *
+
+             * @param \Illuminate\Http\UploadedFile $file
+
+             * @return string The path to the stored image.
+
+             */
+
+            private function compressAndStoreImage($file): string
+
+            {
+
+                $originalPath = $file->getRealPath();
+
+                $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        
+
+                // Generate unique filename with .jpg extension
+
+                $accountName = Str::slug(Auth::user()->name);
+
+                $timestamp = now()->format('YmdHis');
+
+                $filename = $accountName . '-' . $timestamp . '.jpg';
+
+        
+
+                // Create image resource from uploaded file
+
+                $imageResource = null;
+
+                switch ($originalExtension) {
+
+                    case 'jpg':
+
+                    case 'jpeg':
+
+                        $imageResource = imagecreatefromjpeg($originalPath);
+
+                        break;
+
+                    case 'png':
+
+                        $imageResource = imagecreatefrompng($originalPath);
+
+                        // Preserve transparency for PNG
+
+                        imagealphablending($imageResource, true);
+
+                        imagesavealpha($imageResource, true);
+
+                        break;
+
+                    case 'gif':
+
+                        $imageResource = imagecreatefromgif($originalPath);
+
+                        break;
+
+                    default:
+
+                        // If file type is not supported, store it without compression
+
+                        return $file->store('reports/' . Auth::id(), 'public');
+
+                }
+
+        
+
+                if (!$imageResource) {
+
+                    // Fallback if image resource creation failed
+
+                    return $file->store('reports/' . Auth::id(), 'public');
+
+                }
+
+        
+
+                $originalWidth = imagesx($imageResource);
+
+                $originalHeight = imagesy($imageResource);
+
+        
+
+                $maxWidth = 1280; // Max width for images
+
+                $maxHeight = 1280; // Max height for images
+
+        
+
+                $newWidth = $originalWidth;
+
+                $newHeight = $originalHeight;
+
+        
+
+                // Resize if image is larger than max dimensions
+
+                if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+
+                    $ratio = $originalWidth / $originalHeight;
+
+                    if ($ratio > 1) { // Landscape
+
+                        $newWidth = $maxWidth;
+
+                        $newHeight = $maxWidth / $ratio;
+
+                    } else { // Portrait or Square
+
+                        $newHeight = $maxHeight;
+
+                        $newWidth = $maxHeight * $ratio;
+
+                    }
+
+                }
+
+        
+
+                // Create a new true color image with the new dimensions
+
+                $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+
+        
+
+                // Preserve transparency for PNG
+
+                if ($originalExtension === 'png') {
+
+                    imagealphablending($newImageResource, false);
+
+                    imagesavealpha($newImageResource, true);
+
+                    $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+
+                    imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+
+                }
+
+        
+
+                // Resample (resize) the image
+
+                imagecopyresampled(
+
+                    $newImageResource,
+
+                    $imageResource,
+
+                    0, 0, 0, 0,
+
+                    (int) $newWidth, (int) $newHeight,
+
+                    $originalWidth, $originalHeight
+
+                );
+
+        
+
+                // Define storage path
+
+                $year = now()->format('Y');
+
+                $month = now()->format('m');
+
+                $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
+
+                $publicPath = storage_path('app/public/' . $storagePath);
+
+        
+
+                // Ensure directory exists
+
+                if (!file_exists(dirname($publicPath))) {
+
+                    mkdir(dirname($publicPath), 0755, true);
+
+                }
+
+        
+
+                $quality = 90; // Start with high quality
+
+                $maxFileSize = 1024 * 1024; // 1MB in bytes
+
+                $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+        
+
+                do {
+
+                    // Save the image with current quality to a temporary file
+
+                    imagejpeg($newImageResource, $tempPath, $quality);
+
+                    $fileSize = filesize($tempPath);
+
+        
+
+                    if ($fileSize > $maxFileSize && $quality > 10) {
+
+                        $quality -= 5; // Reduce quality
+
+                    } else {
+
+                        break; // Exit loop if size is acceptable or quality is too low
+
+                    }
+
+                } while ($quality >= 10);
+
+        
+
+                // Move the compressed image from temporary path to public storage
+
+                rename($tempPath, $publicPath);
+
+        
+
+                // Free up memory
+
+                imagedestroy($imageResource);
+
+                imagedestroy($newImageResource);
+
+        
+
+                return $storagePath;
+
+            }
+
+        }
+
+        
