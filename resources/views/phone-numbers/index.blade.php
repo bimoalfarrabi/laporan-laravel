@@ -16,7 +16,19 @@
                         </div>
                     @endif
 
-                    @if (empty($phoneNumbers))
+                    <form method="GET" action="{{ route('phone-numbers.index') }}" class="mb-4">
+                        <div class="flex items-center">
+                            <input type="text" name="search" placeholder="Cari nama atau ext..."
+                                value="{{ $search }}"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <button type="submit"
+                                class="ml-2 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                Cari
+                            </button>
+                        </div>
+                    </form>
+
+                    @if ($phoneNumbers->isEmpty())
                         <p class="mt-4">Tidak ada nomor telepon yang ditemukan.</p>
                     @else
                         <div class="mt-6 overflow-x-auto">
@@ -53,6 +65,10 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="mt-4">
+                            {{ $phoneNumbers->links() }}
                         </div>
                     @endif
                 </div>
