@@ -35,6 +35,10 @@ class ReportPolicy
      */
     public function view(User $user, Report $report): bool
     {
+        if ($user->hasRole('manajemen')) {
+            return true;
+        }
+
         // danru, manajemen, and anggota can view any approved report
         if ($report->status === 'disetujui' && $user->hasRole(['danru', 'manajemen', 'anggota'])) {
             return true;
@@ -123,7 +127,7 @@ class ReportPolicy
 
     public function exportMonthly(User $user): bool
     {
-        return $user->hasRole('danru') && $user->can('reports:export-monthly');
+        return ($user->hasRole('danru') || $user->hasRole('manajemen')) && $user->can('reports:export-monthly');
     }
 
     public function approve(User $user, Report $report): bool
