@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'phone_api_url' => env('PHONE_API_URL'),
+    'phone_api_key' => env('PHONE_API_KEY'),
+
 ];

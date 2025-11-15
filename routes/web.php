@@ -85,6 +85,9 @@ Route::middleware('auth')->group(function () {
     // Absensi
     Route::resource('attendances', AttendanceController::class);
 
+    // Phone Numbers
+    Route::get('/phone-numbers', [\App\Http\Controllers\PhoneNumberController::class, 'index'])->name('phone-numbers.index');
+
     // Location Settings
     Route::middleware('role:superadmin')->group(function () {
         Route::get('/settings/location', [SettingController::class, 'locationSettings'])->name('settings.location');
