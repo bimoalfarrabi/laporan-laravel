@@ -145,7 +145,7 @@
                                             <td class="px-6 py-4">
                                                 <div class="font-medium">{{ $report->reportType?->name ?? 'Jenis Laporan Dihapus' }}</div>
                                                 @if (isset($report->data['deskripsi']))
-                                                    <div class="prose max-w-none text-sm text-gray-500 mt-1">@markdown($report->data['deskripsi'])</div>
+                                                    <div class="prose max-w-none text-sm text-gray-500 mt-1">@markdown_limit($report->data['deskripsi'], 100)</div>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4">
