@@ -65,6 +65,11 @@
                                         <option value="ditolak" {{ $filterByStatus == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                                     </select>
                                 </div>
+                                <div class="lg:col-span-1">
+                                    <input type="date" name="filter_date" value="{{ request('filter_date') }}"
+                                        class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        title="Filter Tanggal">
+                                </div>
                                 <div class="lg:col-span-1 flex items-center">
                                     <label for="filter_by_user" class="flex items-center">
                                         <input type="checkbox" name="filter_by_user" id="filter_by_user" value="1" {{ $filterByUser ? 'checked' : '' }}
@@ -72,7 +77,7 @@
                                         <span class="ml-2 text-sm text-gray-600">Laporan Saya</span>
                                     </label>
                                 </div>
-                                <div class="lg:col-span-1 flex space-x-2">
+                                <div class="lg:col-span-5 flex space-x-2">
                                     <x-primary-button type="submit" class="w-full justify-center">
                                         {{ __('Filter') }}
                                     </x-primary-button>

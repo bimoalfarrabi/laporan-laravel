@@ -27,6 +27,7 @@ class ReportController extends Controller
         $filterReportTypeId = $request->query('report_type_id');
         $filterByUser = $request->query('filter_by_user');
         $filterByStatus = $request->query('filter_by_status');
+        $filterDate = $request->query('filter_date');
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDirection = $request->query('sort_direction', 'desc');
 
@@ -66,6 +67,10 @@ class ReportController extends Controller
             $query->where('status', $filterByStatus);
         }
 
+        if ($filterDate) {
+            $query->whereDate('created_at', $filterDate);
+        }
+
         // Apply sorting
         if ($sortBy == 'report_type_name') {
             $query->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
@@ -92,7 +97,8 @@ class ReportController extends Controller
             'sortBy',
             'sortDirection',
             'filterByUser',
-            'filterByStatus'
+            'filterByStatus',
+            'filterDate'
         ));
     }
 
