@@ -38,7 +38,7 @@
                     {{-- Form Search dan Filter --}}
                     <div class="bg-gray-50 p-4 rounded-lg mb-4">
                         <form method="GET" action="{{ route('reports.index') }}">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-center">
                                 <div class="lg:col-span-1">
                                     <input type="text" name="search" placeholder="Cari Jenis/Pembuat Laporan..."
                                         value="{{ $search }}"
@@ -77,12 +77,12 @@
                                         <span class="ml-2 text-sm text-gray-600">Laporan Saya</span>
                                     </label>
                                 </div>
-                                <div class="lg:col-span-5 flex space-x-2">
-                                    <x-primary-button type="submit" class="w-full justify-center">
+                                <div class="lg:col-span-1 flex space-x-2">
+                                    <x-primary-button type="submit" class="flex-grow justify-center">
                                         {{ __('Filter') }}
                                     </x-primary-button>
                                     <a href="{{ route('reports.index') }}"
-                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full">
+                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 flex-grow">
                                         {{ __('Reset') }}
                                     </a>
                                 </div>
