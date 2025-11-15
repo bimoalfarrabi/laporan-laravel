@@ -84,7 +84,7 @@
                                                 <span class="ml-2">{{ $timeFieldValue }} WIB</span>
                                             @endif
                                         @elseif ($field->type === 'textarea' || $field->type === 'text')
-                                            <p class="whitespace-pre-wrap">{{ $report->data[$field->name] ?? '-' }}</p>
+                                            <p class="whitespace-pre-wrap">{!! (new Parsedown())->text($report->data[$field->name] ?? '-') !!}</p>
                                         @elseif ($field->type === 'checkbox')
                                             <span
                                                 class="{{ $report->data[$field->name] ?? false ? 'text-green-600' : 'text-red-600' }}">
