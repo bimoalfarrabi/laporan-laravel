@@ -17,8 +17,8 @@
                     @endif
 
                     <div class="mb-6 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 shadow-md rounded-lg">
-                        <p class="mb-2">1. Menghubungi Ruangan Dalam Gedung Manajemen RSUD: Angkat Gagang - Tekan EXT yang akan dituju.</p>
-                        <p class="mb-0">2. Menghubungi kantor TU (Timur) ke RSUD Blambangan: Tekan 88 - Tekan EXT yang akan dituju.</p>
+                        <p class="mb-2">1. Menghubungi Ruangan Dalam Gedung Manajemen RSUD: <b>Angkat Gagang - Tekan EXT yang akan dituju.</b></p>
+                        <p class="mb-0">2. Menghubungi kantor TU (Timur) ke RSUD Blambangan: <b> Tekan 88 - Tekan EXT yang akan dituju.</b></p>
                     </div>
 
                     <form method="GET" action="{{ route('phone-numbers.index') }}" class="mb-4">
