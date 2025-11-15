@@ -14,7 +14,7 @@
                     </div>
                     <div class="mb-4">
                         <strong>Isi Pengumuman:</strong>
-                        <p class="whitespace-pre-wrap">{!! (new Parsedown())->text($announcement->content) !!}</p>
+                        <p class="whitespace-pre-wrap">@markdown($announcement->content)</p>
                     </div>
                     <div class="mb-4">
                         <strong>Dibuat Oleh:</strong> {{ $announcement->user->name }}
