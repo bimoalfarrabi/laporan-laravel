@@ -56,10 +56,13 @@
                             class="flex flex-col md:flex-row md:justify-between text-base text-gray-700 space-y-3 md:space-y-0">
                             {{-- Left Side --}}
                             <div class="space-y-3">
-                                <p><strong>Dibuat oleh:</strong> {{ $report->user->name }} pada
+                                <p><strong>Dibuat oleh:</strong> {{ $report->user->name }} @if ($report->user->roles->isNotEmpty())
+                                        <span class="text-sm text-gray-500">({{ $report->user->roles->first()->name }})</span>
+                                    @endif pada
                                     <span class="font-medium">{{ $report->created_at->format('d-m-Y H:i') }}</span></p>
                                 @if ($report->lastEditedBy && $report->updated_at != $report->created_at)
                                     <p><strong>Terakhir diperbarui oleh:</strong> {{ $report->lastEditedBy->name }}
+                                        @if ($report->lastEditedBy->roles->isNotEmpty())<span class="text-sm text-gray-500">({{ $report->lastEditedBy->roles->first()->name }})</span>@endif
                                         pada
                                         <span class="font-medium">{{ $report->updated_at->format('d-m-Y H:i') }}</span></p>
                                 @endif
@@ -68,7 +71,8 @@
                             {{-- Right Side --}}
                             <div class="space-y-3 md:text-right">
                                 @if ($report->approvedBy)
-                                    <p><strong>Disetujui oleh:</strong> {{ $report->approvedBy->name }} pada
+                                    <p><strong>Disetujui oleh:</strong> {{ $report->approvedBy->name }}
+                                        @if ($report->approvedBy->roles->isNotEmpty())<span class="text-sm text-gray-500">({{ $report->approvedBy->roles->first()->name }})</span>@endif pada
                                         <span class="font-medium">{{ $report->approved_at->format('d-m-Y H:i') }}</span></p>
                                 @endif
                                 @if ($report->rejectedBy)

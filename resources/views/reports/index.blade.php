@@ -150,6 +150,10 @@
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $report->user?->name ?? 'Pengguna Dihapus' }}
+                                                @if ($report->user?->roles->isNotEmpty())
+                                                    <span
+                                                        class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4">
                                                 @php
@@ -216,7 +220,7 @@
                                     </div>
                                     <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                         <p><strong class="text-gray-600">Jenis Laporan:</strong> {{ $report->reportType?->name ?? 'Jenis Laporan Dihapus' }}</p>
-                                        <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user?->name ?? 'Pengguna Dihapus' }}</p>
+                                        <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user?->name ?? 'Pengguna Dihapus' }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                         <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                         @if (isset($report->data['deskripsi']))
                                             <div class="prose max-w-none text-sm text-gray-500 mt-1">
