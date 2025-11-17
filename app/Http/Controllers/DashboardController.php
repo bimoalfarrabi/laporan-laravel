@@ -18,11 +18,6 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewData = [];
 
-        // Fetch today's attendance for the user
-        $viewData['todayAttendance'] = \App\Models\Attendance::where('user_id', $user->id)
-            ->whereDate('time_in', today())
-            ->first();
-
         $viewData['announcements'] = Announcement::with('user')
             ->where(function ($query) {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
