@@ -45,7 +45,7 @@
                         </div>
                         
                         <div class="flex items-center justify-center mt-4">
-                            <x-primary-button id="submit-attendance-button" class="w-full max-w-xs">
+                            <x-primary-button id="submit-attendance-button">
                                 {{ __('Kirim Absensi') }}
                             </x-primary-button>
                         </div>
