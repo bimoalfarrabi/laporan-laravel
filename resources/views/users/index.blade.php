@@ -92,6 +92,7 @@
                                                 'phone_number' => 'No. HP',
                                                 'created_at' => 'Waktu Dibuat',
                                                 'last_login_at' => 'Terakhir Login',
+                                                'role' => 'Peran',
                                             ];
                                         @endphp
 
@@ -115,11 +116,6 @@
                                                 </a>
                                             </th>
                                         @endforeach
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Peran (Spatie)
-                                        </th>
 
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -149,9 +145,6 @@
                                                 {{ $user->phone_number }}
                                             </td>
                                             <td class="px-6 py-4">
-                                                {{ $user->roles->pluck('name')->join(', ') }}
-                                            </td>
-                                            <td class="px-6 py-4">
                                                 <x-waktu-dibuat :date="$user->created_at" />
                                             </td>
                                             <td class="px-6 py-4">
@@ -160,6 +153,9 @@
                                                 @else
                                                     Belum pernah login
                                                 @endif
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {{ $user->roles->pluck('name')->join(', ') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('users.show', $user->id) }}"
