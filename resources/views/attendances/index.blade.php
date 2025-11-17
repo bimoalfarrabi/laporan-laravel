@@ -45,17 +45,17 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($attendances as $attendance)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $attendance->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->type ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" data-label="Nama">{{ $attendance->user->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Tipe">{{ $attendance->type ?? '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Status">
                                             @if($attendance->status == 'Terlambat')
                                                 <span class="text-red-500 font-semibold">{{ $attendance->status }}</span>
                                             @else
                                                 {{ $attendance->status }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Waktu Masuk">{{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Foto Masuk">
                                             @if($attendance->photo_in_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
                                                 <a class="open-photo-modal cursor-pointer" data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}">
                                                     <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" alt="Foto Masuk" class="h-10 w-10 rounded-full object-cover">
@@ -64,13 +64,13 @@
                                                 <span class="text-gray-400">Foto tidak tersedia</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Lokasi Masuk">
                                             <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_in }}&mlon={{ $attendance->longitude_in }}#map=16/{{ $attendance->latitude_in }}/{{ $attendance->longitude_in }}" target="_blank" class="text-blue-500 hover:underline">
                                                 Lihat Peta
                                             </a>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Waktu Pulang">{{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Foto Pulang">
                                             @if($attendance->photo_out_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
                                                 <a class="open-photo-modal cursor-pointer" data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}">
                                                     <img src="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}" alt="Foto Pulang" class="h-10 w-10 rounded-full object-cover">
@@ -79,7 +79,7 @@
                                                 <span class="text-gray-400">Foto tidak tersedia</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Lokasi Pulang">
                                             @if($attendance->latitude_out && $attendance->longitude_out)
                                                 <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_out }}&mlon={{ $attendance->longitude_out }}#map=16/{{ $attendance->latitude_out }}/{{ $attendance->longitude_out }}" target="_blank" class="text-blue-500 hover:underline">
                                                     Lihat Peta
@@ -108,6 +108,50 @@
             </div>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        @media screen and (max-width: 640px) {
+            table {
+                border: 0;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                margin-bottom: 1rem;
+                border: 1px solid #e2e8f0; /* gray-200 */
+                display: block;
+                border-radius: 0.5rem; /* sm:rounded-lg */
+                overflow: hidden;
+            }
+
+            td {
+                display: block;
+                text-align: right;
+                padding-left: 50%; /* Make space for the label */
+                position: relative;
+                border-bottom: 1px solid #e2e8f0; /* gray-200 */
+            }
+
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding-left: 0.5rem;
+                font-weight: bold;
+                text-align: left;
+            }
+
+            td:last-child {
+                border-bottom: 0;
+            }
+        }
+    </style>
+    @endpush
 
     @push('scripts')
     <script>
