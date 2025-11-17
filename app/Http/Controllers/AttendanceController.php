@@ -254,7 +254,7 @@ class AttendanceController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => $successMessage,
-                'redirect_url' => route('dashboard')
+                'redirect_url' => route('attendances.index')
             ]);
         }
 

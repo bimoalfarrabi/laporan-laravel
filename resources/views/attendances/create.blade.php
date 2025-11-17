@@ -378,7 +378,15 @@
                             startCamera();
                         });
                     } else {
-                        window.location.href = result.redirect_url;
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = result.redirect_url;
+                        });
                     }
                 } catch (error) {
                     console.error('Submission error:', error);
