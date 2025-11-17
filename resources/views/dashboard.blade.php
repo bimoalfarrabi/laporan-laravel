@@ -73,7 +73,7 @@
                                         @foreach ($reportsForApproval as $report)
                                             <tr>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</td>
                                                 <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">
@@ -101,7 +101,7 @@
                                             </span>
                                         </div>
                                         <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                             <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                         </div>
                                         <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -138,7 +138,7 @@
                                             @foreach ($approvedReports as $report)
                                                 <tr>
                                                     <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</td>
                                                     <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
@@ -160,7 +160,7 @@
                                                 </span>
                                             </div>
                                             <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                                 <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                             </div>
                                             <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -266,7 +266,7 @@
                                             @foreach ($approvedReports as $report)
                                                 <tr>
                                                     <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</td>
                                                     <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
@@ -288,7 +288,7 @@
                                                 </span>
                                             </div>
                                             <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                                 <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                             </div>
                                             <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -334,7 +334,7 @@
                                         @foreach ($recentReports as $report)
                                             <tr>
                                                 <td class="px-6 py-4 whitespace-nowrap">{{ $report->reportType->name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</td>
                                                 <td class="px-6 py-4 whitespace-nowrap"><x-waktu-dibuat :date="$report->created_at" /></td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
@@ -371,7 +371,7 @@
                                             </span>
                                         </div>
                                         <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                             <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                         </div>
                                         <div class="mt-3 flex justify-end space-x-2 text-sm">
