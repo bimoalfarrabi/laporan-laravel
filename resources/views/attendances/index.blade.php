@@ -185,8 +185,8 @@
                         imageAlt: 'Foto Absensi',
                         showCloseButton: true,
                         showConfirmButton: false,
-                        width: '80%', // Adjust width as needed
-                        imageWidth: '100%',
+                        width: '50%', // Adjust width as needed
+                        imageWidth: 'auto',
                         imageHeight: 'auto',
                         customClass: {
                             image: 'rounded-lg'
