@@ -51,23 +51,20 @@ class SettingController extends Controller
      */
     public function attendanceSettings()
     {
-        $shifts = ['reguler', 'normal_pagi', 'normal_malam'];
         $types = ['in', 'out'];
         $times = ['start', 'end'];
         $settingKeys = [];
 
-        foreach ($shifts as $shift) {
-            foreach ($types as $type) {
-                foreach ($times as $time) {
-                    $settingKeys[] = "attendance_{$shift}_{$type}_{$time}";
-                }
+        foreach ($types as $type) {
+            foreach ($times as $time) {
+                $settingKeys[] = "attendance_{$type}_{$time}";
             }
         }
 
         $settings = Setting::whereIn('key', $settingKeys)
             ->pluck('value', 'key');
 
-        return view('settings.attendance', compact('settings', 'shifts', 'types', 'times'));
+        return view('settings.attendance', compact('settings', 'types', 'times'));
     }
 
     /**
@@ -75,17 +72,14 @@ class SettingController extends Controller
      */
     public function updateAttendanceSettings(Request $request)
     {
-        $shifts = ['reguler', 'normal_pagi', 'normal_malam'];
         $types = ['in', 'out'];
         $times = ['start', 'end'];
         $rules = [];
 
-        foreach ($shifts as $shift) {
-            foreach ($types as $type) {
-                foreach ($times as $time) {
-                    $key = "attendance_{$shift}_{$type}_{$time}";
-                    $rules[$key] = 'required|date_format:H:i';
-                }
+        foreach ($types as $type) {
+            foreach ($times as $time) {
+                $key = "attendance_{$type}_{$time}";
+                $rules[$key] = 'required|date_format:H:i';
             }
         }
 

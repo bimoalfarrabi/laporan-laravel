@@ -33,37 +33,35 @@
                     <form action="{{ route('settings.attendance.update') }}" method="POST">
                         @csrf
                         <div class="space-y-8">
-                            @foreach ($shifts as $shift)
-                                <div class="p-4 border rounded-lg">
-                                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4 capitalize">
-                                        Shift {{ str_replace('_', ' ', $shift) }}
-                                    </h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        @foreach ($types as $type)
-                                            <div class="p-4 border rounded-md">
-                                                <h4 class="text-md font-medium text-gray-800 mb-2 capitalize">
-                                                    Absensi {{ $type }}
-                                                </h4>
-                                                <div class="space-y-2">
-                                                    @foreach ($times as $time)
-                                                        @php
-                                                            $key = "attendance_{$shift}_{$type}_{$time}";
-                                                            $label = ucfirst($type) . ' ' . ucfirst($time);
-                                                        @endphp
-                                                        <div>
-                                                            <label for="{{ $key }}"
-                                                                class="block text-sm font-medium text-gray-700">{{ $label }}</label>
-                                                            <input type="time" name="{{ $key }}" id="{{ $key }}"
-                                                                value="{{ old($key, $settings[$key] ?? '') }}"
-                                                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                                        </div>
-                                                    @endforeach
-                                                </div>
+                            <div class="p-4 border rounded-lg">
+                                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
+                                    Waktu Absensi Global
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    @foreach ($types as $type)
+                                        <div class="p-4 border rounded-md">
+                                            <h4 class="text-md font-medium text-gray-800 mb-2 capitalize">
+                                                Absensi {{ $type }}
+                                            </h4>
+                                            <div class="space-y-2">
+                                                @foreach ($times as $time)
+                                                    @php
+                                                        $key = "attendance_{$type}_{$time}";
+                                                        $label = ucfirst($type) . ' ' . ucfirst($time);
+                                                    @endphp
+                                                    <div>
+                                                        <label for="{{ $key }}"
+                                                            class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                                                        <input type="time" name="{{ $key }}" id="{{ $key }}"
+                                                            value="{{ old($key, $settings[$key] ?? '') }}"
+                                                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
 
                         <div class="mt-8 flex justify-end">

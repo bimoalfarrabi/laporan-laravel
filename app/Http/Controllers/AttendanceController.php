@@ -80,23 +80,14 @@ class AttendanceController extends Controller
 
         // Time validation for non-superadmin roles
         if (!$user->hasRole('superadmin')) {
-            // TODO: Ask user for clarification on shift mapping.
-            // For now, assuming: pagi -> normal_pagi, sore -> reguler, malam -> normal_malam
-            $shiftMap = [
-                'pagi' => 'normal_pagi',
-                'sore' => 'reguler',
-                'malam' => 'normal_malam',
-            ];
-            $attendanceShift = $shiftMap[$user->shift] ?? 'reguler'; // Default to 'reguler'
-
             $settingKeys = [
-                "attendance_{$attendanceShift}_{$action}_start",
-                "attendance_{$attendanceShift}_{$action}_end",
+                "attendance_{$action}_start",
+                "attendance_{$action}_end",
             ];
             $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
 
-            $startTime = $settings["attendance_{$attendanceShift}_{$action}_start"] ?? null;
-            $endTime = $settings["attendance_{$attendanceShift}_{$action}_end"] ?? null;
+            $startTime = $settings["attendance_{$action}_start"] ?? null;
+            $endTime = $settings["attendance_{$action}_end"] ?? null;
 
             if (!$startTime || !$endTime || !$this->isTimeWithinWindow($now, $startTime, $endTime)) {
                 return redirect()->back()->with('error', "Anda tidak dapat melakukan absensi {$action} di luar jam yang ditentukan ({$startTime} - {$endTime}).");
@@ -196,7 +187,6 @@ class AttendanceController extends Controller
         if ($action === 'in') {
             Attendance::create([
                 'user_id' => $user->id,
-                'shift' => $user->shift,
                 'time_in' => $now,
                 'photo_in_path' => $photoPath,
                 'latitude_in' => $request->latitude,
