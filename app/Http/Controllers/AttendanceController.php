@@ -169,42 +169,42 @@ class AttendanceController extends Controller
         // --- End of Native GD Logic ---
 
         if ($action === 'in') {
-            // Time restriction logic
-            $status = 'Tepat Waktu';
+            // Time restriction logic (temporarily disabled for testing)
+            $status = 'Tepat Waktu'; // Default status when restrictions are off
             $now = now();
-            $dateString = $now->toDateString();
+            // $dateString = $now->toDateString();
 
-            // Determine expected shift based on current time
-            $pagiShiftStart = \Carbon\Carbon::parse($dateString . ' 07:00');
-            $malamShiftStart = \Carbon\Carbon::parse($dateString . ' 19:00');
+            // // Determine expected shift based on current time
+            // $pagiShiftStart = \Carbon\Carbon::parse($dateString . ' 07:00');
+            // $malamShiftStart = \Carbon\Carbon::parse($dateString . ' 19:00');
 
-            $expectedStartTime = null;
-            // If current time is before 2 PM, assume it's for the morning shift. Otherwise, night shift.
-            if ($now->hour < 14) {
-                $expectedStartTime = $pagiShiftStart;
-            } else {
-                $expectedStartTime = $malamShiftStart;
-            }
+            // $expectedStartTime = null;
+            // // If current time is before 2 PM, assume it's for the morning shift. Otherwise, night shift.
+            // if ($now->hour < 14) {
+            //     $expectedStartTime = $pagiShiftStart;
+            // } else {
+            //     $expectedStartTime = $malamShiftStart;
+            // }
 
-            $windowStart = $expectedStartTime->copy()->subHour();
-            $windowEnd = $expectedStartTime->copy()->addHour();
+            // $windowStart = $expectedStartTime->copy()->subHour();
+            // $windowEnd = $expectedStartTime->copy()->addHour();
 
-            // Check if user is clocking in too early
-            if ($now->isBefore($windowStart)) {
-                $errorMessage = 'Anda tidak dapat absen terlalu pagi. Anda dapat absen mulai pukul ' . $windowStart->format('H:i') . '.';
-                if ($request->expectsJson()) {
-                    return response()->json(['message' => $errorMessage], 422);
-                }
-                return redirect()->back()->with('error', $errorMessage);
-            }
+            // // Check if user is clocking in too early
+            // if ($now->isBefore($windowStart)) {
+            //     $errorMessage = 'Anda tidak dapat absen terlalu pagi. Anda dapat absen mulai pukul ' . $windowStart->format('H:i') . '.';
+            //     if ($request->expectsJson()) {
+            //         return response()->json(['message' => $errorMessage], 422);
+            //     }
+            //     return redirect()->back()->with('error', $errorMessage);
+            // }
 
-            // Check if user is clocking in within the allowed window but late
-            if ($now->isAfter($expectedStartTime) && $now->isBefore($windowEnd)) {
-                $status = 'Terlambat';
-            } elseif ($now->isAfter($windowEnd)) {
-                // Also consider clocking in after the 1-hour window as late, as per stakeholder request
-                $status = 'Terlambat';
-            }
+            // // Check if user is clocking in within the allowed window but late
+            // if ($now->isAfter($expectedStartTime) && $now->isBefore($windowEnd)) {
+            //     $status = 'Terlambat';
+            // } elseif ($now->isAfter($windowEnd)) {
+            //     // Also consider clocking in after the 1-hour window as late, as per stakeholder request
+            //     $status = 'Terlambat';
+            // }
 
 
             Attendance::create([
