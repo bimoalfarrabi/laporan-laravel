@@ -58,7 +58,8 @@
                     @if (Auth::user()->hasRole(['danru', 'manajemen']))
                         <h3 class="text-lg font-semibold mb-4">Laporan Menunggu Persetujuan</h3>
                         @if ($reportsForApproval->isNotEmpty())
-                            <div class="overflow-x-auto">
+                            {{-- Table View for Larger Screens --}}
+                            <div class="overflow-x-auto hidden sm:block">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -88,6 +89,33 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            {{-- Card View for Small Screens --}}
+                            <div class="mt-6 sm:hidden space-y-4">
+                                @foreach ($reportsForApproval as $report)
+                                    <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-yellow-200 text-yellow-800 text-xs">
+                                                Menunggu Persetujuan
+                                            </span>
+                                        </div>
+                                        <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                            <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
+                                        </div>
+                                        <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                            <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">
+                                                @if (Auth::id() === $report->user_id)
+                                                    Lihat
+                                                @else
+                                                    Lihat & Setujui/Tolak
+                                                @endif
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         @else
                             <p>Tidak ada laporan yang memerlukan persetujuan saat ini.</p>
                         @endif
@@ -95,7 +123,8 @@
                         <div class="mt-8">
                             <h3 class="text-lg font-semibold mb-4">Laporan Lain yang Disetujui</h3>
                             @if ($approvedReports->isNotEmpty())
-                                <div class="overflow-x-auto">
+                                {{-- Table View for Larger Screens --}}
+                                <div class="overflow-x-auto hidden sm:block">
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
@@ -119,6 +148,28 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {{-- Card View for Small Screens --}}
+                                <div class="mt-6 sm:hidden space-y-4">
+                                    @foreach ($approvedReports as $report)
+                                        <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                                <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
+                                                    Disetujui
+                                                </span>
+                                            </div>
+                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                                <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
+                                            </div>
+                                            <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                                <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
                                 <div class="mt-4">
                                     {{ $approvedReports->links() }}
                                 </div>
@@ -134,7 +185,8 @@
                             <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">Buat Laporan Baru</a>
                         </div>
                         @if ($myRecentReports->isNotEmpty())
-                            <div class="overflow-x-auto">
+                            {{-- Table View for Larger Screens --}}
+                            <div class="overflow-x-auto hidden sm:block">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -166,6 +218,32 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            {{-- Card View for Small Screens --}}
+                            <div class="mt-6 sm:hidden space-y-4">
+                                @foreach ($myRecentReports as $report)
+                                    <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                            @php
+                                                $bgColor = '';
+                                                if ($report->status == 'belum disetujui') $bgColor = 'bg-yellow-200 text-yellow-800';
+                                                elseif ($report->status == 'disetujui') $bgColor = 'bg-green-200 text-green-800';
+                                                elseif ($report->status == 'ditolak') $bgColor = 'bg-red-200 text-red-800';
+                                            @endphp
+                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
+                                                {{ ucfirst($report->status) }}
+                                            </span>
+                                        </div>
+                                        <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                            <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
+                                        </div>
+                                        <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                            <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         @else
                             <p>Anda belum membuat laporan.</p>
                         @endif
@@ -173,7 +251,8 @@
                         <div class="mt-8">
                             <h3 class="text-lg font-semibold mb-4">Laporan Lain yang Disetujui</h3>
                             @if ($approvedReports->isNotEmpty())
-                                <div class="overflow-x-auto">
+                                {{-- Table View for Larger Screens --}}
+                                <div class="overflow-x-auto hidden sm:block">
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
@@ -197,6 +276,28 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {{-- Card View for Small Screens --}}
+                                <div class="mt-6 sm:hidden space-y-4">
+                                    @foreach ($approvedReports as $report)
+                                        <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                                <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
+                                                    Disetujui
+                                                </span>
+                                            </div>
+                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                                <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
+                                            </div>
+                                            <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                                <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
                                 <div class="mt-4">
                                     {{ $approvedReports->links() }}
                                 </div>
@@ -217,7 +318,8 @@
 
                         <h3 class="text-lg font-semibold mb-4">5 Laporan Terbaru</h3>
                         @if ($recentReports->isNotEmpty())
-                            <div class="overflow-x-auto">
+                            {{-- Table View for Larger Screens --}}
+                            <div class="overflow-x-auto hidden sm:block">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -250,6 +352,33 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                            </div>
+
+                            {{-- Card View for Small Screens --}}
+                            <div class="mt-6 sm:hidden space-y-4">
+                                @foreach ($recentReports as $report)
+                                    <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                            @php
+                                                $bgColor = '';
+                                                if ($report->status == 'belum disetujui') $bgColor = 'bg-yellow-200 text-yellow-800';
+                                                elseif ($report->status == 'disetujui') $bgColor = 'bg-green-200 text-green-800';
+                                                elseif ($report->status == 'ditolak') $bgColor = 'bg-red-200 text-red-800';
+                                            @endphp
+                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
+                                                {{ ucfirst($report->status) }}
+                                            </span>
+                                        </div>
+                                        <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                            <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }}</p>
+                                            <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
+                                        </div>
+                                        <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                            <a href="{{ route('reports.show', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @else
                             <p>Tidak ada laporan yang dibuat.</p>
