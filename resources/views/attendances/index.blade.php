@@ -27,34 +27,56 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Masuk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto Masuk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi Masuk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Pulang</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto Pulang</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi Pulang</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($attendances as $attendance)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $attendance->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->created_at->format('d M Y, H:i') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            @if($attendance->photo_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_path))
-                                                <a href="{{ asset('storage/' . $attendance->photo_path) }}" target="_blank">
-                                                    <img src="{{ asset('storage/' . $attendance->photo_path) }}" alt="Foto Absensi" class="h-10 w-10 rounded-full object-cover">
+                                            @if($attendance->photo_in_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
+                                                <a href="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" target="_blank">
+                                                    <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" alt="Foto Masuk" class="h-10 w-10 rounded-full object-cover">
                                                 </a>
                                             @else
                                                 <span class="text-gray-400">Foto tidak tersedia</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude }}&mlon={{ $attendance->longitude }}#map=16/{{ $attendance->latitude }}/{{ $attendance->longitude }}" target="_blank" class="text-blue-500 hover:underline">
+                                            <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_in }}&mlon={{ $attendance->longitude_in }}#map=16/{{ $attendance->latitude_in }}/{{ $attendance->longitude_in }}" target="_blank" class="text-blue-500 hover:underline">
                                                 Lihat Peta
                                             </a>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($attendance->photo_out_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
+                                                <a href="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}" target="_blank">
+                                                    <img src="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}" alt="Foto Pulang" class="h-10 w-10 rounded-full object-cover">
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">Foto tidak tersedia</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($attendance->latitude_out && $attendance->longitude_out)
+                                                <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_out }}&mlon={{ $attendance->longitude_out }}#map=16/{{ $attendance->latitude_out }}/{{ $attendance->longitude_out }}" target="_blank" class="text-blue-500 hover:underline">
+                                                    Lihat Peta
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                             Belum ada data absensi.
                                         </td>
                                     </tr>
