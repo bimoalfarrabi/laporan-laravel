@@ -42,7 +42,15 @@
                                 </div>
                                 <canvas id="camera-canvas" class="hidden"></canvas>
                             </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-center sm:justify-end mt-4">
+                            <x-primary-button id="submit-attendance-button" class="w-full sm:w-auto">
+                                {{ __('Kirim Absensi') }}
+                            </x-primary-button>
+                        </div>
 
+                        <div class="form-container">
                             <!-- Location -->
                             <input type="hidden" name="latitude" id="latitude">
                             <input type="hidden" name="longitude" id="longitude">
@@ -61,14 +69,6 @@
                                     <div id="map" class="w-full h-full"></div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-center sm:justify-end mt-4">
-                            <x-primary-button id="submit-attendance-button" class="w-full sm:w-auto">
-                                {{ __('Kirim Absensi') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
