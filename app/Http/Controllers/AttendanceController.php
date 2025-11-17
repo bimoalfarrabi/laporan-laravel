@@ -99,7 +99,7 @@ class AttendanceController extends Controller
         $settingKeys = ['center_latitude', 'center_longitude', 'allowed_radius_meters'];
         $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
 
-        if ($settings->has($settingKeys)) {
+        if (count($settingKeys) === $settings->count()) {
             $centerLat = $settings['center_latitude'];
             $centerLon = $settings['center_longitude'];
             $allowedRadius = $settings['allowed_radius_meters'];
