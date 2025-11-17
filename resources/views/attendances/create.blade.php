@@ -9,6 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    <div id="attendance-message" class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg">
+                        <!-- Message will be dynamically inserted here by JavaScript -->
+                    </div>
 
                     <form action="{{ route('attendances.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -34,7 +37,7 @@
                         </div>
                         
                         <div class="flex items-center justify-end mt-4">
-                            <x-primary-button class="ml-4">
+                            <x-primary-button id="submit-attendance-button" class="ml-4">
                                 {{ __('Kirim Absensi') }}
                             </x-primary-button>
                         </div>
@@ -55,6 +58,36 @@
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
             const mapDiv = document.getElementById('map');
+            const attendanceMessageDiv = document.getElementById('attendance-message');
+            const submitButton = document.getElementById('submit-attendance-button');
+            const photoInput = document.getElementById('photo');
+
+            // Pass todayAttendance data from Blade to JavaScript
+            const todayAttendance = @json($todayAttendance);
+
+            let message = '';
+            let buttonText = '';
+            let isFormDisabled = false;
+
+            if (!todayAttendance) {
+                message = '<p class="font-bold">Anda akan melakukan Absen Masuk.</p><p class="text-sm">Pastikan Anda berada di lokasi yang benar dan siap mengambil foto.</p>';
+                buttonText = 'Absen Masuk';
+            } else if (!todayAttendance.time_out) {
+                message = '<p class="font-bold">Anda akan melakukan Absen Pulang.</p><p class="text-sm">Anda sudah absen masuk pada: ' + new Date(todayAttendance.time_in).toLocaleString() + '</p>';
+                buttonText = 'Absen Pulang';
+            } else {
+                message = '<p class="font-bold">Anda sudah melakukan Absen Masuk dan Pulang hari ini.</p><p class="text-sm">Masuk: ' + new Date(todayAttendance.time_in).toLocaleString() + '</p><p class="text-sm">Pulang: ' + new Date(todayAttendance.time_out).toLocaleString() + '</p><p class="text-sm">Tipe Absensi: ' + (todayAttendance.type || 'N/A') + '</p><p class="text-sm mt-2">Anda tidak dapat melakukan absensi lagi hari ini.</p>';
+                buttonText = 'Absensi Selesai';
+                isFormDisabled = true;
+            }
+
+            attendanceMessageDiv.innerHTML = message;
+            submitButton.textContent = buttonText;
+            if (isFormDisabled) {
+                submitButton.setAttribute('disabled', 'true');
+                photoInput.setAttribute('disabled', 'true');
+            }
+
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
