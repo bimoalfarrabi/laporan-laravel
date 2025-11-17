@@ -131,6 +131,9 @@ class AttendanceController extends Controller
         }
 
         if ($imageResource) {
+            // Rotate image if it's landscape to make it portrait
+            $imageResource = $this->rotateLandscapeToPortrait($imageResource);
+
             $year = now()->format('Y');
             $month = now()->format('m');
             $storagePath = 'attendances/' . $year . '/' . $month . '/' . $filename;
@@ -283,6 +286,25 @@ class AttendanceController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
+    }
+
+    /**
+     * Rotates a GD image resource if it's in landscape orientation to make it portrait.
+     *
+     * @param resource $imageResource The GD image resource.
+     * @return resource The rotated image resource.
+     */
+    private function rotateLandscapeToPortrait($imageResource)
+    {
+        $width = imagesx($imageResource);
+        $height = imagesy($imageResource);
+
+        if ($width > $height) {
+            // Image is landscape, rotate 90 degrees clockwise to make it portrait
+            $imageResource = imagerotate($imageResource, 270, 0); // 270 degrees is 90 degrees clockwise
+        }
+
+        return $imageResource;
     }
 
     /**
