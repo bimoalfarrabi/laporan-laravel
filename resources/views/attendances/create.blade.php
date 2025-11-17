@@ -50,13 +50,7 @@
                         
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button class="ml-4" @disabled($todayAttendance && $todayAttendance->time_out)>
-                                @if (!$todayAttendance)
-                                    {{ __('Absen Masuk') }}
-                                @elseif (!$todayAttendance->time_out)
-                                    {{ __('Absen Pulang') }}
-                                @else
-                                    {{ __('Absensi Selesai') }}
-                                @endif
+                                {{ __(!$todayAttendance ? 'Absen Masuk' : (!$todayAttendance->time_out ? 'Absen Pulang' : 'Absensi Selesai')) }}
                             </x-primary-button>
                         </div>
                     </form>
