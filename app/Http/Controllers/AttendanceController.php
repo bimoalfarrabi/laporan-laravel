@@ -173,12 +173,47 @@ class AttendanceController extends Controller
         // --- End of Native GD Logic ---
 
         if ($action === 'in') {
+            // Time restriction logic
+            $status = 'Tepat Waktu';
+            $now = now();
+            $dateString = $now->toDateString();
+
+            // Determine expected shift based on current time
+            $pagiShiftStart = \Carbon\Carbon::parse($dateString . ' 07:00');
+            $malamShiftStart = \Carbon\Carbon::parse($dateString . ' 19:00');
+
+            $expectedStartTime = null;
+            // If current time is before 2 PM, assume it's for the morning shift. Otherwise, night shift.
+            if ($now->hour < 14) {
+                $expectedStartTime = $pagiShiftStart;
+            } else {
+                $expectedStartTime = $malamShiftStart;
+            }
+
+            $windowStart = $expectedStartTime->copy()->subHour();
+            $windowEnd = $expectedStartTime->copy()->addHour();
+
+            // Check if user is clocking in too early
+            if ($now->isBefore($windowStart)) {
+                return redirect()->back()->with('error', 'Anda tidak dapat absen terlalu pagi. Anda dapat absen mulai pukul ' . $windowStart->format('H:i') . '.');
+            }
+
+            // Check if user is clocking in within the allowed window but late
+            if ($now->isAfter($expectedStartTime) && $now->isBefore($windowEnd)) {
+                $status = 'Terlambat';
+            } elseif ($now->isAfter($windowEnd)) {
+                // Also consider clocking in after the 1-hour window as late, as per stakeholder request
+                $status = 'Terlambat';
+            }
+
+
             Attendance::create([
                 'user_id' => $user->id,
                 'time_in' => $now,
                 'photo_in_path' => $photoPath,
                 'latitude_in' => $request->latitude,
                 'longitude_in' => $request->longitude,
+                'status' => $status,
             ]);
         } else {
             // Determine attendance type
