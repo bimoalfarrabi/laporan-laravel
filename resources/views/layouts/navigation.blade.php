@@ -58,7 +58,7 @@
                                         {{ __('Manajemen Hak Akses') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('settings.location')">
-                                        {{ __('Pengaturan Lokasi') }}
+                                        {{ __('Pengaturan Lokasi Absensi') }}
                                     </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
