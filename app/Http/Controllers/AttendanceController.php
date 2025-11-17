@@ -195,7 +195,11 @@ class AttendanceController extends Controller
 
             // Check if user is clocking in too early
             if ($now->isBefore($windowStart)) {
-                return redirect()->back()->with('error', 'Anda tidak dapat absen terlalu pagi. Anda dapat absen mulai pukul ' . $windowStart->format('H:i') . '.');
+                $errorMessage = 'Anda tidak dapat absen terlalu pagi. Anda dapat absen mulai pukul ' . $windowStart->format('H:i') . '.';
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $errorMessage], 422);
+                }
+                return redirect()->back()->with('error', $errorMessage);
             }
 
             // Check if user is clocking in within the allowed window but late
@@ -250,7 +254,15 @@ class AttendanceController extends Controller
             ]);
         }
 
-        return redirect()->route('dashboard')->with('success', 'Absensi ' . $action . ' berhasil dicatat.');
+        $successMessage = 'Absensi ' . ($action === 'in' ? 'masuk' : 'pulang') . ' berhasil dicatat.';
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $successMessage,
+                'redirect_url' => route('dashboard')
+            ]);
+        }
+
+        return redirect()->route('dashboard')->with('success', $successMessage);
     }
 
     /**
