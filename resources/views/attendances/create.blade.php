@@ -20,6 +20,12 @@
                         <!-- Pesan status absensi akan dimuat di sini -->
                     </div>
 
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm text-sm text-gray-700">
+                        <p><strong>Waktu Saat Ini:</strong> <span id="current-time">Memuat...</span></p>
+                        <p><strong>Latitude:</strong> <span id="display-latitude">Memuat...</span></p>
+                        <p><strong>Longitude:</strong> <span id="display-longitude">Memuat...</span></p>
+                    </div>
+
                     <form id="attendance-form" action="{{ route('attendances.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
@@ -145,8 +151,28 @@
             const mapDiv = document.getElementById('map');
             const video = document.getElementById('camera-viewfinder');
             const canvas = document.getElementById('camera-canvas');
-            const mapLoadingIndicator = document.getElementById('map-loading-indicator'); // New
+            const mapLoadingIndicator = document.getElementById('map-loading-indicator');
+            const currentTimeSpan = document.getElementById('current-time'); // New
+            const displayLatitudeSpan = document.getElementById('display-latitude'); // New
+            const displayLongitudeSpan = document.getElementById('display-longitude'); // New
             const todayAttendance = @json($todayAttendance);
+
+            // Function to update current time
+            function updateCurrentTime() {
+                const now = new Date();
+                currentTimeSpan.textContent = now.toLocaleString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            // Update time every second
+            setInterval(updateCurrentTime, 1000);
+            updateCurrentTime(); // Initial call
 
             function initializeUI() {
                 let message = '';
@@ -194,6 +220,8 @@
                         const lon = position.coords.longitude;
                         latitudeInput.value = lat;
                         longitudeInput.value = lon;
+                        displayLatitudeSpan.textContent = lat.toFixed(6); // Display with 6 decimal places
+                        displayLongitudeSpan.textContent = lon.toFixed(6); // Display with 6 decimal places
 
                         const map = L.map(mapDiv).setView([lat, lon], 16);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -204,10 +232,14 @@
                     }, () => {
                         alert('Gagal mendapatkan lokasi. Pastikan izin lokasi telah diberikan.');
                         mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on error
+                        displayLatitudeSpan.textContent = 'Tidak tersedia';
+                        displayLongitudeSpan.textContent = 'Tidak tersedia';
                     });
                 } else {
                     alert("Browser Anda tidak mendukung geolokasi.");
                     mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator if not supported
+                    displayLatitudeSpan.textContent = 'Tidak tersedia';
+                    displayLongitudeSpan.textContent = 'Tidak tersedia';
                 }
             }
 
