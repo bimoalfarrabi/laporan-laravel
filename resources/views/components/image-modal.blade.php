@@ -1,9 +1,9 @@
 @props(['imageUrl' => ''])
 
 <div
-    x-data="{ show: false, imageUrl: '', rotation: 90 }"
+    x-data="{ show: false, imageUrl: '', rotation: 0 }"
     x-show="show"
-    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; rotation = 90"
+    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; rotation = 0"
     x-on:keydown.escape.window="show = false"
     style="display: none;"
     class="fixed inset-0 z-50 flex items-center justify-center p-4"
