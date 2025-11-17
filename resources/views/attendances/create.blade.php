@@ -121,6 +121,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            transform: scaleX(-1); /* Mirror effect for selfie camera */
         }
 
         #camera::before {
