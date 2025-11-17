@@ -37,12 +37,21 @@
                             <!-- Map -->
                             <div class="form-section">
                                 <x-input-label for="map" :value="__('Lokasi Anda')" class="text-center sm:text-left" />
-                                <div id="map" class="mt-2 rounded-md border-gray-300"></div>
+                                <div id="map-container" class="relative mt-2 rounded-md border-gray-300" style="min-height: 200px;">
+                                    <div id="map-loading-indicator" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+                                        <svg class="animate-spin h-8 w-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span class="ml-2 text-gray-700">Memuat peta...</span>
+                                    </div>
+                                    <div id="map" class="w-full h-full"></div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="flex items-center justify-end mt-4">
-                            <x-primary-button id="submit-attendance-button" class="w-full sm:w-auto ml-4">
+                        <div class="flex items-center justify-center sm:justify-end mt-4">
+                            <x-primary-button id="submit-attendance-button" class="w-full sm:w-auto">
                                 {{ __('Kirim Absensi') }}
                             </x-primary-button>
                         </div>
@@ -129,6 +138,7 @@
             const mapDiv = document.getElementById('map');
             const video = document.getElementById('camera-viewfinder');
             const canvas = document.getElementById('camera-canvas');
+            const mapLoadingIndicator = document.getElementById('map-loading-indicator'); // New
             const todayAttendance = @json($todayAttendance);
 
             function initializeUI() {
@@ -170,6 +180,7 @@
             }
 
             function initializeGeolocation() {
+                mapLoadingIndicator.classList.remove('hidden'); // Show loading indicator
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(position => {
                         const lat = position.coords.latitude;
@@ -182,11 +193,14 @@
                             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         }).addTo(map);
                         L.marker([lat, lon]).addTo(map).bindPopup('Lokasi Anda').openPopup();
+                        mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on success
                     }, () => {
                         alert('Gagal mendapatkan lokasi. Pastikan izin lokasi telah diberikan.');
+                        mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on error
                     });
                 } else {
                     alert("Browser Anda tidak mendukung geolokasi.");
+                    mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator if not supported
                 }
             }
 
