@@ -5,10 +5,10 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-4 sm:py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+                <div class="p-4 sm:p-6 bg-white border-b border-gray-200">
                     <div id="attendance-message" class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg">
                         <!-- Pesan status absensi akan dimuat di sini -->
                     </div>
@@ -16,37 +16,33 @@
                     <form id="attendance-form" action="{{ route('attendances.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <!-- General Location Error -->
+                        <!-- General Location/Photo Error -->
                         <x-input-error :messages="$errors->get('location')" class="mt-2 mb-4" />
                         <x-input-error :messages="$errors->get('photo')" class="mt-2 mb-4" />
 
-                        <!-- Camera Viewfinder -->
-                        <div class="mb-4">
-                            <x-input-label for="camera" :value="__('Ambil Foto Absensi')" />
-                            <div class="mt-2 relative">
-                                <video id="camera-viewfinder" autoplay playsinline class="w-full h-auto bg-gray-200 rounded-md"></video>
+                        <div class="form-container">
+                            <!-- Camera Viewfinder -->
+                            <div class="form-section">
+                                <x-input-label for="camera" :value="__('Ambil Foto Absensi')" class="text-center sm:text-left" />
+                                <div id="camera" class="mt-2">
+                                    <video id="camera-viewfinder" autoplay playsinline></video>
+                                </div>
                                 <canvas id="camera-canvas" class="hidden"></canvas>
-                                <img id="photo-preview" src="" alt="Pratinjau Foto" class="w-full h-auto rounded-md hidden" />
                             </div>
-                            <div class="mt-4 flex justify-center space-x-4">
-                                <button type="button" id="capture-button" class="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700">Ambil Gambar</button>
-                                <button type="button" id="recapture-button" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-400 hidden">Ambil Ulang</button>
+
+                            <!-- Location -->
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
+
+                            <!-- Map -->
+                            <div class="form-section">
+                                <x-input-label for="map" :value="__('Lokasi Anda')" class="text-center sm:text-left" />
+                                <div id="map" class="mt-2 rounded-md border-gray-300"></div>
                             </div>
-                        </div>
-
-
-                        <!-- Location -->
-                        <input type="hidden" name="latitude" id="latitude">
-                        <input type="hidden" name="longitude" id="longitude">
-
-                        <!-- Map -->
-                        <div class="mb-4">
-                            <x-input-label for="map" :value="__('Lokasi Anda')" />
-                            <div id="map" style="height: 300px;" class="mt-1 block w-full rounded-md border-gray-300"></div>
                         </div>
                         
                         <div class="flex items-center justify-end mt-4">
-                            <x-primary-button id="submit-attendance-button" class="ml-4">
+                            <x-primary-button id="submit-attendance-button" class="w-full sm:w-auto ml-4">
                                 {{ __('Kirim Absensi') }}
                             </x-primary-button>
                         </div>
@@ -58,39 +54,90 @@
 
     @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        /* Default Mobile Styles */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #camera {
+            width: 260px; /* Consistent size for all screens */
+            height: 260px; /* Consistent size for all screens */
+            border-radius: 50%;
+            overflow: hidden;
+            display: block;
+            margin: 0 auto;
+            border: 5px solid #000000;
+            position: relative;
+        }
+        #map {
+            height: 200px; /* Smaller map on mobile */
+            width: 100%;
+        }
+
+        /* Desktop Styles */
+        @media (min-width: 640px) {
+            .form-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .form-section {
+                width: 48%;
+            }
+            /* #camera styles are now consistent, no need to override here */
+            #map {
+                height: 300px; /* Larger map on desktop */
+            }
+        }
+
+        #camera video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #camera::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 190px;
+            border-radius: 45% 45% 80% 80%;
+            border: 3px solid rgb(58, 58, 58);
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+    </style>
     @endpush
 
     @push('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
+        // The existing JavaScript logic remains the same
         document.addEventListener('DOMContentLoaded', function () {
-            // DOM Elements
             const attendanceMessageDiv = document.getElementById('attendance-message');
             const submitButton = document.getElementById('submit-attendance-button');
             const form = document.getElementById('attendance-form');
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
             const mapDiv = document.getElementById('map');
-            
-            // Camera Elements
             const video = document.getElementById('camera-viewfinder');
             const canvas = document.getElementById('camera-canvas');
-            const photoPreview = document.getElementById('photo-preview');
-            const captureButton = document.getElementById('capture-button');
-            const recaptureButton = document.getElementById('recapture-button');
-            let capturedImageBlob = null;
-
-            // Data from Controller
             const todayAttendance = @json($todayAttendance);
 
-            // --- 1. Initialize UI based on Attendance Status ---
             function initializeUI() {
                 let message = '';
                 let buttonText = '';
                 let isFormDisabled = false;
 
                 if (!todayAttendance) {
-                    message = '<p class="font-bold">Anda akan melakukan Absen Masuk.</p><p class="text-sm">Pastikan Anda berada di lokasi yang benar dan siap mengambil foto.</p>';
+                    message = '<p class="font-bold">Anda akan melakukan Absen Masuk.</p><p class="text-sm">Posisikan wajah Anda di dalam bingkai dan klik tombol Absen Masuk.</p>';
                     buttonText = 'Absen Masuk';
                 } else if (!todayAttendance.time_out) {
                     message = `<p class="font-bold">Anda akan melakukan Absen Pulang.</p><p class="text-sm">Anda sudah absen masuk pada: ${new Date(todayAttendance.time_in).toLocaleString('id-ID')}</p>`;
@@ -105,54 +152,23 @@
                 submitButton.textContent = buttonText;
                 if (isFormDisabled) {
                     submitButton.setAttribute('disabled', 'true');
-                    captureButton.setAttribute('disabled', 'true');
+                    document.getElementById('camera').style.display = 'none';
                 } else {
                     startCamera();
                 }
             }
 
-            // --- 2. Camera Logic ---
             async function startCamera() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                     video.srcObject = stream;
-                    video.classList.remove('hidden');
-                    photoPreview.classList.add('hidden');
-                    recaptureButton.classList.add('hidden');
-                    captureButton.classList.remove('hidden');
-                    capturedImageBlob = null;
                 } catch (err) {
                     console.error("Error accessing camera: ", err);
                     attendanceMessageDiv.innerHTML = '<p class="font-bold text-red-700">Error: Tidak dapat mengakses kamera.</p><p class="text-sm text-red-600">Pastikan Anda memberikan izin akses kamera di browser Anda dan menggunakan koneksi HTTPS.</p>';
-                    captureButton.setAttribute('disabled', 'true');
+                    submitButton.setAttribute('disabled', 'true');
                 }
             }
 
-            captureButton.addEventListener('click', () => {
-                const context = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                canvas.toBlob(blob => {
-                    capturedImageBlob = blob;
-                    photoPreview.src = URL.createObjectURL(blob);
-                    
-                    // UI update
-                    video.classList.add('hidden');
-                    photoPreview.classList.remove('hidden');
-                    captureButton.classList.add('hidden');
-                    recaptureButton.classList.remove('hidden');
-
-                    // Stop the camera stream
-                    video.srcObject.getTracks().forEach(track => track.stop());
-                }, 'image/jpeg', 0.9);
-            });
-
-            recaptureButton.addEventListener('click', startCamera);
-
-
-            // --- 3. Geolocation Logic ---
             function initializeGeolocation() {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(position => {
@@ -174,20 +190,50 @@
                 }
             }
 
-            // --- 4. Form Submission Logic ---
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 
-                if (!capturedImageBlob) {
-                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Silakan ambil foto terlebih dahulu.' });
-                    return;
-                }
-
                 submitButton.setAttribute('disabled', 'true');
                 submitButton.textContent = 'Mengirim...';
 
+                const imageBlob = await new Promise(resolve => {
+                    const context = canvas.getContext('2d');
+                    const size = 260; // Match the CSS size
+                    canvas.width = size;
+                    canvas.height = size;
+                    
+                    const videoRatio = video.videoWidth / video.videoHeight;
+                    let sourceWidth, sourceHeight, sx, sy;
+
+                    if (videoRatio > 1) {
+                        sourceHeight = video.videoHeight;
+                        sourceWidth = sourceHeight;
+                        sx = (video.videoWidth - sourceWidth) / 2;
+                        sy = 0;
+                    } else {
+                        sourceWidth = video.videoWidth;
+                        sourceHeight = sourceWidth;
+                        sx = 0;
+                        sy = (video.videoHeight - sourceHeight) / 2;
+                    }
+
+                    context.drawImage(video, sx, sy, sourceWidth, sourceHeight, 0, 0, size, size);
+                    canvas.toBlob(resolve, 'image/jpeg', 0.9);
+                });
+
+                if (!imageBlob) {
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal mengambil gambar. Silakan coba lagi.' });
+                    submitButton.removeAttribute('disabled');
+                    submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
+                    return;
+                }
+
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                }
+
                 const formData = new FormData(form);
-                formData.append('photo', capturedImageBlob, 'attendance.jpg');
+                formData.append('photo', imageBlob, 'attendance.jpg');
 
                 try {
                     const response = await fetch("{{ route('attendances.store') }}", {
@@ -195,23 +241,23 @@
                         body: formData,
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json' // Expect a JSON response
+                            'Accept': 'application/json'
                         }
                     });
 
                     const result = await response.json();
 
                     if (!response.ok) {
-                        // Handle validation errors or other server errors
                         let errorText = result.message || 'Terjadi kesalahan.';
                         if (result.errors) {
                             errorText = Object.values(result.errors).flat().join('\n');
                         }
-                        Swal.fire({ icon: 'error', title: 'Gagal!', text: errorText });
-                        submitButton.removeAttribute('disabled');
-                        submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
+                        Swal.fire({ icon: 'error', title: 'Gagal!', text: errorText }).then(() => {
+                            submitButton.removeAttribute('disabled');
+                            submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
+                            startCamera();
+                        });
                     } else {
-                        // Success
                         window.location.href = result.redirect_url;
                     }
                 } catch (error) {
@@ -221,7 +267,6 @@
                 }
             });
 
-            // --- Initializations ---
             initializeUI();
             initializeGeolocation();
         });
