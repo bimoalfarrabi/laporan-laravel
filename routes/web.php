@@ -92,6 +92,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:superadmin')->group(function () {
         Route::get('/settings/location', [SettingController::class, 'locationSettings'])->name('settings.location');
         Route::post('/settings/location', [SettingController::class, 'updateLocationSettings'])->name('settings.location.update');
+        Route::get('/settings/attendance', [SettingController::class, 'attendanceSettings'])->name('settings.attendance');
+        Route::post('/settings/attendance', [SettingController::class, 'updateAttendanceSettings'])->name('settings.attendance.update');
     });
 });
 

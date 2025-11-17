@@ -60,6 +60,9 @@
                                     <x-dropdown-link :href="route('settings.location')">
                                         {{ __('Pengaturan Lokasi Absensi') }}
                                     </x-dropdown-link>
+                                    <x-dropdown-link :href="route('settings.attendance')">
+                                        {{ __('Pengaturan Waktu Absensi') }}
+                                    </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
                         </div>
@@ -161,6 +164,9 @@
                         </x-responsive-nav-link>
                         <x-responsive-nav-link :href="route('settings.location')" :active="request()->routeIs('settings.location')">
                             {{ __('Pengaturan Lokasi') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('settings.attendance')" :active="request()->routeIs('settings.attendance')">
+                            {{ __('Pengaturan Waktu Absensi') }}
                         </x-responsive-nav-link>
                     </div>
                 </div>

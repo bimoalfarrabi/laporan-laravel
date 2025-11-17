@@ -63,6 +63,47 @@ class AttendanceController extends Controller
             'longitude' => 'required|numeric',
         ]);
 
+        $user = Auth::user();
+        $now = now();
+
+        // Find today's attendance record
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('time_in', $now->toDateString())
+            ->first();
+
+        $action = 'in';
+        if ($attendance && $attendance->time_out) {
+            return redirect()->back()->with('error', 'Anda sudah melakukan absensi datang dan pulang hari ini.');
+        } elseif ($attendance) {
+            $action = 'out';
+        }
+
+        // Time validation for non-superadmin roles
+        if (!$user->hasRole('superadmin')) {
+            // TODO: Ask user for clarification on shift mapping.
+            // For now, assuming: pagi -> normal_pagi, sore -> reguler, malam -> normal_malam
+            $shiftMap = [
+                'pagi' => 'normal_pagi',
+                'sore' => 'reguler',
+                'malam' => 'normal_malam',
+            ];
+            $attendanceShift = $shiftMap[$user->shift] ?? 'reguler'; // Default to 'reguler'
+
+            $settingKeys = [
+                "attendance_{$attendanceShift}_{$action}_start",
+                "attendance_{$attendanceShift}_{$action}_end",
+            ];
+            $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
+
+            $startTime = $settings["attendance_{$attendanceShift}_{$action}_start"] ?? null;
+            $endTime = $settings["attendance_{$attendanceShift}_{$action}_end"] ?? null;
+
+            if (!$startTime || !$endTime || !$this->isTimeWithinWindow($now, $startTime, $endTime)) {
+                return redirect()->back()->with('error', "Anda tidak dapat melakukan absensi {$action} di luar jam yang ditentukan ({$startTime} - {$endTime}).");
+            }
+        }
+
+
         // Location validation
         $settingKeys = ['center_latitude', 'center_longitude', 'allowed_radius_meters'];
         $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
@@ -152,14 +193,46 @@ class AttendanceController extends Controller
         }
         // --- End of Native GD Logic ---
 
-        Attendance::create([
-            'user_id' => Auth::id(),
-            'photo_path' => $photoPath,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-        ]);
+        if ($action === 'in') {
+            Attendance::create([
+                'user_id' => $user->id,
+                'shift' => $user->shift,
+                'time_in' => $now,
+                'photo_in_path' => $photoPath,
+                'latitude_in' => $request->latitude,
+                'longitude_in' => $request->longitude,
+            ]);
+        } else {
+            $attendance->update([
+                'time_out' => $now,
+                'photo_out_path' => $photoPath,
+                'latitude_out' => $request->latitude,
+                'longitude_out' => $request->longitude,
+            ]);
+        }
 
-        return redirect()->route('dashboard')->with('success', 'Absensi berhasil dicatat.');
+        return redirect()->route('dashboard')->with('success', 'Absensi ' . $action . ' berhasil dicatat.');
+    }
+
+    /**
+     * Check if a time is within a given window, handling overnight shifts.
+     *
+     * @param \Carbon\Carbon $timeToCheck
+     * @param string $startTime (H:i)
+     * @param string $endTime (H:i)
+     * @return bool
+     */
+    private function isTimeWithinWindow($timeToCheck, $startTime, $endTime)
+    {
+        $start = \Carbon\Carbon::createFromTimeString($startTime);
+        $end = \Carbon\Carbon::createFromTimeString($endTime);
+
+        if ($end < $start) { // Overnight shift
+            return $timeToCheck->between($start, \Carbon\Carbon::tomorrow()->endOfDay()) ||
+                   $timeToCheck->between(\Carbon\Carbon::today()->startOfDay(), $end);
+        }
+
+        return $timeToCheck->between($start, $end);
     }
 
     /**

@@ -11,9 +11,15 @@ class Attendance extends Model
 
     protected $fillable = [
         'user_id',
-        'photo_path',
-        'latitude',
-        'longitude',
+        'shift',
+        'time_in',
+        'time_out',
+        'photo_in_path',
+        'photo_out_path',
+        'latitude_in',
+        'longitude_in',
+        'latitude_out',
+        'longitude_out',
     ];
 
     public function user()

@@ -45,5 +45,59 @@ class SettingController extends Controller
 
         return redirect()->back()->with('success', 'Pengaturan lokasi berhasil diperbarui.');
     }
-}
 
+    /**
+     * Show the form for editing attendance time settings.
+     */
+    public function attendanceSettings()
+    {
+        $shifts = ['reguler', 'normal_pagi', 'normal_malam'];
+        $types = ['in', 'out'];
+        $times = ['start', 'end'];
+        $settingKeys = [];
+
+        foreach ($shifts as $shift) {
+            foreach ($types as $type) {
+                foreach ($times as $time) {
+                    $settingKeys[] = "attendance_{$shift}_{$type}_{$time}";
+                }
+            }
+        }
+
+        $settings = Setting::whereIn('key', $settingKeys)
+            ->pluck('value', 'key');
+
+        return view('settings.attendance', compact('settings', 'shifts', 'types', 'times'));
+    }
+
+    /**
+     * Update the attendance time settings in storage.
+     */
+    public function updateAttendanceSettings(Request $request)
+    {
+        $shifts = ['reguler', 'normal_pagi', 'normal_malam'];
+        $types = ['in', 'out'];
+        $times = ['start', 'end'];
+        $rules = [];
+
+        foreach ($shifts as $shift) {
+            foreach ($types as $type) {
+                foreach ($times as $time) {
+                    $key = "attendance_{$shift}_{$type}_{$time}";
+                    $rules[$key] = 'required|date_format:H:i';
+                }
+            }
+        }
+
+        $request->validate($rules);
+
+        foreach ($rules as $key => $rule) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $request->input($key)]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan waktu absensi berhasil diperbarui.');
+    }
+}
