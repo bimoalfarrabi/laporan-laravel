@@ -65,7 +65,7 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Lokasi Masuk">
-                                            <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_in }}&mlon={{ $attendance->longitude_in }}#map=16/{{ $attendance->latitude_in }}/{{ $attendance->longitude_in }}" target="_blank" class="text-blue-500 hover:underline">
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_in }},{{ $attendance->longitude_in }}" target="_blank" class="text-blue-500 hover:underline">
                                                 Lihat Peta
                                             </a>
                                         </td>
@@ -81,7 +81,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="Lokasi Pulang">
                                             @if($attendance->latitude_out && $attendance->longitude_out)
-                                                <a href="https://www.openstreetmap.org/?mlat={{ $attendance->latitude_out }}&mlon={{ $attendance->longitude_out }}#map=16/{{ $attendance->latitude_out }}/{{ $attendance->longitude_out }}" target="_blank" class="text-blue-500 hover:underline">
+                                                <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_out }},{{ $attendance->longitude_out }}" target="_blank" class="text-blue-500 hover:underline">
                                                     Lihat Peta
                                                 </a>
                                             @else
