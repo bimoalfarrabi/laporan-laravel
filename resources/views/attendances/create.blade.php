@@ -17,7 +17,13 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-4 sm:p-6 bg-white border-b border-gray-200">
                     <div id="attendance-message" class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg">
-                        <!-- Pesan status absensi akan dimuat di sini -->
+                        <span id="dynamic-attendance-status">
+                            <!-- Pesan status absensi akan dimuat di sini -->
+                        </span>
+                        <div class="mt-2 p-2 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-lg">
+                            <p class="font-bold">Peringatan:</p>
+                            <p class="text-sm">Pastikan wajah anda nampak jelas didalam frame wajah, jangan pakai masker / penutup wajah lainya</p>
+                        </div>
                     </div>
 
                     <div class="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm text-sm text-gray-700">
@@ -145,6 +151,7 @@
         // The existing JavaScript logic remains the same
         document.addEventListener('DOMContentLoaded', function () {
             const attendanceMessageDiv = document.getElementById('attendance-message');
+            const dynamicAttendanceStatusSpan = document.getElementById('dynamic-attendance-status');
             const submitButton = document.getElementById('submit-attendance-button');
             const form = document.getElementById('attendance-form');
             const latitudeInput = document.getElementById('latitude');
@@ -192,7 +199,7 @@
                     isFormDisabled = true;
                 }
 
-                attendanceMessageDiv.innerHTML = message;
+                dynamicAttendanceStatusSpan.innerHTML = message;
                 submitButton.textContent = buttonText;
                 if (isFormDisabled) {
                     submitButton.setAttribute('disabled', 'true');
@@ -208,7 +215,7 @@
                     video.srcObject = stream;
                 } catch (err) {
                     console.error("Error accessing camera: ", err);
-                    attendanceMessageDiv.innerHTML = '<p class="font-bold text-red-700">Error: Tidak dapat mengakses kamera.</p><p class="text-sm text-red-600">Pastikan Anda memberikan izin akses kamera di browser Anda dan menggunakan koneksi HTTPS.</p>';
+                    dynamicAttendanceStatusSpan.innerHTML = '<p class="font-bold text-red-700">Error: Tidak dapat mengakses kamera.</p><p class="text-sm text-red-600">Pastikan Anda memberikan izin akses kamera di browser Anda dan menggunakan koneksi HTTPS.</p>';
                     submitButton.setAttribute('disabled', 'true');
                 }
             }
