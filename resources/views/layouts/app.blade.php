@@ -39,5 +39,54 @@
             </div>
         </footer>
         @stack('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // SweetAlert for success messages
+                @if (session('success'))
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: '{{ session('success') }}',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                @endif
+
+                // SweetAlert for error messages
+                @if (session('error'))
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: '{{ session('error') }}',
+                        showConfirmButton: true,
+                    });
+                @endif
+
+                // SweetAlert for confirmation dialogs (e.g., delete, reset password)
+                document.querySelectorAll('[data-confirm-dialog="true"]').forEach(button => {
+                    button.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const form = this.closest('form');
+                        const swalTitle = this.dataset.swalTitle || 'Apakah Anda yakin?';
+                        const swalText = this.dataset.swalText || 'Tindakan ini tidak dapat dibatalkan.';
+
+                        Swal.fire({
+                            title: swalTitle,
+                            text: swalText,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Ya, lakukan!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
