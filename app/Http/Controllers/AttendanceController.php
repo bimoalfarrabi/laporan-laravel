@@ -49,12 +49,7 @@ class AttendanceController extends Controller
      */
     public function create()
     {
-        $user = Auth::user();
-        $todayAttendance = Attendance::where('user_id', $user->id)
-            ->whereDate('time_in', today())
-            ->first();
-
-        return view('attendances.create', compact('todayAttendance'));
+        return view('attendances.create');
     }
 
     /**

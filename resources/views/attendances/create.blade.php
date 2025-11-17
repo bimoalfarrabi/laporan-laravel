@@ -9,21 +9,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg">
-                        @if (!$todayAttendance)
-                            <p class="font-bold">Anda akan melakukan Absen Masuk.</p>
-                            <p class="text-sm">Pastikan Anda berada di lokasi yang benar dan siap mengambil foto.</p>
-                        @elseif (!$todayAttendance->time_out)
-                            <p class="font-bold">Anda akan melakukan Absen Pulang.</p>
-                            <p class="text-sm">Anda sudah absen masuk pada: {{ \Carbon\Carbon::parse($todayAttendance->time_in)->format('d M Y, H:i') }}</p>
-                        @else
-                            <p class="font-bold">Anda sudah melakukan Absen Masuk dan Pulang hari ini.</p>
-                            <p class="text-sm">Masuk: {{ \Carbon\Carbon::parse($todayAttendance->time_in)->format('d M Y, H:i') }}</p>
-                            <p class="text-sm">Pulang: {{ \Carbon\Carbon::parse($todayAttendance->time_out)->format('d M Y, H:i') }}</p>
-                            <p class="text-sm">Tipe Absensi: {{ $todayAttendance->type ?? 'N/A' }}</p>
-                            <p class="text-sm mt-2">Anda tidak dapat melakukan absensi lagi hari ini.</p>
-                        @endif
-                    </div>
 
                     <form action="{{ route('attendances.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -34,7 +19,7 @@
                         <!-- Photo -->
                         <div class="mb-4">
                             <x-input-label for="photo" :value="__('Ambil Foto Absensi')" />
-                            <input type="file" name="photo" id="photo" accept="image/*" capture="environment" required class="mt-1 block w-full" @disabled($todayAttendance && $todayAttendance->time_out)>
+                            <input type="file" name="photo" id="photo" accept="image/*" capture="environment" required class="mt-1 block w-full">
                             <x-input-error :messages="$errors->get('photo')" class="mt-2" />
                         </div>
 
@@ -49,8 +34,8 @@
                         </div>
                         
                         <div class="flex items-center justify-end mt-4">
-                            <x-primary-button class="ml-4" @disabled($todayAttendance && $todayAttendance->time_out)>
-                                {{ __(!$todayAttendance ? 'Absen Masuk' : (!$todayAttendance->time_out ? 'Absen Pulang' : 'Absensi Selesai')) }}
+                            <x-primary-button class="ml-4">
+                                {{ __('Kirim Absensi') }}
                             </x-primary-button>
                         </div>
                     </form>
