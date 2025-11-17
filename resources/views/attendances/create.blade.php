@@ -218,6 +218,46 @@
                     navigator.geolocation.getCurrentPosition(position => {
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        const timestamp = position.timestamp;
+
+                        // Mock Location Detection Heuristics
+                        const currentTime = Date.now();
+                        const locationAge = (currentTime - timestamp) / 1000; // in seconds
+
+                        // Heuristic 1: Suspiciously low accuracy (e.g., 0 or very close to 0)
+                        // Real GPS rarely has perfect accuracy. A threshold of < 5m is often a red flag.
+                        if (accuracy < 5) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Deteksi Lokasi Palsu!',
+                                text: 'Akurasi lokasi Anda terlalu tinggi (' + accuracy.toFixed(2) + 'm). Ini mungkin indikasi penggunaan lokasi palsu. Absensi dibatalkan.',
+                                allowOutsideClick: false,
+                                showConfirmButton: true,
+                            });
+                            submitButton.setAttribute('disabled', 'true');
+                            mapLoadingIndicator.classList.add('hidden');
+                            displayLatitudeSpan.textContent = 'Deteksi Palsu';
+                            displayLongitudeSpan.textContent = 'Deteksi Palsu';
+                            return;
+                        }
+
+                        // Heuristic 2: Stale location data (older than, e.g., 60 seconds)
+                        if (locationAge > 60) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lokasi Kedaluwarsa!',
+                                text: 'Data lokasi Anda terlalu lama (' + locationAge.toFixed(0) + ' detik yang lalu). Harap coba lagi untuk mendapatkan lokasi terbaru. Absensi dibatalkan.',
+                                allowOutsideClick: false,
+                                showConfirmButton: true,
+                            });
+                            submitButton.setAttribute('disabled', 'true');
+                            mapLoadingIndicator.classList.add('hidden');
+                            displayLatitudeSpan.textContent = 'Kedaluwarsa';
+                            displayLongitudeSpan.textContent = 'Kedaluwarsa';
+                            return;
+                        }
+
                         latitudeInput.value = lat;
                         longitudeInput.value = lon;
                         displayLatitudeSpan.textContent = lat.toFixed(6); // Display with 6 decimal places
@@ -229,14 +269,40 @@
                         }).addTo(map);
                         L.marker([lat, lon]).addTo(map).bindPopup('Lokasi Anda').openPopup();
                         mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on success
-                    }, () => {
-                        alert('Gagal mendapatkan lokasi. Pastikan izin lokasi telah diberikan.');
+                    }, (error) => {
+                        let errorMessage = 'Gagal mendapatkan lokasi. Pastikan izin lokasi telah diberikan.';
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMessage = 'Izin lokasi ditolak. Harap izinkan akses lokasi untuk absensi.';
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            errorMessage = 'Informasi lokasi tidak tersedia.';
+                        } else if (error.code === error.TIMEOUT) {
+                            errorMessage = 'Waktu tunggu untuk mendapatkan lokasi habis. Harap coba lagi.';
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Lokasi!',
+                            text: errorMessage + ' Absensi dibatalkan.',
+                            allowOutsideClick: false,
+                            showConfirmButton: true,
+                        });
+                        submitButton.setAttribute('disabled', 'true');
                         mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on error
-                        displayLatitudeSpan.textContent = 'Tidak tersedia';
-                        displayLongitudeSpan.textContent = 'Tidak tersedia';
+                        displayLatitudeSpan.textContent = 'Error';
+                        displayLongitudeSpan.textContent = 'Error';
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000, // 10 seconds timeout
+                        maximumAge: 0 // Force current location
                     });
                 } else {
-                    alert("Browser Anda tidak mendukung geolokasi.");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Browser Tidak Mendukung!',
+                        text: 'Browser Anda tidak mendukung geolokasi. Absensi dibatalkan.',
+                        allowOutsideClick: false,
+                        showConfirmButton: true,
+                    });
+                    submitButton.setAttribute('disabled', 'true');
                     mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator if not supported
                     displayLatitudeSpan.textContent = 'Tidak tersedia';
                     displayLongitudeSpan.textContent = 'Tidak tersedia';
