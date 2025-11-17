@@ -235,6 +235,8 @@
                                 text: 'Akurasi lokasi Anda terlalu tinggi (' + accuracy.toFixed(2) + 'm). Ini mungkin indikasi penggunaan lokasi palsu. Absensi dibatalkan.',
                                 allowOutsideClick: false,
                                 showConfirmButton: true,
+                            }).then(() => {
+                                window.location.href = "{{ route('attendances.index') }}";
                             });
                             submitButton.setAttribute('disabled', 'true');
                             mapLoadingIndicator.classList.add('hidden');
@@ -251,6 +253,8 @@
                                 text: 'Data lokasi Anda terlalu lama (' + locationAge.toFixed(0) + ' detik yang lalu). Harap coba lagi untuk mendapatkan lokasi terbaru. Absensi dibatalkan.',
                                 allowOutsideClick: false,
                                 showConfirmButton: true,
+                            }).then(() => {
+                                window.location.href = "{{ route('attendances.index') }}";
                             });
                             submitButton.setAttribute('disabled', 'true');
                             mapLoadingIndicator.classList.add('hidden');
@@ -285,6 +289,8 @@
                             text: errorMessage + ' Absensi dibatalkan.',
                             allowOutsideClick: false,
                             showConfirmButton: true,
+                        }).then(() => {
+                            window.location.href = "{{ route('attendances.index') }}";
                         });
                         submitButton.setAttribute('disabled', 'true');
                         mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on error
@@ -302,6 +308,8 @@
                         text: 'Browser Anda tidak mendukung geolokasi. Absensi dibatalkan.',
                         allowOutsideClick: false,
                         showConfirmButton: true,
+                    }).then(() => {
+                        window.location.href = "{{ route('attendances.index') }}";
                     });
                     submitButton.setAttribute('disabled', 'true');
                     mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator if not supported
@@ -342,7 +350,9 @@
                 });
 
                 if (!imageBlob) {
-                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal mengambil gambar. Silakan coba lagi.' });
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal mengambil gambar. Silakan coba lagi.' }).then(() => {
+                        window.location.href = "{{ route('attendances.index') }}";
+                    });
                     submitButton.removeAttribute('disabled');
                     submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
                     return;
@@ -373,9 +383,7 @@
                             errorText = Object.values(result.errors).flat().join('\n');
                         }
                         Swal.fire({ icon: 'error', title: 'Gagal!', text: errorText }).then(() => {
-                            submitButton.removeAttribute('disabled');
-                            submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
-                            startCamera();
+                            window.location.href = "{{ route('attendances.index') }}";
                         });
                     } else {
                         Swal.fire({
@@ -390,7 +398,9 @@
                     }
                 } catch (error) {
                     console.error('Submission error:', error);
-                    Swal.fire({ icon: 'error', title: 'Error!', text: 'Tidak dapat terhubung ke server.' });
+                    Swal.fire({ icon: 'error', title: 'Error!', text: 'Tidak dapat terhubung ke server.' }).then(() => {
+                        window.location.href = "{{ route('attendances.index') }}";
+                    });
                     submitButton.removeAttribute('disabled');
                 }
             });
