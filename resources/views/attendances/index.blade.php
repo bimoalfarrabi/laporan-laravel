@@ -149,6 +149,25 @@
             td:last-child {
                 border-bottom: 0;
             }
+
+            /* Specific adjustments for image columns */
+            td[data-label="Foto Masuk"],
+            td[data-label="Foto Pulang"] {
+                text-align: left; /* Align image to the left */
+                display: flex; /* Use flexbox for better alignment of label and image */
+                align-items: center;
+                justify-content: space-between; /* Push label to left, image to right */
+                padding-left: 0.5rem; /* Reset padding-left */
+                padding-right: 0.5rem; /* Add padding-right */
+            }
+
+            td[data-label="Foto Masuk"]::before,
+            td[data-label="Foto Pulang"]::before {
+                position: static; /* Remove absolute positioning */
+                width: auto; /* Let width be determined by content */
+                padding-left: 0; /* Remove padding-left */
+                margin-right: 0.5rem; /* Add some space between label and image */
+            }
         }
     </style>
     @endpush
