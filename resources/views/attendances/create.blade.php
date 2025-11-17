@@ -1,8 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Absensi Baru') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Absensi Baru') }}
+            </h2>
+            @can('viewAny', App\Models\Attendance::class)
+                <a href="{{ route('attendances.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 active:bg-gray-50 active:text-gray-800 transition ease-in-out duration-150">
+                    {{ __('Lihat Daftar Absensi') }}
+                </a>
+            @endcan
+        </div>
     </x-slot>
 
     <div class="py-4 sm:py-12">

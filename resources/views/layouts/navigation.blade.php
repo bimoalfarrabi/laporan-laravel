@@ -15,9 +15,15 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
-                        {{ __('Absensi') }}
-                    </x-nav-link>
+                    @hasanyrole('danru|anggota')
+                        <x-nav-link :href="route('attendances.create')" :active="request()->routeIs('attendances.create')">
+                            {{ __('Absensi') }}
+                        </x-nav-link>
+                    @else
+                        <x-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
+                            {{ __('Absensi') }}
+                        </x-nav-link>
+                    @endhasanyrole
                     @can('viewAny', App\Models\ReportType::class)
                         <x-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
                             {{ __('Manajemen Jenis Laporan') }}
@@ -127,9 +133,15 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
-                {{ __('Absensi') }}
-            </x-responsive-nav-link>
+            @hasanyrole('danru|anggota')
+                <x-responsive-nav-link :href="route('attendances.create')" :active="request()->routeIs('attendances.create')">
+                    {{ __('Absensi') }}
+                </x-responsive-nav-link>
+            @else
+                <x-responsive-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
+                    {{ __('Absensi') }}
+                </x-responsive-nav-link>
+            @endhasanyrole
             @can('viewAny', App\Models\ReportType::class)
                 <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
                     {{ __('Manajemen Jenis Laporan') }}
