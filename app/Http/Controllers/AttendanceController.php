@@ -78,23 +78,6 @@ class AttendanceController extends Controller
             $action = 'out';
         }
 
-        // Time validation for non-superadmin roles
-        if (!$user->hasRole('superadmin')) {
-            $settingKeys = [
-                "attendance_{$action}_start",
-                "attendance_{$action}_end",
-            ];
-            $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
-
-            $startTime = $settings["attendance_{$action}_start"] ?? null;
-            $endTime = $settings["attendance_{$action}_end"] ?? null;
-
-            if (!$startTime || !$endTime || !$this->isTimeWithinWindow($now, $startTime, $endTime)) {
-                return redirect()->back()->with('error', "Anda tidak dapat melakukan absensi {$action} di luar jam yang ditentukan ({$startTime} - {$endTime}).");
-            }
-        }
-
-
         // Location validation
         $settingKeys = ['center_latitude', 'center_longitude', 'allowed_radius_meters'];
         $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key');
@@ -193,36 +176,41 @@ class AttendanceController extends Controller
                 'longitude_in' => $request->longitude,
             ]);
         } else {
+            // Determine attendance type
+            $timeIn = \Carbon\Carbon::parse($attendance->time_in);
+            $timeOut = $now;
+            $type = null;
+
+            $dateString = $timeIn->toDateString();
+
+            // Define time windows
+            $regulerStart = \Carbon\Carbon::parse($dateString . ' 07:00');
+            $regulerEnd = \Carbon\Carbon::parse($dateString . ' 15:00');
+
+            $normalPagiStart = \Carbon\Carbon::parse($dateString . ' 07:00');
+            $normalPagiEnd = \Carbon\Carbon::parse($dateString . ' 19:00');
+
+            $normalMalamStart = \Carbon\Carbon::parse($dateString . ' 19:00');
+            $normalMalamEnd = \Carbon\Carbon::parse($dateString . ' 07:00')->addDay();
+
+            if ($timeIn >= $regulerStart && $timeOut <= $regulerEnd) {
+                $type = 'Reguler';
+            } elseif ($timeIn >= $normalPagiStart && $timeOut <= $normalPagiEnd) {
+                $type = 'Normal Pagi';
+            } elseif ($timeIn >= $normalMalamStart && $timeOut <= $normalMalamEnd) {
+                $type = 'Normal Malam';
+            }
+
             $attendance->update([
                 'time_out' => $now,
                 'photo_out_path' => $photoPath,
                 'latitude_out' => $request->latitude,
                 'longitude_out' => $request->longitude,
+                'type' => $type,
             ]);
         }
 
         return redirect()->route('dashboard')->with('success', 'Absensi ' . $action . ' berhasil dicatat.');
-    }
-
-    /**
-     * Check if a time is within a given window, handling overnight shifts.
-     *
-     * @param \Carbon\Carbon $timeToCheck
-     * @param string $startTime (H:i)
-     * @param string $endTime (H:i)
-     * @return bool
-     */
-    private function isTimeWithinWindow($timeToCheck, $startTime, $endTime)
-    {
-        $start = \Carbon\Carbon::createFromTimeString($startTime);
-        $end = \Carbon\Carbon::createFromTimeString($endTime);
-
-        if ($end < $start) { // Overnight shift
-            return $timeToCheck->between($start, \Carbon\Carbon::tomorrow()->endOfDay()) ||
-                   $timeToCheck->between(\Carbon\Carbon::today()->startOfDay(), $end);
-        }
-
-        return $timeToCheck->between($start, $end);
     }
 
     /**
