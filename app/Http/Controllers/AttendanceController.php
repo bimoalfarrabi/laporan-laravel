@@ -26,18 +26,11 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $query = Attendance::with('user')->latest('time_in');
 
-        if ($user->hasRole(['superadmin', 'manajemen'])) {
-            // Superadmin & Manajemen can see all attendances
+        // Roles that can see all attendances: superadmin, manajemen, danru
+        if ($user->hasRole(['superadmin', 'manajemen', 'danru'])) {
             $attendances = $query->paginate(15);
-        } elseif ($user->hasRole('danru')) {
-            // Danru can see their own and all anggota's attendances
-            // Note: This assumes no direct team structure. A more complex system
-            // might require a 'team_id' or 'supervisor_id' on the users table.
-            $attendances = $query->whereHas('user.roles', function ($q) {
-                $q->whereIn('name', ['anggota', 'danru']);
-            })->paginate(15);
         } else {
-            // Anggota can only see their own attendances
+            // All other roles (e.g., 'anggota') can only see their own attendances
             $attendances = $query->where('user_id', $user->id)->paginate(15);
         }
 
