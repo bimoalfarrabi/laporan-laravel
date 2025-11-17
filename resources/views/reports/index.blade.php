@@ -220,7 +220,7 @@
                                         <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                         @if (isset($report->data['deskripsi']))
                                             <div class="prose max-w-none text-sm text-gray-500 mt-1">
-                                                <strong class="text-gray-600">Deskripsi:</strong> @markdown($report->data['deskripsi'])
+                                                <strong class="text-gray-600">Deskripsi:</strong> @markdown_limit($report->data['deskripsi'], 100)
                                             </div>
                                         @endif
                                     </div>
