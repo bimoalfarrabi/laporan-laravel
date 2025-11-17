@@ -34,7 +34,7 @@
                         <!-- Photo -->
                         <div class="mb-4">
                             <x-input-label for="photo" :value="__('Ambil Foto Absensi')" />
-                            <input type="file" name="photo" id="photo" accept="image/*" capture="environment" required class="mt-1 block w-full" @if($todayAttendance && $todayAttendance->time_out) disabled @endif>
+                            <input type="file" name="photo" id="photo" accept="image/*" capture="environment" required class="mt-1 block w-full" @disabled($todayAttendance && $todayAttendance->time_out)>
                             <x-input-error :messages="$errors->get('photo')" class="mt-2" />
                         </div>
 
@@ -49,7 +49,7 @@
                         </div>
                         
                         <div class="flex items-center justify-end mt-4">
-                            <x-primary-button class="ml-4" @if($todayAttendance && $todayAttendance->time_out) disabled @endif>
+                            <x-primary-button class="ml-4" @disabled($todayAttendance && $todayAttendance->time_out)>
                                 @if (!$todayAttendance)
                                     {{ __('Absen Masuk') }}
                                 @elseif (!$todayAttendance->time_out)
