@@ -87,7 +87,6 @@
                                                 'id' => 'ID',
                                                 'name' => 'Nama',
                                                 'username' => 'Username',
-                                                'email' => 'Email',
                                                 'nik' => 'NIK',
                                                 'phone_number' => 'No. HP',
                                                 'created_at' => 'Waktu Dibuat',
@@ -134,9 +133,6 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{ $user->username }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $user->email }}
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $user->nik }}
@@ -208,7 +204,6 @@
                                     </div>
                                     <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                         <p><strong class="text-gray-600">Username:</strong> {{ $user->username }}</p>
-                                        <p><strong class="text-gray-600">Email:</strong> {{ $user->email }}</p>
                                         <p><strong class="text-gray-600">NIK:</strong> {{ $user->nik }}</p>
                                         <p><strong class="text-gray-600">No. HP:</strong> {{ $user->phone_number }}</p>
                                         <p><strong class="text-gray-600">Peran:</strong> {{ $user->roles->pluck('name')->join(', ') }}</p>
