@@ -20,7 +20,8 @@
                     @if ($announcements->isEmpty())
                         <p>Belum ada pengumuman.</p>
                     @else
-                        <div class="overflow-x-auto">
+                        {{-- Table View for Larger Screens --}}
+                        <div class="overflow-x-auto hidden sm:block">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
@@ -98,6 +99,49 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- Card View for Small Screens --}}
+                        <div class="mt-6 sm:hidden space-y-4">
+                            @foreach ($announcements as $announcement)
+                                <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200 {{ $announcement->expires_at && $announcement->expires_at->isPast() ? 'bg-red-100 text-red-700' : '' }}">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <div class="font-bold text-lg text-gray-800">{{ $announcement->title }}</div>
+                                    </div>
+                                    <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                        <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $announcement->user->name }}</p>
+                                        <p><strong class="text-gray-600">Starts At:</strong>
+                                            @if ($announcement->starts_at)
+                                                <x-waktu-dibuat :date="$announcement->starts_at" />
+                                            @else
+                                                Langsung Aktif
+                                            @endif
+                                        </p>
+                                        <p><strong class="text-gray-600">Expires At:</strong>
+                                            @if ($announcement->expires_at)
+                                                <x-waktu-dibuat :date="$announcement->expires_at" />
+                                            @else
+                                                Tidak Ada
+                                            @endif
+                                        </p>
+                                        <p><strong class="text-gray-600">Created At:</strong> <x-waktu-dibuat :date="$announcement->created_at" /></p>
+                                        <p><strong class="text-gray-600">Updated At:</strong> <x-waktu-dibuat :date="$announcement->updated_at" /></p>
+                                    </div>
+                                    <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                        <a href="{{ route('announcements.show', $announcement->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                        <a href="{{ route('announcements.edit', $announcement->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                        <form action="{{ route('announcements.destroy', $announcement->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900"
+                                                data-confirm-dialog="true"
+                                                data-swal-title="Hapus Pengumuman?"
+                                                data-swal-text="Pengumuman akan dihapus. Anda yakin?">Hapus</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
                         <div class="mt-4">
                             {{ $announcements->appends(request()->query())->links() }}
                         </div>
