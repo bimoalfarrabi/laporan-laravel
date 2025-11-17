@@ -57,7 +57,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($attendance->photo_in_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
-                                                <a href="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" target="_blank">
+                                                <a class="open-photo-modal cursor-pointer" data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}">
                                                     <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" alt="Foto Masuk" class="h-10 w-10 rounded-full object-cover">
                                                 </a>
                                             @else
@@ -72,7 +72,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($attendance->photo_out_path && Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
-                                                <a href="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}" target="_blank">
+                                                <a class="open-photo-modal cursor-pointer" data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}">
                                                     <img src="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}" alt="Foto Pulang" class="h-10 w-10 rounded-full object-cover">
                                                 </a>
                                             @else
@@ -108,4 +108,30 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.open-photo-modal').forEach(item => {
+                item.addEventListener('click', event => {
+                    event.preventDefault();
+                    const imageUrl = event.currentTarget.dataset.fullImageUrl;
+                    Swal.fire({
+                        title: 'Foto Absensi',
+                        imageUrl: imageUrl,
+                        imageAlt: 'Foto Absensi',
+                        showCloseButton: true,
+                        showConfirmButton: false,
+                        width: '80%', // Adjust width as needed
+                        imageWidth: '100%',
+                        imageHeight: 'auto',
+                        customClass: {
+                            image: 'rounded-lg'
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>
