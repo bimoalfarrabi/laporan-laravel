@@ -27,7 +27,8 @@
                         </div>
                     @endif
 
-                    <div class="mt-6 overflow-x-auto">
+                    {{-- Table View for Larger Screens --}}
+                    <div class="mt-6 overflow-x-auto hidden sm:block">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -86,6 +87,34 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Card View for Small Screens --}}
+                    <div class="mt-6 sm:hidden space-y-4">
+                        @foreach ($roles as $role)
+                            @if ($role->name !== 'superadmin')
+                                <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="font-bold text-lg text-gray-800">{{ ucfirst($role->name) }}</div>
+                                    </div>
+                                    <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                        <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$role->created_at" /></p>
+                                    </div>
+                                    <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                        <a href="{{ route('role-permissions.edit', $role->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit Hak Akses</a>
+                                        <a href="{{ route('roles.edit', $role->id) }}" class="text-blue-600 hover:text-blue-900">Edit Nama</a>
+                                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900"
+                                                data-confirm-dialog="true"
+                                                data-swal-title="Hapus Role?"
+                                                data-swal-text="Role akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
                     <div class="mt-4">
                         {{ $roles->appends(request()->query())->links() }}
