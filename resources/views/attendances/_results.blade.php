@@ -117,9 +117,11 @@
                                         <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}" alt="Foto Masuk" class="h-10 w-10 rounded-md object-cover">
                                     </a>
                                 @endif
+                                @if(isset($attendance->latitude_in) && $attendance->latitude_in)
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_in }},{{ $attendance->longitude_in }}" target="_blank" class="text-blue-500 hover:underline">
                                     Lihat Lokasi
                                 </a>
+                                @endif
                             </div>
                         </div>
                     </div>
