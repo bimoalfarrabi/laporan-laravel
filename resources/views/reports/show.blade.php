@@ -301,16 +301,19 @@
             }
         });
     </script>
-    <script type="module">
-        import EXIF from '{{ asset('node_modules/exif-js/exif.js') }}';
-        window.EXIF = EXIF;
-
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // EXIF will be available on the window object because it was imported in app.js
+            if (typeof EXIF === 'undefined') {
+                console.error('EXIF.js is not loaded. Make sure it is included in your app.js bundle.');
+                return;
+            }
+
             const images = document.querySelectorAll('.report-image');
             images.forEach(applyRotation);
         });
 
-        async function applyRotation(img) {
+        function applyRotation(img) {
             // Ensure the image is loaded before trying to read EXIF data
             if (!img.complete) {
                 img.addEventListener('load', () => processRotation(img), { once: true });
@@ -319,7 +322,7 @@
             }
         }
 
-        async function processRotation(img) {
+        function processRotation(img) {
             try {
                 EXIF.getData(img, function() {
                     const orientation = EXIF.getTag(this, 'Orientation');

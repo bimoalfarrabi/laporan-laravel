@@ -1,4 +1,6 @@
 import './bootstrap';
+import 'exif-js';
+
 
 import Alpine from 'alpinejs';
 import Swal from 'sweetalert2';
