@@ -21,7 +21,7 @@ class LeaveRequestPolicy
      */
     public function view(User $user, LeaveRequest $leaveRequest): bool
     {
-        if ($user->hasRole(['superadmin', 'manajemen', 'danru'])) {
+        if ($user->hasRole(['superadmin', 'manajemen', 'danru', 'anggota'])) {
             return true;
         }
 
