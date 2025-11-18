@@ -44,12 +44,12 @@
                                 
                                 @can('create', App\Models\LeaveRequest::class)
                                 <x-dropdown-link :href="route('leave-requests.create')">
-                                    {{ __('Pengajuan Cuti') }}
+                                    {{ __('Pengajuan Izin') }}
                                 </x-dropdown-link>
                                 @endcan
                                 
                                 <x-dropdown-link :href="route('leave-requests.index')">
-                                    {{ __('Daftar Pengajuan Cuti') }}
+{{ __('Daftar Pengajuan Izin') }}
                                 </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
@@ -174,11 +174,11 @@
             @endhasanyrole
             @can('create', App\Models\LeaveRequest::class)
             <x-responsive-nav-link :href="route('leave-requests.create')" :active="request()->routeIs('leave-requests.create')">
-                {{ __('Pengajuan Cuti') }}
+                {{ __('Pengajuan Izin') }}
             </x-responsive-nav-link>
             @endcan
             <x-responsive-nav-link :href="route('leave-requests.index')" :active="request()->routeIs('leave-requests.index')">
-                {{ __('Daftar Pengajuan Cuti') }}
+                {{ __('Daftar Pengajuan Izin') }}
             </x-responsive-nav-link>
             @can('viewAny', App\Models\ReportType::class)
                 <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">

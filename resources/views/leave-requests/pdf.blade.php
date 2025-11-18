@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Surat Pengajuan Cuti</title>
+    <title>Surat Pengajuan Izin</title>
     <style>
         body { font-family: 'Helvetica', sans-serif; font-size: 12px; }
         .container { width: 100%; padding: 20px; }
@@ -20,7 +20,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>SURAT PENGAJUAN CUTI</h1>
+            <h1>SURAT PENGAJUAN IZIN</h1>
         </div>
 
         <div class="content">
@@ -36,17 +36,17 @@
                     <td>: {{ ucfirst($leaveRequest->user->roles->first()->name ?? 'Karyawan') }}</td>
                 </tr>
                 <tr>
-                    <td>Jenis Cuti</td>
+                    <td>Jenis Izin</td>
                     <td>: {{ $leaveRequest->leave_type }}</td>
                 </tr>
             </table>
             <p>
-                Dengan ini mengajukan permohonan cuti selama {{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari, terhitung mulai tanggal 
+                Dengan ini mengajukan permohonan izin selama {{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari, terhitung mulai tanggal 
                 <strong>{{ $leaveRequest->start_date->format('d F Y') }}</strong> sampai dengan tanggal <strong>{{ $leaveRequest->end_date->format('d F Y') }}</strong>.
             </p>
-            <p>Adapun alasan saya mengajukan cuti adalah sebagai berikut:</p>
+            <p>Adapun alasan saya mengajukan izin adalah berikut:</p>
             <p><em>{{ $leaveRequest->reason }}</em></p>
-            <p>Demikian surat permohonan cuti ini saya buat dengan sebenarnya. Atas perhatian dan izin yang diberikan, saya ucapkan terima kasih.</p>
+            <p>Demikian surat permohonan izin ini saya buat dengan sebenarnya. Atas perhatian dan izin yang diberikan, saya ucapkan terima kasih.</p>
         </div>
 
         <table class="signatures">

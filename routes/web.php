@@ -85,7 +85,7 @@ Route::middleware('auth')->group(function () {
     // Absensi
     Route::resource('attendances', AttendanceController::class);
 
-    // Cuti
+    // Izin
     Route::resource('leave-requests', \App\Http\Controllers\LeaveRequestController::class);
     Route::post('leave-requests/{leave_request}/approve', [\App\Http\Controllers\LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
     Route::post('leave-requests/{leave_request}/reject', [\App\Http\Controllers\LeaveRequestController::class, 'reject'])->name('leave-requests.reject');

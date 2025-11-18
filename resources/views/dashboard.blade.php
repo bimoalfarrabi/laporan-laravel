@@ -122,15 +122,14 @@
                         {{-- Leave Requests for Danru --}}
                         @if (Auth::user()->hasRole('danru'))
                             <div class="mt-8">
-                                <h3 class="text-lg font-semibold mb-4">Pengajuan Cuti Menunggu Persetujuan</h3>
+                                <h3 class="text-lg font-semibold mb-4">Pengajuan Izin Menunggu Persetujuan</h3>
                                 @if ($pendingLeaveRequests->isNotEmpty())
                                     {{-- Table View for Larger Screens --}}
                                     <div class="overflow-x-auto hidden sm:block">
                                         <table class="min-w-full divide-y divide-gray-200">
                                             <thead class="bg-gray-50">
                                                 <tr>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Izin</th>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -163,7 +162,7 @@
                                                     </span>
                                                 </div>
                                                 <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                                    <p><strong class="text-gray-600">Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                                                    <p><strong class="text-gray-600">Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
                                                     <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
                                                 </div>
                                                 <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -173,7 +172,7 @@
                                         @endforeach
                                     </div>
                                 @else
-                                    <p>Tidak ada pengajuan cuti yang memerlukan persetujuan saat ini.</p>
+                                    <p>Tidak ada pengajuan izin yang memerlukan persetujuan saat ini.</p>
                                 @endif
                             </div>
                         @endif
@@ -237,7 +236,7 @@
 
                         {{-- Latest Leave Requests for Danru and Manajemen --}}
                         <div class="mt-8">
-                            <h3 class="text-lg font-semibold mb-4">5 Pengajuan Cuti Terbaru</h3>
+                            <h3 class="text-lg font-semibold mb-4">5 Pengajuan Izin Terbaru</h3>
                             @if ($latestLeaveRequests->isNotEmpty())
                                 {{-- Table View for Larger Screens --}}
                                 <div class="overflow-x-auto hidden sm:block">
@@ -245,7 +244,7 @@
                                         <thead class="bg-gray-50">
                                             <tr>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
-                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Izin</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -294,7 +293,7 @@
                                                 </span>
                                             </div>
                                             <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                                <p><strong class="text-gray-600">Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                                                <p><strong class="text-gray-600">Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
                                                 <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
                                             </div>
                                             <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -304,7 +303,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p>Tidak ada pengajuan cuti terbaru.</p>
+                                <p>Tidak ada pengajuan izin terbaru.</p>
                             @endif
                         </div>
                     {{-- ANGGOTA DASHBOARD --}}
@@ -378,14 +377,14 @@
                         @endif
 
                         <div class="mt-8">
-                            <h3 class="text-lg font-semibold mb-4">Pengajuan Cuti Anda</h3>
+                            <h3 class="text-lg font-semibold mb-4">Pengajuan Izin Anda</h3>
                             @if ($myLeaveRequests->isNotEmpty())
                                 {{-- Table View for Larger Screens --}}
                                 <div class="overflow-x-auto hidden sm:block">
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
-                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Izin</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -442,7 +441,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p>Anda belum memiliki pengajuan cuti.</p>
+                                <p>Anda belum memiliki pengajuan izin.</p>
                             @endif
                         </div>
 
@@ -582,7 +581,7 @@
                         @endif
 
                         <div class="mt-8">
-                            <h3 class="text-lg font-semibold mb-4">5 Pengajuan Cuti Terbaru</h3>
+                            <h3 class="text-lg font-semibold mb-4">5 Pengajuan Izin Terbaru</h3>
                             @if ($latestLeaveRequests->isNotEmpty())
                                 {{-- Table View for Larger Screens --}}
                                 <div class="overflow-x-auto hidden sm:block">
@@ -590,7 +589,7 @@
                                         <thead class="bg-gray-50">
                                             <tr>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
-                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Izin</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -639,7 +638,7 @@
                                                 </span>
                                             </div>
                                             <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                                <p><strong class="text-gray-600">Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                                                <p><strong class="text-gray-600">Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
                                                 <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
                                             </div>
                                             <div class="mt-3 flex justify-end space-x-2 text-sm">
@@ -649,7 +648,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p>Tidak ada pengajuan cuti terbaru.</p>
+                                <p>Tidak ada pengajuan izin terbaru.</p>
                             @endif
                         </div>
 

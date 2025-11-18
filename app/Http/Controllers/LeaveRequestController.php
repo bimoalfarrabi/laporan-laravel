@@ -77,7 +77,7 @@ class LeaveRequestController extends Controller
             'status' => 'menunggu persetujuan',
         ]);
 
-        return redirect()->route('leave-requests.index')->with('success', 'Pengajuan cuti berhasil dibuat.');
+        return redirect()->route('leave-requests.index')->with('success', 'Pengajuan izin berhasil dibuat.');
     }
 
     /**
@@ -126,7 +126,7 @@ class LeaveRequestController extends Controller
             'rejected_at' => null,
         ]);
 
-        return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan cuti telah disetujui.');
+        return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan izin telah disetujui.');
     }
 
     /**
@@ -144,7 +144,7 @@ class LeaveRequestController extends Controller
             'approved_at' => null,
         ]);
 
-        return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan cuti telah ditolak.');
+        return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan izin telah ditolak.');
     }
 
     /**
@@ -160,7 +160,7 @@ class LeaveRequestController extends Controller
         
         $applicantName = Str::slug($leaveRequest->user->name);
         $startDate = $leaveRequest->start_date->format('Ymd');
-        $filename = "surat-cuti-{$applicantName}-{$startDate}.pdf";
+        $filename = "surat-izin-{$applicantName}-{$startDate}.pdf";
 
         return $pdf->download($filename);
     }
@@ -172,6 +172,6 @@ class LeaveRequestController extends Controller
     {
         $this->authorize('delete', $leaveRequest);
         $leaveRequest->delete();
-        return redirect()->route('leave-requests.index')->with('success', 'Pengajuan cuti berhasil dihapus.');
+        return redirect()->route('leave-requests.index')->with('success', 'Pengajuan izin berhasil dihapus.');
     }
 }

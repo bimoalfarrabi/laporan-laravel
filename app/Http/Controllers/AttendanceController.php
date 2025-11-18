@@ -67,7 +67,7 @@ class AttendanceController extends Controller
         $usersOnLeave = $leaveRequests->map(function ($leave) use ($filterDate) {
             return (object) [
                 'user' => $leave->user,
-                'status' => 'Cuti',
+                'status' => 'Izin',
                 'type' => $leave->leave_type,
                 'time_in' => $filterDate->copy()->startOfDay(), // for sorting
                 'time_out' => null,

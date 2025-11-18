@@ -1,6 +1,6 @@
 @if ($leaveRequests->isEmpty())
     <div class="text-center py-10">
-        <p class="text-gray-500">Tidak ada pengajuan cuti yang ditemukan.</p>
+        <p class="text-gray-500">Tidak ada pengajuan izin yang ditemukan.</p>
     </div>
 @else
     {{-- Table View for Larger Screens --}}
@@ -9,7 +9,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Izin</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>

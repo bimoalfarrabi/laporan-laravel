@@ -1,6 +1,6 @@
 @if ($attendances->isEmpty())
     <div class="text-center py-10">
-        <p class="text-gray-500">Tidak ada data absensi atau cuti yang ditemukan untuk tanggal ini.</p>
+        <p class="text-gray-500">Tidak ada data absensi atau izin yang ditemukan untuk tanggal ini.</p>
     </div>
 @else
     {{-- Table View for Larger Screens --}}
@@ -30,9 +30,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->type ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @if($attendance->status == 'Cuti' && isset($attendance->leaveRequest))
+@if($attendance->status == 'Izin' && isset($attendance->leaveRequest))
                                 <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}" class="text-blue-500 hover:underline font-semibold">
-                                    Cuti
+Izin
                                 </a>
                             @elseif($attendance->status == 'Terlambat')
                                 <span class="text-red-500 font-semibold">{{ $attendance->status }}</span>
@@ -96,9 +96,9 @@
                         @endif
                     </div>
                     <div class="text-right">
-                        @if($attendance->status == 'Cuti' && isset($attendance->leaveRequest))
+                        @if($attendance->status == 'Izin' && isset($attendance->leaveRequest))
                             <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}" class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-blue-200 text-blue-800 text-xs hover:underline">
-                                Cuti
+Izin
                             </a>
                         @elseif($attendance->status == 'Terlambat')
                             <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-red-200 text-red-800 text-xs">{{ $attendance->status }}</span>
@@ -109,7 +109,7 @@
                     </div>
                 </div>
 
-                @if($attendance->status != 'Cuti')
+                @if($attendance->status != 'Izin')
                 <div class="border-t border-gray-200 pt-3 space-y-3 text-sm">
                     <div class="flex items-start">
                         <strong class="text-gray-600 w-1/3">Masuk:</strong>

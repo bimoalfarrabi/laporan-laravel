@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Detail Pengajuan Cuti') }}
+            {{ __('Detail Pengajuan Izin') }}
         </h2>
     </x-slot>
 
@@ -13,7 +13,7 @@
                     {{-- Metadata --}}
                     <div class="space-y-4 mb-6">
                         <p><strong>Pemohon:</strong> {{ $leaveRequest->user->name }}</p>
-                        <p><strong>Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                        <p><strong>Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
                         <p><strong>Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }} ({{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari)</p>
                         <p><strong>Alasan:</strong></p>
                         <div class="prose max-w-none p-4 bg-gray-50 rounded-md border border-gray-200">

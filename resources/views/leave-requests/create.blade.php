@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Buat Pengajuan Cuti Baru') }}
+            {{ __('Buat Pengajuan Izin Baru') }}
         </h2>
     </x-slot>
 
@@ -14,9 +14,9 @@
 
                         <!-- Leave Type -->
                         <div>
-                            <x-input-label for="leave_type" :value="__('Jenis Cuti')" />
+                            <x-input-label for="leave_type" :value="__('Jenis Izin')" />
                             <select id="leave_type" name="leave_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                <option value="">Pilih Jenis Cuti</option>
+                                <option value="">Pilih Jenis Izin</option>
                                 <option value="Izin sakit" {{ old('leave_type') == 'Izin sakit' ? 'selected' : '' }}>Izin sakit</option>
                                 <option value="Izin pemeriksaan atau perawatan medis" {{ old('leave_type') == 'Izin pemeriksaan atau perawatan medis' ? 'selected' : '' }}>Izin pemeriksaan atau perawatan medis</option>
                                 <option value="Izin keluarga inti sakit" {{ old('leave_type') == 'Izin keluarga inti sakit' ? 'selected' : '' }}>Izin keluarga inti sakit</option>
@@ -24,28 +24,28 @@
                                 <option value="Izin mengurus administrasi resmi" {{ old('leave_type') == 'Izin mengurus administrasi resmi' ? 'selected' : '' }}>Izin mengurus administrasi resmi</option>
                                 <option value="Izin memenuhi panggilan instansi pemerintah" {{ old('leave_type') == 'Izin memenuhi panggilan instansi pemerintah' ? 'selected' : '' }}>Izin memenuhi panggilan instansi pemerintah</option>
                                 <option value="Izin keperluan keluarga mendadak" {{ old('leave_type') == 'Izin keperluan keluarga mendadak' ? 'selected' : '' }}>Izin keperluan keluarga mendadak</option>
-                                <option value="Izin menikah/cuti menikah" {{ old('leave_type') == 'Izin menikah/cuti menikah' ? 'selected' : '' }}>Izin menikah/cuti menikah</option>
+                                <option value="Izin menikah/izin menikah" {{ old('leave_type') == 'Izin menikah/izin menikah' ? 'selected' : '' }}>Izin menikah/izin menikah</option>
                             </select>
                             <x-input-error :messages="$errors->get('leave_type')" class="mt-2" />
                         </div>
 
                         <!-- Start Date -->
                         <div class="mt-4">
-                            <x-input-label for="start_date" :value="__('Tanggal Mulai Cuti')" />
+                            <x-input-label for="start_date" :value="__('Tanggal Mulai Izin')" />
                             <x-text-input id="start_date" class="block mt-1 w-full" type="date" name="start_date" :value="old('start_date')" required />
                             <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
                         </div>
 
                         <!-- End Date -->
                         <div class="mt-4">
-                            <x-input-label for="end_date" :value="__('Tanggal Selesai Cuti')" />
+                            <x-input-label for="end_date" :value="__('Tanggal Selesai Izin')" />
                             <x-text-input id="end_date" class="block mt-1 w-full" type="date" name="end_date" :value="old('end_date')" required />
                             <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
                         </div>
 
                         <!-- Reason -->
                         <div class="mt-4">
-                            <x-input-label for="reason" :value="__('Alasan Cuti')" />
+                            <x-input-label for="reason" :value="__('Alasan Izin')" />
                             <textarea id="reason" name="reason" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('reason') }}</textarea>
                             <x-input-error :messages="$errors->get('reason')" class="mt-2" />
                         </div>
@@ -56,7 +56,7 @@
                             </x-secondary-button>
 
                             <x-primary-button class="ms-3">
-                                {{ __('Ajukan Cuti') }}
+                                {{ __('Ajukan Izin') }}
                             </x-primary-button>
                         </div>
                     </form>
