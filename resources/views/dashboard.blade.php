@@ -119,6 +119,65 @@
                             <p>Tidak ada laporan yang memerlukan persetujuan saat ini.</p>
                         @endif
 
+                        {{-- Leave Requests for Danru --}}
+                        @if (Auth::user()->hasRole('danru'))
+                            <div class="mt-8">
+                                <h3 class="text-lg font-semibold mb-4">Pengajuan Cuti Menunggu Persetujuan</h3>
+                                @if ($pendingLeaveRequests->isNotEmpty())
+                                    {{-- Table View for Larger Screens --}}
+                                    <div class="overflow-x-auto hidden sm:block">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach ($pendingLeaveRequests as $leaveRequest)
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->user->name }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->leave_type }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->start_date->format('d M Y') }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->end_date->format('d M Y') }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                            <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat & Proses</a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {{-- Card View for Small Screens --}}
+                                    <div class="mt-6 sm:hidden space-y-4">
+                                        @foreach ($pendingLeaveRequests as $leaveRequest)
+                                            <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <div class="font-bold text-lg text-gray-800 mr-2">{{ $leaveRequest->user->name }}</div>
+                                                    <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-yellow-200 text-yellow-800 text-xs">
+                                                        Menunggu Persetujuan
+                                                    </span>
+                                                </div>
+                                                <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                    <p><strong class="text-gray-600">Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                                                    <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
+                                                </div>
+                                                <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                                    <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat & Proses</a>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p>Tidak ada pengajuan cuti yang memerlukan persetujuan saat ini.</p>
+                                @endif
+                            </div>
+                        @endif
+
                         <div class="mt-8">
                             <h3 class="text-lg font-semibold mb-4">Laporan Lain yang Disetujui</h3>
                             @if ($approvedReports->isNotEmpty())
@@ -245,6 +304,75 @@
                         @else
                             <p>Anda belum membuat laporan.</p>
                         @endif
+
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">Pengajuan Cuti Anda</h3>
+                            @if ($myLeaveRequests->isNotEmpty())
+                                {{-- Table View for Larger Screens --}}
+                                <div class="overflow-x-auto hidden sm:block">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach ($myLeaveRequests as $leaveRequest)
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->leave_type }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->start_date->format('d M Y') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->end_date->format('d M Y') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        @php
+                                                            $statusClass = '';
+                                                            if ($leaveRequest->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                                            elseif ($leaveRequest->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                                            elseif ($leaveRequest->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
+                                                        @endphp
+                                                        <span class="px-2 inline-flex leading-5 font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($leaveRequest->status) }}</span>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {{-- Card View for Small Screens --}}
+                                <div class="mt-6 sm:hidden space-y-4">
+                                    @foreach ($myLeaveRequests as $leaveRequest)
+                                        <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="font-bold text-lg text-gray-800 mr-2">{{ $leaveRequest->leave_type }}</div>
+                                                @php
+                                                    $statusClass = '';
+                                                    if ($leaveRequest->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                                    elseif ($leaveRequest->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                                    elseif ($leaveRequest->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
+                                                @endphp
+                                                <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $statusClass }} text-xs">
+                                                    {{ ucfirst($leaveRequest->status) }}
+                                                </span>
+                                            </div>
+                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
+                                            </div>
+                                            <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                                <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p>Anda belum memiliki pengajuan cuti.</p>
+                            @endif
+                        </div>
 
                         <div class="mt-8">
                             <h3 class="text-lg font-semibold mb-4">Laporan Lain yang Disetujui</h3>
@@ -380,6 +508,78 @@
                         @else
                             <p>Tidak ada laporan yang dibuat.</p>
                         @endif
+
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">5 Pengajuan Cuti Terbaru</h3>
+                            @if ($latestLeaveRequests->isNotEmpty())
+                                {{-- Table View for Larger Screens --}}
+                                <div class="overflow-x-auto hidden sm:block">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach ($latestLeaveRequests as $leaveRequest)
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->user->name }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->leave_type }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->start_date->format('d M Y') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leaveRequest->end_date->format('d M Y') }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        @php
+                                                            $statusClass = '';
+                                                            if ($leaveRequest->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                                            elseif ($leaveRequest->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                                            elseif ($leaveRequest->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
+                                                        @endphp
+                                                        <span class="px-2 inline-flex leading-5 font-semibold rounded-full {{ $statusClass }}">{{ ucfirst($leaveRequest->status) }}</span>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {{-- Card View for Small Screens --}}
+                                <div class="mt-6 sm:hidden space-y-4">
+                                    @foreach ($latestLeaveRequests as $leaveRequest)
+                                        <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="font-bold text-lg text-gray-800 mr-2">{{ $leaveRequest->user->name }}</div>
+                                                @php
+                                                    $statusClass = '';
+                                                    if ($leaveRequest->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                                    elseif ($leaveRequest->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                                    elseif ($leaveRequest->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
+                                                @endphp
+                                                <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $statusClass }} text-xs">
+                                                    {{ ucfirst($leaveRequest->status) }}
+                                                </span>
+                                            </div>
+                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                <p><strong class="text-gray-600">Jenis Cuti:</strong> {{ $leaveRequest->leave_type }}</p>
+                                                <p><strong class="text-gray-600">Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}</p>
+                                            </div>
+                                            <div class="mt-3 flex justify-end space-x-2 text-sm">
+                                                <a href="{{ route('leave-requests.show', $leaveRequest->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p>Tidak ada pengajuan cuti terbaru.</p>
+                            @endif
+                        </div>
 
                     @else
                         {{ __("You're logged in!") }}

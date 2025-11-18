@@ -43,6 +43,10 @@ class DashboardController extends Controller
                 ->where('status', 'disetujui')
                 ->latest()
                 ->paginate(5);
+            $viewData['pendingLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+                ->where('status', 'menunggu persetujuan')
+                ->latest()
+                ->get();
         } elseif ($user->hasRole('manajemen')) {
             $viewData['reportsForApproval'] = Report::with('user', 'reportType')
                 ->where('status', 'belum disetujui')
@@ -57,6 +61,10 @@ class DashboardController extends Controller
                 ->where('status', 'disetujui')
                 ->latest()
                 ->paginate(5);
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+                ->latest()
+                ->take(5)
+                ->get();
         } elseif ($user->hasRole('anggota')) {
             $viewData['myRecentReports'] = Report::with('user', 'reportType')->where('user_id', $user->id)
                 ->latest()
@@ -66,6 +74,10 @@ class DashboardController extends Controller
                 ->where('status', 'disetujui')
                 ->latest()
                 ->paginate(5);
+            $viewData['myLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+                ->where('user_id', $user->id)
+                ->latest()
+                ->get();
         } elseif ($user->hasRole('superadmin')) {
             $viewData['totalUsers'] = User::count();
             $viewData['reportStats'] = Report::query()
@@ -73,6 +85,10 @@ class DashboardController extends Controller
                 ->groupBy('status')
                 ->pluck('count', 'status');
             $viewData['recentReports'] = Report::with('user', 'reportType')->latest()->take(5)->get();
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+                ->latest()
+                ->take(5)
+                ->get();
         }
 
         return view('dashboard', $viewData);
