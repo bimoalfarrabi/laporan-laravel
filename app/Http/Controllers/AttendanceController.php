@@ -77,6 +77,7 @@ class AttendanceController extends Controller
                 'photo_out_path' => null,
                 'latitude_out' => null,
                 'longitude_out' => null,
+                'leaveRequest' => $leave, // <-- Add this line
             ];
         });
 

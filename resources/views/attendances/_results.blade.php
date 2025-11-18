@@ -30,10 +30,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->type ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @if($attendance->status == 'Terlambat')
+                            @if($attendance->status == 'Cuti' && isset($attendance->leaveRequest))
+                                <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}" class="text-blue-500 hover:underline font-semibold">
+                                    Cuti
+                                </a>
+                            @elseif($attendance->status == 'Terlambat')
                                 <span class="text-red-500 font-semibold">{{ $attendance->status }}</span>
-                            @elseif($attendance->status == 'Cuti')
-                                <span class="text-blue-500 font-semibold">{{ $attendance->status }}</span>
                             @else
                                 {{ $attendance->status }}
                             @endif
@@ -94,10 +96,12 @@
                         @endif
                     </div>
                     <div class="text-right">
-                        @if($attendance->status == 'Terlambat')
+                        @if($attendance->status == 'Cuti' && isset($attendance->leaveRequest))
+                            <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}" class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-blue-200 text-blue-800 text-xs hover:underline">
+                                Cuti
+                            </a>
+                        @elseif($attendance->status == 'Terlambat')
                             <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-red-200 text-red-800 text-xs">{{ $attendance->status }}</span>
-                        @elseif($attendance->status == 'Cuti')
-                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-blue-200 text-blue-800 text-xs">{{ $attendance->status }}</span>
                         @else
                             <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">{{ $attendance->status }}</span>
                         @endif
