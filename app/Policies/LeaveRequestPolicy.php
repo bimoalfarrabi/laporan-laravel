@@ -68,20 +68,13 @@ class LeaveRequestPolicy
      */
     public function exportPdf(User $user, LeaveRequest $leaveRequest): bool
     {
-        if ($leaveRequest->status !== 'approved') {
+        // Only approved leave requests can be exported
+        if ($leaveRequest->status !== 'disetujui') {
             return false;
         }
 
-        if ($user->hasRole('manajemen')) {
-            return true;
-        }
-
-        // Danru can export if they are the one who approved it.
-        if ($user->hasRole('danru') && $user->id === $leaveRequest->approved_by) {
-            return true;
-        }
-
-        return false;
+        // Superadmin, Manajemen, and Danru can export any approved leave request
+        return $user->hasRole(['superadmin', 'manajemen', 'danru']);
     }
 
     /**
