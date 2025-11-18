@@ -94,13 +94,12 @@
                             <div class="mt-6 sm:hidden space-y-4">
                                 @foreach ($reportsForApproval as $report)
                                     <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
-                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-yellow-200 text-yellow-800 text-xs">
-                                                Menunggu Persetujuan
-                                            </span>
-                                        </div>
-                                        <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                                            <div class="flex justify-between items-start mb-2">
+                                                                                <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
+                                                                                <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-yellow-200 text-yellow-800 text-xs">
+                                                                                    Menunggu Persetujuan
+                                                                                </span>
+                                                                            </div>                                        <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                             <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                             <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                         </div>
@@ -153,13 +152,12 @@
                                 <div class="mt-6 sm:hidden space-y-4">
                                     @foreach ($approvedReports as $report)
                                         <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                            <div class="flex justify-between items-center mb-2">
-                                                <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
-                                                <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
-                                                    Disetujui
-                                                </span>
-                                            </div>
-                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                                                    <div class="flex justify-between items-start mb-2">
+                                                                                        <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
+                                                                                        <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
+                                                                                            Disetujui
+                                                                                        </span>
+                                                                                    </div>                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                                 <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                                 <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                             </div>
@@ -223,15 +221,15 @@
                             <div class="mt-6 sm:hidden space-y-4">
                                 @foreach ($myRecentReports as $report)
                                     <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
                                             @php
                                                 $bgColor = '';
                                                 if ($report->status == 'belum disetujui') $bgColor = 'bg-yellow-200 text-yellow-800';
                                                 elseif ($report->status == 'disetujui') $bgColor = 'bg-green-200 text-green-800';
                                                 elseif ($report->status == 'ditolak') $bgColor = 'bg-red-200 text-red-800';
                                             @endphp
-                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
+                                            <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
                                                 {{ ucfirst($report->status) }}
                                             </span>
                                         </div>
@@ -281,13 +279,12 @@
                                 <div class="mt-6 sm:hidden space-y-4">
                                     @foreach ($approvedReports as $report)
                                         <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                            <div class="flex justify-between items-center mb-2">
-                                                <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
-                                                <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
-                                                    Disetujui
-                                                </span>
-                                            </div>
-                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
+                                                                                    <div class="flex justify-between items-start mb-2">
+                                                                                        <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
+                                                                                        <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
+                                                                                            Disetujui
+                                                                                        </span>
+                                                                                    </div>                                            <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                                 <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user->name }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
                                                 <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
                                             </div>
@@ -358,15 +355,15 @@
                             <div class="mt-6 sm:hidden space-y-4">
                                 @foreach ($recentReports as $report)
                                     <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <div class="font-bold text-lg text-gray-800">{{ $report->reportType->name }}</div>
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
                                             @php
                                                 $bgColor = '';
                                                 if ($report->status == 'belum disetujui') $bgColor = 'bg-yellow-200 text-yellow-800';
                                                 elseif ($report->status == 'disetujui') $bgColor = 'bg-green-200 text-green-800';
                                                 elseif ($report->status == 'ditolak') $bgColor = 'bg-red-200 text-red-800';
                                             @endphp
-                                            <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
+                                            <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
                                                 {{ ucfirst($report->status) }}
                                             </span>
                                         </div>
