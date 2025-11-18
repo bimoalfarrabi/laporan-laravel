@@ -24,7 +24,7 @@ class AttendanceController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $query = Attendance::with('user')->latest('time_in');
+        $query = Attendance::with('user.roles')->latest('time_in');
 
         // Roles that can see all attendances: superadmin, manajemen, danru
         if ($user->hasRole(['superadmin', 'manajemen', 'danru'])) {
