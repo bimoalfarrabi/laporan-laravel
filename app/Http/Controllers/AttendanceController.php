@@ -325,7 +325,7 @@ class AttendanceController extends Controller
             ]);
         } else {
             // Determine attendance type by finding the closest shift schedule
-            $timeIn = \Carbon\Carbon::parse($attendance->time_in);
+            $timeIn = $attendanceToUpdate->time_in;
             $timeOut = $now;
 
             // Calculate the midpoint of the user's actual shift duration
