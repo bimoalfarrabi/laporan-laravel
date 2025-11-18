@@ -1,9 +1,46 @@
-@props(['imageUrl' => ''])
-
 <div
-    x-data="{ show: false, imageUrl: '', rotation: 0 }"
+    x-data="{
+        show: false,
+        imageUrl: '',
+        rotation: 0,
+        isLoading: true,
+        async setRotationFromExif(url) {
+            this.isLoading = true;
+            this.rotation = 0; // Reset rotation
+            try {
+                // Fetch the image as a blob to read EXIF data
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const self = this;
+
+                EXIF.getData(blob, function() {
+                    const orientation = EXIF.getTag(this, 'Orientation');
+                    let newRotation = 0;
+                    switch (orientation) {
+                        case 3:
+                            newRotation = 180;
+                            break;
+                        case 6:
+                            newRotation = 90;
+                            break;
+                        case 8:
+                            newRotation = 270;
+                            break;
+                        default:
+                            newRotation = 0;
+                    }
+                    self.rotation = newRotation;
+                    self.isLoading = false;
+                });
+            } catch (e) {
+                console.error('Could not get EXIF data:', e);
+                this.isLoading = false; // Stop loading on error
+                this.rotation = 0; // Default to 0 on error
+            }
+        }
+    }"
     x-show="show"
-    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; rotation = 0"
+    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; setRotationFromExif($event.detail.imageUrl)"
     x-on:keydown.escape.window="show = false"
     style="display: none;"
     class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -34,15 +71,23 @@
         class="relative z-10 flex flex-col items-center"
     >
         <div class="relative">
-            <img :src="imageUrl" alt="Image" class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg shadow-lg" :style="{ transform: `rotate(${rotation}deg)` }">
+            <!-- Loading Spinner -->
+            <div x-show="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-800/50 rounded-lg">
+                <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
 
-            <button @click="rotation -= 90" class="absolute top-1/2 -translate-y-1/2 left-4 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+            <img :src="imageUrl" @load="isLoading = false" alt="Image" class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg shadow-lg" :style="{ transform: `rotate(${rotation}deg)` }" x-show="!isLoading">
+
+            <button @click="rotation -= 90" class="absolute top-1/2 -translate-y-1/2 -left-16 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 19.5L3 15m0 0l4.5-4.5M3 15h13.5a6 6 0 000-12H3" />
                 </svg>
             </button>
 
-            <button @click="rotation += 90" class="absolute top-1/2 -translate-y-1/2 right-4 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+            <button @click="rotation += 90" class="absolute top-1/2 -translate-y-1/2 -right-16 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 19.5L21 15m0 0l-4.5-4.5M21 15H7.5a6 6 0 010-12H21" />
                 </svg>

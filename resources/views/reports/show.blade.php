@@ -152,7 +152,7 @@
                                                             class="w-40 h-52 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200">
                                                             <img src="{{ $imageUrl }}"
                                                                 alt="{{ $field->label }}"
-                                                                class="w-full h-full object-cover">
+                                                                class="w-full h-full object-cover report-image">
                                                         </div>
 
                                                         <span
@@ -300,5 +300,49 @@
                 });
             }
         });
+    </script>
+    <script type="module">
+        import EXIF from '{{ asset('node_modules/exif-js/exif.js') }}';
+        window.EXIF = EXIF;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.report-image');
+            images.forEach(applyRotation);
+        });
+
+        async function applyRotation(img) {
+            // Ensure the image is loaded before trying to read EXIF data
+            if (!img.complete) {
+                img.addEventListener('load', () => processRotation(img), { once: true });
+            } else {
+                processRotation(img);
+            }
+        }
+
+        async function processRotation(img) {
+            try {
+                EXIF.getData(img, function() {
+                    const orientation = EXIF.getTag(this, 'Orientation');
+                    let rotation = 0;
+                    switch (orientation) {
+                        case 3:
+                            rotation = 180;
+                            break;
+                        case 6:
+                            rotation = 90;
+                            break;
+                        case 8:
+                            rotation = 270;
+                            break;
+                    }
+                    if (rotation !== 0) {
+                        // Apply rotation to the image itself, as it's using object-fit
+                        img.style.transform = `rotate(${rotation}deg)`;
+                    }
+                });
+            } catch (e) {
+                console.error('Could not apply rotation:', e);
+            }
+        }
     </script>
 </x-app-layout>

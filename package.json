@@ -56,12 +56,13 @@
     
     },
     
-    "dependencies": {
+        "dependencies": {
     
-        
-    "sweetalert2": "^11.26.3"
+            "exif-js": "^2.3.0",
     
-    },
+            "sweetalert2": "^11.26.3"
+    
+        },
     
     "optionalDependencies": {
     
