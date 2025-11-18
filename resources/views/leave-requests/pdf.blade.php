@@ -35,6 +35,10 @@
                     <td>Jabatan</td>
                     <td>: {{ ucfirst($leaveRequest->user->roles->first()->name ?? 'Karyawan') }}</td>
                 </tr>
+                <tr>
+                    <td>Jenis Cuti</td>
+                    <td>: {{ $leaveRequest->leave_type }}</td>
+                </tr>
             </table>
             <p>
                 Dengan ini mengajukan permohonan cuti selama {{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari, terhitung mulai tanggal 

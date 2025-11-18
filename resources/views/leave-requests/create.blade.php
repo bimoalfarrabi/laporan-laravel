@@ -12,6 +12,23 @@
                     <form method="POST" action="{{ route('leave-requests.store') }}">
                         @csrf
 
+                        <!-- Leave Type -->
+                        <div>
+                            <x-input-label for="leave_type" :value="__('Jenis Cuti')" />
+                            <select id="leave_type" name="leave_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <option value="">Pilih Jenis Cuti</option>
+                                <option value="Izin sakit" {{ old('leave_type') == 'Izin sakit' ? 'selected' : '' }}>Izin sakit</option>
+                                <option value="Izin pemeriksaan atau perawatan medis" {{ old('leave_type') == 'Izin pemeriksaan atau perawatan medis' ? 'selected' : '' }}>Izin pemeriksaan atau perawatan medis</option>
+                                <option value="Izin keluarga inti sakit" {{ old('leave_type') == 'Izin keluarga inti sakit' ? 'selected' : '' }}>Izin keluarga inti sakit</option>
+                                <option value="Izin kedukaan/kematian keluarga" {{ old('leave_type') == 'Izin kedukaan/kematian keluarga' ? 'selected' : '' }}>Izin kedukaan/kematian keluarga</option>
+                                <option value="Izin mengurus administrasi resmi" {{ old('leave_type') == 'Izin mengurus administrasi resmi' ? 'selected' : '' }}>Izin mengurus administrasi resmi</option>
+                                <option value="Izin memenuhi panggilan instansi pemerintah" {{ old('leave_type') == 'Izin memenuhi panggilan instansi pemerintah' ? 'selected' : '' }}>Izin memenuhi panggilan instansi pemerintah</option>
+                                <option value="Izin keperluan keluarga mendadak" {{ old('leave_type') == 'Izin keperluan keluarga mendadak' ? 'selected' : '' }}>Izin keperluan keluarga mendadak</option>
+                                <option value="Izin menikah/cuti menikah" {{ old('leave_type') == 'Izin menikah/cuti menikah' ? 'selected' : '' }}>Izin menikah/cuti menikah</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('leave_type')" class="mt-2" />
+                        </div>
+
                         <!-- Start Date -->
                         <div class="mt-4">
                             <x-input-label for="start_date" :value="__('Tanggal Mulai Cuti')" />

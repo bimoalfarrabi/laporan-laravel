@@ -9,6 +9,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemohon</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -21,6 +22,7 @@
                             <div class="text-sm font-medium text-gray-900">{{ $request->user->name }}</div>
                             <div class="text-sm text-gray-500">{{ $request->user->roles->first()->name ?? '' }}</div>
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $request->leave_type }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $request->start_date->format('d M Y') }} - {{ $request->end_date->format('d M Y') }}</div>
                             <div class="text-sm text-gray-500">{{ $request->start_date->diffInDays($request->end_date) + 1 }} hari</div>
@@ -52,7 +54,8 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="font-bold text-gray-800">{{ $request->user->name }}</div>
-                        <div class="text-sm text-gray-500">{{ $request->start_date->format('d M Y') }} - {{ $request->end_date->format('d M Y') }}</div>
+                        <div class="text-sm text-gray-500">{{ $request->leave_type }}</div>
+                        <div class="text-sm text-gray-500 mt-1">{{ $request->start_date->format('d M Y') }} - {{ $request->end_date->format('d M Y') }}</div>
                     </div>
                     @php
                         $statusClass = '';
@@ -60,7 +63,7 @@
                         elseif ($request->status == 'approved') $statusClass = 'bg-green-200 text-green-800';
                         elseif ($request->status == 'rejected') $statusClass = 'bg-red-200 text-red-800';
                     @endphp
-                    <span class="px-2 py-1 text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                    <span class="px-2 py-1 text-xs leading-5 font-semibold rounded-full {{ $statusClass }} flex-shrink-0">
                         {{ ucfirst($request->status) }}
                     </span>
                 </div>
