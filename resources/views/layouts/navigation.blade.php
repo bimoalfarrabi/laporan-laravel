@@ -34,7 +34,9 @@
                                     <x-dropdown-link :href="route('attendances.create')">
                                         {{ __('Buat Absensi') }}
                                     </x-dropdown-link>
-                                @else
+                                @endhasanyrole
+                                
+                                @hasanyrole('superadmin|manajemen|danru')
                                     <x-dropdown-link :href="route('attendances.index')">
                                         {{ __('Daftar Absensi') }}
                                     </x-dropdown-link>
