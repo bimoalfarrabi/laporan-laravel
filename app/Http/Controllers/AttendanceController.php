@@ -64,24 +64,31 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $now = now();
 
-        // Find the last attendance record that is still open (has not been clocked out)
-        $attendance = Attendance::where('user_id', $user->id)
+        // Attempt to find an open attendance record for the user
+        $openAttendance = Attendance::where('user_id', $user->id)
             ->whereNull('time_out')
             ->latest('time_in')
             ->first();
 
-        // If an open attendance exists, but it's older than 24 hours, treat it as a missed clock-out.
-        // In this case, we'll force a new clock-in instead of updating the old record.
-        if ($attendance && $attendance->time_in->diffInHours($now) > 24) {
-            $attendance = null;
+        // If an open attendance exists, but it's older than 24 hours,
+        // we consider it stale and proceed as if no open attendance was found.
+        if ($openAttendance && $openAttendance->time_in->diffInHours($now) > 24) {
+            $openAttendance = null;
         }
 
+        // Determine the intended action (clock-in or clock-out)
         $action = 'in';
-        if ($attendance) {
+        $attendanceToUpdate = null; // Initialize attendanceToUpdate
+
+        if ($openAttendance) {
+            // Case 1: An active, open attendance record exists. This must be a clock-out.
             $action = 'out';
+            $attendanceToUpdate = $openAttendance; // This is the record to update
         } else {
-            // No open attendance record found, so we are clocking in.
-            // Check if the user has already completed a shift today to prevent duplicates.
+            // Case 2: No active, open attendance record found. This must be a clock-in.
+
+            // Before allowing a clock-in, check for conditions that prevent it:
+            // A) User already completed a shift today (for non-night shifts)
             $completedToday = Attendance::where('user_id', $user->id)
                 ->whereDate('time_in', $now->toDateString())
                 ->whereNotNull('time_out')
@@ -89,6 +96,19 @@ class AttendanceController extends Controller
 
             if ($completedToday) {
                 return redirect()->back()->with('error', 'Anda sudah melakukan absensi datang dan pulang hari ini.');
+            }
+
+            // B) User tries to clock in too soon after a previous clock-out (e.g., trying to clock out twice)
+            // This handles the "double clock-out" scenario where the system would otherwise try to clock them in again.
+            $lastCompletedAttendance = Attendance::where('user_id', $user->id)
+                ->whereNotNull('time_out')
+                ->latest('time_out') // Look at the latest clock-out time
+                ->first();
+
+            // If the last clock-out was very recent (e.g., within 1 minute), prevent a new clock-in.
+            // This catches accidental double-taps or attempts to clock out when already clocked out.
+            if ($lastCompletedAttendance && $lastCompletedAttendance->time_out->diffInMinutes($now) < 1) {
+                return redirect()->back()->with('error', 'Anda baru saja menyelesaikan absensi. Tidak dapat melakukan absensi masuk lagi dalam waktu singkat.');
             }
         }
 
@@ -283,7 +303,7 @@ class AttendanceController extends Controller
                 $type = $closestShiftName;
             }
 
-            $attendance->update([
+            $attendanceToUpdate->update([
                 'time_out' => $now,
                 'photo_out_path' => $photoPath,
                 'latitude_out' => $request->latitude,
