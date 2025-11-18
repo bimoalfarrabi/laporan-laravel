@@ -47,6 +47,10 @@ class DashboardController extends Controller
                 ->where('status', 'menunggu persetujuan')
                 ->latest()
                 ->get();
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+                ->latest()
+                ->take(5)
+                ->get();
         } elseif ($user->hasRole('manajemen')) {
             $viewData['reportsForApproval'] = Report::with('user', 'reportType')
                 ->where('status', 'belum disetujui')
