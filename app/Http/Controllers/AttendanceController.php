@@ -64,16 +64,32 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $now = now();
 
-        // Find today's attendance record
+        // Find the last attendance record that is still open (has not been clocked out)
         $attendance = Attendance::where('user_id', $user->id)
-            ->whereDate('time_in', $now->toDateString())
+            ->whereNull('time_out')
+            ->latest('time_in')
             ->first();
 
+        // If an open attendance exists, but it's older than 24 hours, treat it as a missed clock-out.
+        // In this case, we'll force a new clock-in instead of updating the old record.
+        if ($attendance && $attendance->time_in->diffInHours($now) > 24) {
+            $attendance = null;
+        }
+
         $action = 'in';
-        if ($attendance && $attendance->time_out) {
-            return redirect()->back()->with('error', 'Anda sudah melakukan absensi datang dan pulang hari ini.');
-        } elseif ($attendance) {
+        if ($attendance) {
             $action = 'out';
+        } else {
+            // No open attendance record found, so we are clocking in.
+            // Check if the user has already completed a shift today to prevent duplicates.
+            $completedToday = Attendance::where('user_id', $user->id)
+                ->whereDate('time_in', $now->toDateString())
+                ->whereNotNull('time_out')
+                ->exists();
+
+            if ($completedToday) {
+                return redirect()->back()->with('error', 'Anda sudah melakukan absensi datang dan pulang hari ini.');
+            }
         }
 
         // Location validation
@@ -216,29 +232,55 @@ class AttendanceController extends Controller
                 'status' => $status,
             ]);
         } else {
-            // Determine attendance type
+            // Determine attendance type by finding the closest shift schedule
             $timeIn = \Carbon\Carbon::parse($attendance->time_in);
             $timeOut = $now;
-            $type = null;
 
-            $dateString = $timeIn->toDateString();
+            // Calculate the midpoint of the user's actual shift duration
+            $actualShiftMidpoint = $timeIn->copy()->addSeconds($timeIn->diffInSeconds($timeOut) / 2);
 
-            // Define time windows
-            $regulerStart = \Carbon\Carbon::parse($dateString . ' 07:00');
-            $regulerEnd = \Carbon\Carbon::parse($dateString . ' 15:00');
+            // Define the ideal shifts relative to the clock-in day
+            $timeInDateString = $timeIn->toDateString();
+            $shifts = [
+                'Reguler' => [
+                    'start' => \Carbon\Carbon::parse($timeInDateString . ' 07:00'),
+                    'end' => \Carbon\Carbon::parse($timeInDateString . ' 15:00'), // 8 hours
+                ],
+                'Normal Pagi' => [
+                    'start' => \Carbon\Carbon::parse($timeInDateString . ' 07:00'),
+                    'end' => \Carbon\Carbon::parse($timeInDateString . ' 19:00'), // 12 hours
+                ],
+                'Normal Malam' => [
+                    'start' => \Carbon\Carbon::parse($timeInDateString . ' 19:00'),
+                    'end' => \Carbon\Carbon::parse($timeInDateString . ' 07:00')->addDay(), // 12 hours
+                ],
+            ];
 
-            $normalPagiStart = \Carbon\Carbon::parse($dateString . ' 07:00');
-            $normalPagiEnd = \Carbon\Carbon::parse($dateString . ' 19:00');
+            $closestShiftName = null;
+            $minimumDistance = PHP_INT_MAX;
 
-            $normalMalamStart = \Carbon\Carbon::parse($dateString . ' 19:00');
-            $normalMalamEnd = \Carbon\Carbon::parse($dateString . ' 07:00')->addDay();
+            // Find the ideal shift with the closest midpoint to the actual shift's midpoint
+            foreach ($shifts as $shiftName => $shiftTimes) {
+                $idealStart = $shiftTimes['start'];
+                $idealEnd = $shiftTimes['end'];
+                $idealMidpoint = $idealStart->copy()->addSeconds($idealStart->diffInSeconds($idealEnd) / 2);
 
-            if ($timeIn >= $regulerStart && $timeOut <= $regulerEnd) {
+                $distance = abs($actualShiftMidpoint->getTimestamp() - $idealMidpoint->getTimestamp());
+
+                if ($distance < $minimumDistance) {
+                    $minimumDistance = $distance;
+                    $closestShiftName = $shiftName;
+                }
+            }
+
+            // This logic helps distinguish between Reguler and Normal Pagi, which have the same start time.
+            // If the closest shift is Normal Pagi, but the actual duration is closer to a Reguler shift (8h)
+            // than a Normal Pagi shift (12h), we override it to Reguler.
+            $actualDurationHours = $timeIn->diffInHours($timeOut);
+            if ($closestShiftName === 'Normal Pagi' && $actualDurationHours < 10) { // 10 hours is a threshold between 8 and 12
                 $type = 'Reguler';
-            } elseif ($timeIn >= $normalPagiStart && $timeOut <= $normalPagiEnd) {
-                $type = 'Normal Pagi';
-            } elseif ($timeIn >= $normalMalamStart && $timeOut <= $normalMalamEnd) {
-                $type = 'Normal Malam';
+            } else {
+                $type = $closestShiftName;
             }
 
             $attendance->update([
