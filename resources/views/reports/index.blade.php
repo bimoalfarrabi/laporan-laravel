@@ -37,7 +37,7 @@
 
                     {{-- Form Search dan Filter --}}
                     <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                        <form method="GET" action="{{ route('reports.index') }}">
+                        <form id="filter-form" method="GET" action="{{ route('reports.index') }}">
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-center">
                                 <div class="lg:col-span-1">
                                     <input type="text" name="search" placeholder="Cari Jenis/Pembuat Laporan..."
@@ -78,11 +78,8 @@
                                     </label>
                                 </div>
                                 <div class="lg:col-span-1 flex space-x-2">
-                                    <x-primary-button type="submit" class="flex-grow justify-center">
-                                        {{ __('Filter') }}
-                                    </x-primary-button>
                                     <a href="{{ route('reports.index') }}"
-                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 flex-grow">
+                                        class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         {{ __('Reset') }}
                                     </a>
                                 </div>
@@ -91,172 +88,74 @@
                     </div>
                     {{-- End Form Search dan Filter --}}
 
-                    @if ($reports->isEmpty())
-                        <div class="text-center py-10">
-                            <p class="text-gray-500">Tidak ada laporan yang ditemukan.</p>
-                        </div>
-                    @else
-                        {{-- Table View for Larger Screens --}}
-                        <div class="mt-6 overflow-x-auto hidden sm:block">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        @php
-                                            $columns = [
-                                                'id' => 'ID',
-                                                'report_type_name' => 'Jenis Laporan',
-                                                'user_name' => 'Dibuat Oleh',
-                                                'status' => 'Status',
-                                                'created_at' => 'Waktu Dibuat',
-                                            ];
-                                        @endphp
-
-                                        @foreach ($columns as $column => $title)
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                <a href="{{ route('reports.index', array_merge(request()->query(), [
-                                                    'sort_by' => $column,
-                                                    'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc',
-                                                ])) }}">
-                                                    {{ $title }}
-                                                    @if ($sortBy == $column)
-                                                        @if ($sortDirection == 'asc')
-                                                            <span>&#9650;</span>
-                                                        @else
-                                                            <span>&#9660;</span>
-                                                        @endif
-                                                    @endif
-                                                </a>
-                                            </th>
-                                        @endforeach
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Aksi
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($reports as $report)
-                                        <tr>
-                                            <td class="px-6 py-4">
-                                                {{ $report->id }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <div class="font-medium">{{ $report->reportType?->name ?? 'Jenis Laporan Dihapus' }}</div>
-                                                @if (isset($report->data['deskripsi']))
-                                                    <div class="prose max-w-none text-sm text-gray-500 mt-1">@markdown_limit($report->data['deskripsi'], 100)</div>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                {{ $report->user?->name ?? 'Pengguna Dihapus' }}
-                                                @if ($report->user?->roles->isNotEmpty())
-                                                    <span
-                                                        class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @php
-                                                    $bgColor = '';
-                                                    if ($report->status == 'belum disetujui') {
-                                                        $bgColor = 'bg-yellow-200 text-yellow-800';
-                                                    } elseif ($report->status == 'disetujui') {
-                                                        $bgColor = 'bg-green-200 text-green-800';
-                                                    } elseif ($report->status == 'ditolak') {
-                                                        $bgColor = 'bg-red-200 text-red-800';
-                                                    }
-                                                @endphp
-                                                <span class="px-2 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }}">
-                                                    {{ ucfirst($report->status) }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <x-waktu-dibuat :date="$report->created_at" />
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('reports.show', $report->id) }}"
-                                                    class="text-indigo-600 hover:text-indigo-900 mr-2">Lihat</a>
-                                                @can('update', $report)
-                                                    <a href="{{ route('reports.edit', $report->id) }}"
-                                                        class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                                                @endcan
-                                                @can('delete', $report)
-                                                    <form action="{{ route('reports.destroy', $report->id) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900"
-                                                            data-confirm-dialog="true"
-                                                            data-swal-title="Hapus Laporan?"
-                                                            data-swal-text="Laporan akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
-                                                    </form>
-                                                @endcan
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {{-- Card View for Small Screens --}}
-                        <div class="mt-6 sm:hidden space-y-4">
-                            @foreach ($reports as $report)
-                                <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <div class="font-bold text-lg text-gray-800">#{{ $report->id }}</div>
-                                        @php
-                                            $bgColor = '';
-                                            if ($report->status == 'belum disetujui') {
-                                                $bgColor = 'bg-yellow-200 text-yellow-800';
-                                            } elseif ($report->status == 'disetujui') {
-                                                $bgColor = 'bg-green-200 text-green-800';
-                                            } elseif ($report->status == 'ditolak') {
-                                                $bgColor = 'bg-red-200 text-red-800';
-                                            }
-                                        @endphp
-                                        <span class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full {{ $bgColor }} text-xs">
-                                            {{ ucfirst($report->status) }}
-                                        </span>
-                                    </div>
-                                    <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
-                                        <p><strong class="text-gray-600">Jenis Laporan:</strong> {{ $report->reportType?->name ?? 'Jenis Laporan Dihapus' }}</p>
-                                        <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $report->user?->name ?? 'Pengguna Dihapus' }} @if ($report->user?->roles->isNotEmpty())<span class="text-xs text-gray-500">({{ $report->user?->roles->first()->name }})</span>@endif</p>
-                                        <p><strong class="text-gray-600">Waktu Dibuat:</strong> <x-waktu-dibuat :date="$report->created_at" /></p>
-                                        @if (isset($report->data['deskripsi']))
-                                            <div class="prose max-w-none text-sm text-gray-500 mt-1">
-                                                <strong class="text-gray-600">Deskripsi:</strong> @markdown_limit($report->data['deskripsi'], 100)
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="mt-3 flex justify-end space-x-2 text-sm">
-                                        <a href="{{ route('reports.show', $report->id) }}"
-                                            class="text-indigo-600 hover:text-indigo-900">Lihat</a>
-                                        @can('update', $report)
-                                            <a href="{{ route('reports.edit', $report->id) }}"
-                                                class="text-blue-600 hover:text-blue-900">Edit</a>
-                                        @endcan
-                                        @can('delete', $report)
-                                            <form action="{{ route('reports.destroy', $report->id) }}"
-                                                method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900"
-                                                    data-confirm-dialog="true"
-                                                    data-swal-title="Hapus Laporan?"
-                                                    data-swal-text="Laporan akan dipindahkan ke arsip. Anda yakin?">Hapus</button>
-                                            </form>
-                                        @endcan
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="mt-4">
-                            {{ $reports->links() }}
-                        </div>
-                    @endif
+                    <div id="report-results">
+                        @include('reports._results')
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filter-form');
+    const resultsContainer = document.getElementById('report-results');
+    let debounceTimeout;
+
+    function fetchResults(url) {
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            resultsContainer.innerHTML = html;
+            // Re-initialize any scripts if necessary, e.g., for modals or confirmation dialogs
+            // For now, we just need to re-attach pagination listeners
+            attachPaginationListeners();
+        })
+        .catch(error => console.error('Error fetching results:', error));
+    }
+
+    function handleFormChange() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const url = form.action + '?' + params.toString();
+            
+            history.pushState(null, '', url);
+            fetchResults(url);
+        }, 300); // 300ms debounce
+    }
+
+    function attachPaginationListeners() {
+        resultsContainer.querySelectorAll('.pagination a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                history.pushState(null, '', url);
+                fetchResults(url);
+            });
+        });
+    }
+
+    // Listen for changes on all form inputs
+    form.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', handleFormChange);
+        input.addEventListener('change', handleFormChange); // For select and date/checkbox
+    });
+
+    // Initial attachment for pagination links
+    attachPaginationListeners();
+
+    // Handle back/forward browser buttons
+    window.addEventListener('popstate', function () {
+        fetchResults(location.href);
+    });
+});
+</script>
+@endpush
 </x-app-layout>

@@ -89,6 +89,14 @@ class ReportController extends Controller
 
         $reportTypes = ReportType::where('is_active', true)->get();
 
+        if ($request->ajax()) {
+            return view('reports._results', compact(
+                'reports',
+                'sortBy',
+                'sortDirection'
+            ))->render();
+        }
+
         return view('reports.index', compact(
             'reports',
             'search',

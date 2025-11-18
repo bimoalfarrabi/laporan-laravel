@@ -64,6 +64,18 @@ class UserController extends Controller
         }
 
         $roles = Role::all();
+
+        if ($request->ajax()) {
+            return view('users._results', compact(
+                'users',
+                'roles',
+                'search',
+                'filterRole',
+                'sortBy',
+                'sortDirection'
+            ))->render();
+        }
+
         return view('users.index', compact('users', 'roles', 'search', 'filterRole', 'sortBy', 'sortDirection'));
     }
 
