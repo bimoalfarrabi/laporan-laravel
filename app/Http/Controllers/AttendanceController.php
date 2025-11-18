@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\LeaveRequest;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class AttendanceController extends Controller
 {
@@ -21,20 +25,87 @@ class AttendanceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
-        $query = Attendance::with('user.roles')->latest('time_in');
+        $this->authorize('viewAny', Attendance::class);
 
-        // Roles that can see all attendances: superadmin, manajemen, danru
-        if ($user->hasRole(['superadmin', 'manajemen', 'danru'])) {
-            $attendances = $query->paginate(15);
-        } else {
-            // All other roles (e.g., 'anggota') can only see their own attendances
-            $attendances = $query->where('user_id', $user->id)->paginate(15);
+        $user = Auth::user();
+        $filterDate = $request->input('date') ? Carbon::parse($request->input('date')) : now();
+        $search = $request->input('search');
+
+        // Base query for attendances
+        $attendanceQuery = Attendance::with('user.roles')->whereDate('time_in', $filterDate);
+
+        // Base query for leave requests
+        $leaveQuery = LeaveRequest::with('user.roles')
+            ->where('status', 'disetujui')
+            ->where('start_date', '<=', $filterDate->format('Y-m-d'))
+            ->where('end_date', '>=', $filterDate->format('Y-m-d'));
+
+        // Apply role-based restrictions
+        if ($user->hasRole('anggota')) {
+            $attendanceQuery->where('user_id', $user->id);
+            $leaveQuery->where('user_id', $user->id);
+        } elseif ($user->hasRole('danru')) {
+            $attendanceQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
+            $leaveQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
+        } elseif ($user->hasRole('manajemen')) {
+            $attendanceQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
+            $leaveQuery->whereHas('user.roles', fn($q) => $q->whereIn('name', ['anggota', 'danru']));
         }
 
-        return view('attendances.index', compact('attendances'));
+        // Apply search filter
+        if ($search) {
+            $attendanceQuery->whereHas('user', fn($q) => $q->where('name', 'like', '%' . $search . '%'));
+            $leaveQuery->whereHas('user', fn($q) => $q->where('name', 'like', '%' . $search . '%'));
+        }
+
+        $attendances = $attendanceQuery->get();
+        $leaveRequests = $leaveQuery->get();
+
+        // Create virtual records for users on leave
+        $usersOnLeave = $leaveRequests->map(function ($leave) use ($filterDate) {
+            return (object) [
+                'user' => $leave->user,
+                'status' => 'Cuti',
+                'type' => $leave->leave_type,
+                'time_in' => $filterDate->copy()->startOfDay(), // for sorting
+                'time_out' => null,
+                'photo_in_path' => null,
+                'latitude_in' => null,
+                'longitude_in' => null,
+                'photo_out_path' => null,
+                'latitude_out' => null,
+                'longitude_out' => null,
+            ];
+        });
+
+        // Get user IDs of those who have actual attendance records
+        $usersWithAttendance = $attendances->pluck('user_id');
+
+        // Filter out users on leave who also have an attendance record (edge case)
+        $filteredUsersOnLeave = $usersOnLeave->whereNotIn('user.id', $usersWithAttendance);
+
+        // Merge the two collections
+        $combined = $attendances->toBase()->merge($filteredUsersOnLeave);
+
+        // Sort the combined collection (e.g., by user name)
+        $sorted = $combined->sortBy('user.name')->values();
+
+        // Manually paginate the collection
+        $perPage = 15;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $sorted->slice(($currentPage - 1) * $perPage, $perPage);
+        $paginatedItems = new LengthAwarePaginator($currentPageItems, $sorted->count(), $perPage, $currentPage, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+            'query' => $request->query(),
+        ]);
+
+        if ($request->ajax()) {
+            return view('attendances._results', ['attendances' => $paginatedItems])->render();
+        }
+
+        return view('attendances.index', ['attendances' => $paginatedItems]);
     }
 
     /**
