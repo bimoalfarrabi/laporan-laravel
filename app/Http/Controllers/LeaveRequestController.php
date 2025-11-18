@@ -74,7 +74,7 @@ class LeaveRequestController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'reason' => $request->reason,
-            'status' => 'pending',
+            'status' => 'menunggu persetujuan',
         ]);
 
         return redirect()->route('leave-requests.index')->with('success', 'Pengajuan cuti berhasil dibuat.');
@@ -119,7 +119,7 @@ class LeaveRequestController extends Controller
         $this->authorize('approveOrReject', $leaveRequest);
 
         $leaveRequest->update([
-            'status' => 'approved',
+            'status' => 'disetujui',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
             'rejected_by' => null,
@@ -137,7 +137,7 @@ class LeaveRequestController extends Controller
         $this->authorize('approveOrReject', $leaveRequest);
 
         $leaveRequest->update([
-            'status' => 'rejected',
+            'status' => 'ditolak',
             'rejected_by' => Auth::id(),
             'rejected_at' => now(),
             'approved_by' => null,

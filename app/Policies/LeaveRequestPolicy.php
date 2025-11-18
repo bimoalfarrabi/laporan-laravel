@@ -42,7 +42,7 @@ class LeaveRequestPolicy
     public function update(User $user, LeaveRequest $leaveRequest): bool
     {
         // Only the owner can edit, and only if it's still pending.
-        return $user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending';
+        return $user->id === $leaveRequest->user_id && $leaveRequest->status === 'menunggu persetujuan';
     }
 
     /**
@@ -51,7 +51,7 @@ class LeaveRequestPolicy
     public function delete(User $user, LeaveRequest $leaveRequest): bool
     {
         // Only the owner can delete, and only if it's still pending.
-        return $user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending';
+        return $user->id === $leaveRequest->user_id && $leaveRequest->status === 'menunggu persetujuan';
     }
 
     /**

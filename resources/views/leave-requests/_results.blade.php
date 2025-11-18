@@ -30,9 +30,9 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
                                 $statusClass = '';
-                                if ($request->status == 'pending') $statusClass = 'bg-yellow-200 text-yellow-800';
-                                elseif ($request->status == 'approved') $statusClass = 'bg-green-200 text-green-800';
-                                elseif ($request->status == 'rejected') $statusClass = 'bg-red-200 text-red-800';
+                                if ($request->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                elseif ($request->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                elseif ($request->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
                             @endphp
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
                                 {{ ucfirst($request->status) }}
@@ -59,9 +59,9 @@
                     </div>
                     @php
                         $statusClass = '';
-                        if ($request->status == 'pending') $statusClass = 'bg-yellow-200 text-yellow-800';
-                        elseif ($request->status == 'approved') $statusClass = 'bg-green-200 text-green-800';
-                        elseif ($request->status == 'rejected') $statusClass = 'bg-red-200 text-red-800';
+                        if ($request->status == 'menunggu persetujuan') $statusClass = 'bg-yellow-200 text-yellow-800';
+                        elseif ($request->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                        elseif ($request->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
                     @endphp
                     <span class="px-2 py-1 text-xs leading-5 font-semibold rounded-full {{ $statusClass }} flex-shrink-0">
                         {{ ucfirst($request->status) }}

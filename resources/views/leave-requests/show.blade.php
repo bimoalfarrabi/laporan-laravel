@@ -22,9 +22,9 @@
                         <p><strong>Status:</strong>
                             @php
                                 $statusClass = '';
-                                if ($leaveRequest->status == 'pending') $statusClass = 'bg-yellow-200 text-yellow-800';
-                                elseif ($leaveRequest->status == 'approved') $statusClass = 'bg-green-200 text-green-800';
-                                elseif ($leaveRequest->status == 'rejected') $statusClass = 'bg-red-200 text-red-800';
+                                if ($leaveRequest->status == 'menunggu persetujui') $statusClass = 'bg-yellow-200 text-yellow-800';
+                                elseif ($leaveRequest->status == 'disetujui') $statusClass = 'bg-green-200 text-green-800';
+                                elseif ($leaveRequest->status == 'ditolak') $statusClass = 'bg-red-200 text-red-800';
                             @endphp
                             <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $statusClass }}">
                                 {{ ucfirst($leaveRequest->status) }}
@@ -37,9 +37,9 @@
                         <h3 class="font-semibold text-lg text-gray-800 mb-4">Riwayat Pengajuan</h3>
                         <div class="text-base text-gray-700 space-y-3">
                             <p><strong>Dibuat oleh:</strong> {{ $leaveRequest->user->name }} pada <span class="font-medium">{{ $leaveRequest->created_at->format('d-m-Y H:i') }}</span></p>
-                            @if ($leaveRequest->status === 'approved')
+                            @if ($leaveRequest->status === 'disetujui')
                                 <p><strong>Disetujui oleh:</strong> {{ $leaveRequest->approvedBy->name }} pada <span class="font-medium">{{ $leaveRequest->approved_at->format('d-m-Y H:i') }}</span></p>
-                            @elseif ($leaveRequest->status === 'rejected')
+                            @elseif ($leaveRequest->status === 'ditolak')
                                 <p><strong>Ditolak oleh:</strong> {{ $leaveRequest->rejectedBy->name }} pada <span class="font-medium">{{ $leaveRequest->rejected_at->format('d-m-Y H:i') }}</span></p>
                             @endif
                         </div>
@@ -49,7 +49,7 @@
                     <div class="mt-8 pt-6 border-t">
                         <div class="flex items-center justify-end gap-4">
                             @can('approveOrReject', $leaveRequest)
-                                @if ($leaveRequest->status === 'pending')
+                                @if ($leaveRequest->status === 'menunggu persetujuan')
                                     <form action="{{ route('leave-requests.approve', $leaveRequest->id) }}" method="POST">
                                         @csrf
                                         <x-primary-button class="bg-green-600 hover:bg-green-500">
