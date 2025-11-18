@@ -51,11 +51,11 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('leave-requests.index') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4">
+                            <x-secondary-button type="button" onclick="window.history.back()">
                                 {{ __('Batal') }}
-                            </a>
+                            </x-secondary-button>
 
-                            <x-primary-button>
+                            <x-primary-button class="ms-3">
                                 {{ __('Ajukan Cuti') }}
                             </x-primary-button>
                         </div>

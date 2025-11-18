@@ -72,9 +72,9 @@
                                 </a>
                             @endcan
 
-                            <a href="{{ route('leave-requests.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                            <x-secondary-button type="button" onclick="window.history.back()">
                                 {{ __('Kembali') }}
-                            </a>
+                            </x-secondary-button>
                         </div>
                     </div>
 
