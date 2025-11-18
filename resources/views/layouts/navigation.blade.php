@@ -15,15 +15,43 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @hasanyrole('danru|anggota')
-                        <x-nav-link :href="route('attendances.create')" :active="request()->routeIs('attendances.create')">
-                            {{ __('Absensi') }}
-                        </x-nav-link>
-                    @else
-                        <x-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
-                            {{ __('Absensi') }}
-                        </x-nav-link>
-                    @endhasanyrole
+                    <div class="hidden sm:flex sm:items-center">
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ __('Absensi') }}</div>
+
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+
+                            <x-slot name="content">
+                                @hasanyrole('danru|anggota')
+                                    <x-dropdown-link :href="route('attendances.create')">
+                                        {{ __('Buat Absensi') }}
+                                    </x-dropdown-link>
+                                @else
+                                    <x-dropdown-link :href="route('attendances.index')">
+                                        {{ __('Daftar Absensi') }}
+                                    </x-dropdown-link>
+                                @endhasanyrole
+                                
+                                @can('create', App\Models\LeaveRequest::class)
+                                <x-dropdown-link :href="route('leave-requests.create')">
+                                    {{ __('Pengajuan Cuti') }}
+                                </x-dropdown-link>
+                                @endcan
+                                
+                                <x-dropdown-link :href="route('leave-requests.index')">
+                                    {{ __('Daftar Pengajuan Cuti') }}
+                                </x-dropdown-link>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
                     @can('viewAny', App\Models\ReportType::class)
                         <x-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
                             {{ __('Manajemen Jenis Laporan') }}
@@ -135,13 +163,21 @@
             </x-responsive-nav-link>
             @hasanyrole('danru|anggota')
                 <x-responsive-nav-link :href="route('attendances.create')" :active="request()->routeIs('attendances.create')">
-                    {{ __('Absensi') }}
+                    {{ __('Buat Absensi') }}
                 </x-responsive-nav-link>
             @else
                 <x-responsive-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
-                    {{ __('Absensi') }}
+                    {{ __('Daftar Absensi') }}
                 </x-responsive-nav-link>
             @endhasanyrole
+            @can('create', App\Models\LeaveRequest::class)
+            <x-responsive-nav-link :href="route('leave-requests.create')" :active="request()->routeIs('leave-requests.create')">
+                {{ __('Pengajuan Cuti') }}
+            </x-responsive-nav-link>
+            @endcan
+            <x-responsive-nav-link :href="route('leave-requests.index')" :active="request()->routeIs('leave-requests.index')">
+                {{ __('Daftar Pengajuan Cuti') }}
+            </x-responsive-nav-link>
             @can('viewAny', App\Models\ReportType::class)
                 <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
                     {{ __('Manajemen Jenis Laporan') }}

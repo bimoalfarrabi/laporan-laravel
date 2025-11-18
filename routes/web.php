@@ -85,6 +85,12 @@ Route::middleware('auth')->group(function () {
     // Absensi
     Route::resource('attendances', AttendanceController::class);
 
+    // Cuti
+    Route::resource('leave-requests', \App\Http\Controllers\LeaveRequestController::class);
+    Route::post('leave-requests/{leave_request}/approve', [\App\Http\Controllers\LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
+    Route::post('leave-requests/{leave_request}/reject', [\App\Http\Controllers\LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
+    Route::get('leave-requests/{leave_request}/export-pdf', [\App\Http\Controllers\LeaveRequestController::class, 'exportPdf'])->name('leave-requests.exportPdf');
+
     // Phone Numbers
     Route::get('/phone-numbers', [\App\Http\Controllers\PhoneNumberController::class, 'index'])->name('phone-numbers.index');
 

@@ -12,6 +12,8 @@ use App\Policies\ReportPolicy;
 use App\Policies\UserPolicy;
 use App\Models\Attendance;
 use App\Policies\AttendancePolicy;
+use App\Models\LeaveRequest;
+use App\Policies\LeaveRequestPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Auth\Events\Login;
 use App\Listeners\UpdateLastLoginAt;
@@ -30,6 +32,7 @@ class AuthServiceProvider extends ServiceProvider
         Report::class => ReportPolicy::class,
         User::class => UserPolicy::class,
         Attendance::class => AttendancePolicy::class,
+        LeaveRequest::class => LeaveRequestPolicy::class,
     ];
 
     /**
