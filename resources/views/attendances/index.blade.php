@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Attendances') }}
+            {{ __('Daftar Absensi') }}
         </h2>
     </x-slot>
 
@@ -22,7 +22,7 @@
                                 <input type="date" name="date" value="{{ request('date', now()->format('Y-m-d')) }}"
                                     class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     title="Filter Tanggal">
-                                
+
                                 <input type="text" name="search" placeholder="Cari nama..."
                                     value="{{ request('search') }}"
                                     class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(form);
             const params = new URLSearchParams(formData);
             const url = form.action + '?' + params.toString();
-            
+
             history.pushState(null, '', url);
             fetchResults(url);
         }, 300);
