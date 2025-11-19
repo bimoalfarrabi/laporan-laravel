@@ -64,7 +64,7 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after:starts_at',
+            'expires_at' => 'nullable|date|after_or_equal:today'. ($request->input('starts_at') ? '|after:starts_at' : ''),
         ]);
 
         Announcement::create([
@@ -103,7 +103,7 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after:starts_at',
+            'expires_at' => 'nullable|date|after_or_equal:today'. ($request->input('starts_at') ? '|after:starts_at' : ''),
         ]);
 
         $announcement->update([
