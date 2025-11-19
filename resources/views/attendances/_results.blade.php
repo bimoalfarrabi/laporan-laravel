@@ -70,7 +70,12 @@
                                     class="text-sm text-gray-500">({{ $attendance->user->roles->first()->name }})</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->type ?? '-' }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            @if ($attendance->status == 'libur')
+                                -
+                            @else
+                                {{ $attendance->type ?? '-' }}
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if ($attendance->status == 'Izin' && isset($attendance->leaveRequest))
@@ -226,7 +231,13 @@
                             <span
                                 class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">{{ $attendance->status }}</span>
                         @endif
-                        <div class="text-xs text-gray-500 mt-1">{{ $attendance->type ?? 'N/A' }}</div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            @if ($attendance->status == 'libur')
+                                -
+                            @else
+                                {{ $attendance->type ?? 'N/A' }}
+                            @endif
+                        </div>
                     </div>
                 </div>
 
