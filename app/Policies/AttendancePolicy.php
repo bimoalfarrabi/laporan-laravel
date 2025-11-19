@@ -34,6 +34,14 @@ class AttendancePolicy
     }
 
     /**
+     * Determine whether the user can export models.
+     */
+    public function export(User $user): bool
+    {
+        return $user->hasRole(['superadmin', 'manajemen', 'danru']);
+    }
+
+    /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Attendance $attendance): bool
