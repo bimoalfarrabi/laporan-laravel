@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\LeaveRequest;
 use App\Models\Setting;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +25,10 @@ class AttendanceController extends Controller
         $this->middleware("can:create,App\Models\Attendance")->only([
             "create",
             "store",
+        ]);
+        $this->middleware("can:export,App\Models\Attendance")->only([
+            "showExportForm",
+            "exportPdf",
         ]);
     }
 
@@ -122,10 +129,10 @@ class AttendanceController extends Controller
         $combined = $attendances->toBase()->merge($filteredUsersOnLeave);
 
         // Sort the combined collection
-        $sortBy = $request->query('sort_by', 'user.name');
-        $sortDirection = $request->query('sort_direction', 'asc');
+        $sortBy = $request->query("sort_by", "user.name");
+        $sortDirection = $request->query("sort_direction", "asc");
 
-        if ($sortDirection === 'desc') {
+        if ($sortDirection === "desc") {
             $sorted = $combined->sortByDesc($sortBy)->values();
         } else {
             $sorted = $combined->sortBy($sortBy)->values();
@@ -150,9 +157,9 @@ class AttendanceController extends Controller
         );
 
         $viewData = [
-            'attendances' => $paginatedItems,
-            'sortBy' => $sortBy,
-            'sortDirection' => $sortDirection,
+            "attendances" => $paginatedItems,
+            "sortBy" => $sortBy,
+            "sortDirection" => $sortDirection,
         ];
 
         if ($request->ajax()) {
@@ -191,21 +198,28 @@ class AttendanceController extends Controller
 
         // Cek jika ada absensi dalam 2 jam terakhir untuk mencegah data ganda
         $twoHoursAgo = $now->copy()->subHours(2);
-        $lastAction = Attendance::where('user_id', $user->id)
+        $lastAction = Attendance::where("user_id", $user->id)
             ->where(function ($query) use ($twoHoursAgo) {
-                $query->where('time_in', '>=', $twoHoursAgo)
-                      ->orWhere('time_out', '>=', $twoHoursAgo);
+                $query
+                    ->where("time_in", ">=", $twoHoursAgo)
+                    ->orWhere("time_out", ">=", $twoHoursAgo);
             })
-            ->latest('updated_at')
+            ->latest("updated_at")
             ->first();
 
         if ($lastAction) {
             $lastActionTime = $lastAction->time_out ?? $lastAction->time_in;
             if ($lastAction->time_out && $lastAction->time_in) {
-                 $lastActionTime = $lastAction->time_out > $lastAction->time_in ? $lastAction->time_out : $lastAction->time_in;
+                $lastActionTime =
+                    $lastAction->time_out > $lastAction->time_in
+                        ? $lastAction->time_out
+                        : $lastAction->time_in;
             }
-            $errorMessage = 'Anda sudah melakukan absensi pada pukul ' . \Carbon\Carbon::parse($lastActionTime)->format('H:i') . '. Aksi dibatalkan untuk mencegah data ganda.';
-            return redirect()->back()->with('error', $errorMessage);
+            $errorMessage =
+                "Anda sudah melakukan absensi pada pukul " .
+                \Carbon\Carbon::parse($lastActionTime)->format("H:i") .
+                ". Aksi dibatalkan untuk mencegah data ganda.";
+            return redirect()->back()->with("error", $errorMessage);
         }
 
         // Define a "look-behind" window to find a potential open shift.
@@ -606,5 +620,127 @@ class AttendanceController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function showExportForm()
+    {
+        $this->authorize("export", Attendance::class);
+        return view("attendances.export-form");
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $this->authorize("export", Attendance::class);
+
+        $request->validate([
+            "month" => "required|date_format:Y-m",
+        ]);
+
+        $carbonDate = Carbon::createFromFormat("Y-m", $request->month);
+        $startDate = $carbonDate->copy()->startOfMonth();
+        $endDate = $carbonDate->copy()->endOfMonth();
+        $monthName = $carbonDate->translatedFormat("F Y");
+
+        // 1. Get all users with their roles
+        $users = User::with("roles")
+            ->whereHas("roles", function ($query) {
+                // Filter users who are not superadmin
+                $query->where("name", "!=", "superadmin");
+            })
+            ->orderBy("name")
+            ->get();
+
+        // 2. Get all relevant attendances and leaves for the month
+        $attendances = Attendance::with("user")
+            ->whereBetween("time_in", [$startDate, $endDate])
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->user_id .
+                    "_" .
+                    Carbon::parse($item->time_in)->format("Y-m-d");
+            });
+
+        $leaveRequests = LeaveRequest::with("user")
+            ->where("status", "disetujui")
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query
+                    ->where("start_date", "<=", $endDate->format("Y-m-d"))
+                    ->where("end_date", ">=", $startDate->format("Y-m-d"));
+            })
+            ->get();
+
+        // 3. Create a data matrix
+        $dateRange = CarbonPeriod::create($startDate, $endDate);
+        $dataMatrix = [];
+
+        foreach ($users as $user) {
+            $dataMatrix[$user->id]["user_name"] = $user->name;
+            $dataMatrix[$user->id]["dates"] = [];
+            $dataMatrix[$user->id]["dates"] = [];
+
+            foreach ($dateRange as $date) {
+                $dateString = $date->format("Y-m-d");
+                $attendanceKey = $user->id . "_" . $dateString;
+
+                if (isset($attendances[$attendanceKey])) {
+                    $attendance = $attendances[$attendanceKey];
+                    $timeIn = Carbon::parse($attendance->time_in);
+
+                    // Lateness logic from store method
+                    $pagiShiftStart = $timeIn->copy()->setTime(7, 0, 0);
+                    $malamShiftStart = $timeIn->copy()->setTime(19, 0, 0);
+
+                    $expectedStartTime =
+                        $timeIn->hour >= 0 && $timeIn->hour < 14
+                            ? $pagiShiftStart
+                            : $malamShiftStart;
+                    $isLate = $timeIn->isAfter($expectedStartTime);
+
+                    $dataMatrix[$user->id]["dates"][$dateString] = [
+                        "type" => $attendance->type ?? "N/A",
+                        "time_in" => $timeIn->format("H:i:s"),
+                        "time_out" => $attendance->time_out
+                            ? Carbon::parse($attendance->time_out)->format(
+                                "H:i:s",
+                            )
+                            : "-",
+                        "is_late" => $isLate,
+                        "status" => "Hadir",
+                    ];
+                } else {
+                    // Check if the user is on leave
+                    $isOnLeave = false;
+                    foreach ($leaveRequests as $leave) {
+                        if (
+                            $leave->user_id == $user->id &&
+                            $date->between($leave->start_date, $leave->end_date)
+                        ) {
+                            $dataMatrix[$user->id]["dates"][$dateString] = [
+                                "status" => "Izin",
+                                "type" => $leave->leave_type,
+                            ];
+                            $isOnLeave = true;
+                            break;
+                        }
+                    }
+
+                    if (!$isOnLeave) {
+                        $dataMatrix[$user->id]["dates"][$dateString] = [
+                            "status" => "Tidak Hadir",
+                        ];
+                    }
+                }
+            }
+        }
+
+        // 4. Generate PDF
+        $pdf = Pdf::loadView("attendances.export-pdf", [
+            "dataMatrix" => $dataMatrix,
+            "dateRange" => $dateRange,
+            "monthName" => $monthName,
+        ])->setPaper("a3", "landscape");
+
+        $filename = "Laporan_Absensi_" . Str::slug($monthName) . ".pdf";
+        return $pdf->stream($filename);
     }
 }

@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('announcements/{id}/force-delete', [App\Http\Controllers\AnnouncementController::class, 'forceDelete'])->name('announcements.forceDelete');
 
     // Absensi
+    Route::get('/attendances/export', [AttendanceController::class, 'showExportForm'])->name('attendances.export');
+    Route::get('/attendances/export-pdf', [AttendanceController::class, 'exportPdf'])->name('attendances.exportPdf');
     Route::resource('attendances', AttendanceController::class);
 
     // Izin
