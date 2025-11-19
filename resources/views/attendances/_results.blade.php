@@ -60,7 +60,24 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                            @if ($attendance->time_in && $attendance->status != 'Izin')
+                                @php
+                                    $time_in = \Carbon\Carbon::parse($attendance->time_in);
+                                    $expected_start_hour = ($time_in->hour < 14) ? 7 : 19;
+                                    $expected_start_time = $time_in->copy()->setTime($expected_start_hour, 0, 0);
+                                    $diff_minutes = $expected_start_time->diffInMinutes($time_in, false);
+                                    $diff_formatted = ($diff_minutes >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes) * 60);
+                                    $color_class = $diff_minutes > 0 ? 'text-red-500' : 'text-green-500';
+                                    if ($diff_minutes === 0) {
+                                        $diff_formatted = '00:00';
+                                        $color_class = 'text-gray-500';
+                                    }
+                                @endphp
+                                {{ $time_in->format('d M Y, H:i') }}
+                                <div class="text-xs {{ $color_class }} font-semibold">{{ $diff_formatted }}</div>
+                            @else
+                                {{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->photo_in_path) &&
@@ -86,7 +103,40 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}
+                            @if ($attendance->time_out)
+                                @php
+                                    $time_out = \Carbon\Carbon::parse($attendance->time_out);
+                                    $time_in_for_calc = \Carbon\Carbon::parse($attendance->time_in);
+                                    $diff_minutes_out = 0;
+                                    $diff_formatted_out = '';
+                                    $color_class_out = 'text-gray-500';
+                                    $expected_end_time = null;
+
+                                    if ($attendance->type == 'Reguler') {
+                                        $expected_end_time = $time_in_for_calc->copy()->setTime(15, 0, 0);
+                                    } elseif ($attendance->type == 'Normal Pagi') {
+                                        $expected_end_time = $time_in_for_calc->copy()->setTime(19, 0, 0);
+                                    } elseif ($attendance->type == 'Normal Malam') {
+                                        $expected_end_time = $time_in_for_calc->copy()->addDay()->setTime(7, 0, 0);
+                                    }
+
+                                    if ($expected_end_time) {
+                                        $diff_minutes_out = $expected_end_time->diffInMinutes($time_out, false);
+                                        $diff_formatted_out = ($diff_minutes_out >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_out) * 60);
+                                        $color_class_out = $diff_minutes_out >= 0 ? 'text-green-500' : 'text-red-500';
+                                        if ($diff_minutes_out === 0) {
+                                            $diff_formatted_out = '00:00';
+                                            $color_class_out = 'text-gray-500';
+                                        }
+                                    }
+                                @endphp
+                                {{ $time_out->format('d M Y, H:i') }}
+                                @if ($attendance->type && $expected_end_time)
+                                    <div class="text-xs {{ $color_class_out }} font-semibold">{{ $diff_formatted_out }}</div>
+                                @endif
+                            @else
+                                -
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->photo_out_path) &&
@@ -150,7 +200,25 @@
                         <div class="flex items-start">
                             <strong class="text-gray-600 w-1/3">Masuk:</strong>
                             <div class="w-2/3">
-                                <p>{{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                                <p>
+                                    @if ($attendance->time_in && $attendance->status != 'Izin')
+                                        @php
+                                            $time_in_card = \Carbon\Carbon::parse($attendance->time_in);
+                                            $expected_start_hour_card = ($time_in_card->hour < 14) ? 7 : 19;
+                                            $expected_start_time_card = $time_in_card->copy()->setTime($expected_start_hour_card, 0, 0);
+                                            $diff_minutes_card = $expected_start_time_card->diffInMinutes($time_in_card, false);
+                                            $diff_formatted_card = ($diff_minutes_card >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_card) * 60);
+                                            $color_class_card = $diff_minutes_card > 0 ? 'text-red-500' : 'text-green-500';
+                                            if ($diff_minutes_card === 0) {
+                                                $diff_formatted_card = '00:00';
+                                                $color_class_card = 'text-gray-500';
+                                            }
+                                        @endphp
+                                        {{ $time_in_card->format('d M Y, H:i') }}
+                                        <span class="block text-xs {{ $color_class_card }} font-semibold">{{ $diff_formatted_card }}</span>
+                                    @else
+                                        {{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                                    @endif
                                 </p>
                                 <div class="flex items-center mt-1">
                                     @if (isset($attendance->photo_in_path) &&
@@ -174,7 +242,39 @@
                         <div class="flex items-start">
                             <strong class="text-gray-600 w-1/3">Pulang:</strong>
                             <div class="w-2/3">
-                                <p>{{ $attendance->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('d M Y, H:i') : '-' }}
+                                <p>
+                                    @if ($attendance->time_out)
+                                        @php
+                                            $time_out_card = \Carbon\Carbon::parse($attendance->time_out);
+                                            $time_in_for_calc_card = \Carbon\Carbon::parse($attendance->time_in);
+                                            $diff_minutes_out_card = 0;
+                                            $diff_formatted_out_card = '';
+                                            $color_class_out_card = 'text-gray-500';
+                                            $expected_end_time_card = null;
+                                            if ($attendance->type == 'Reguler') {
+                                                $expected_end_time_card = $time_in_for_calc_card->copy()->setTime(15, 0, 0);
+                                            } elseif ($attendance->type == 'Normal Pagi') {
+                                                $expected_end_time_card = $time_in_for_calc_card->copy()->setTime(19, 0, 0);
+                                            } elseif ($attendance->type == 'Normal Malam') {
+                                                $expected_end_time_card = $time_in_for_calc_card->copy()->addDay()->setTime(7, 0, 0);
+                                            }
+                                            if ($expected_end_time_card) {
+                                                $diff_minutes_out_card = $expected_end_time_card->diffInMinutes($time_out_card, false);
+                                                $diff_formatted_out_card = ($diff_minutes_out_card >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_out_card) * 60);
+                                                $color_class_out_card = $diff_minutes_out_card >= 0 ? 'text-green-500' : 'text-red-500';
+                                                if ($diff_minutes_out_card === 0) {
+                                                    $diff_formatted_out_card = '00:00';
+                                                    $color_class_out_card = 'text-gray-500';
+                                                }
+                                            }
+                                        @endphp
+                                        {{ $time_out_card->format('d M Y, H:i') }}
+                                        @if ($attendance->type && $expected_end_time_card)
+                                            <span class="block text-xs {{ $color_class_out_card }} font-semibold">{{ $diff_formatted_out_card }}</span>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
                                 </p>
                                 @if ($attendance->time_out)
                                     <div class="flex items-center mt-1">
