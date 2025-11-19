@@ -83,8 +83,7 @@ class UserController extends Controller
     {
         if (Auth::user()->hasRole('superadmin')) {
             $roles = Role::all(); // Superadmin can assign any role
-        } else {
-            $roles = Role::where('name', 'anggota')->get(); // Danru can only assign 'anggota'
+            $roles = Role::whereIn('name', ['anggota', 'backup'])->get(); // Danru can assign 'anggota' or 'backup'
         }
         return view('users.create', compact('roles'));
     }
@@ -128,9 +127,9 @@ class UserController extends Controller
             $userData['shift'] = $request->shift;
         } elseif (Auth::user()->hasRole('danru')) {
             $userData['shift'] = Auth::user()->shift;
-            // Ensure danru can only create 'anggota'
-            if ($request->role !== 'anggota') {
-                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat membuat pengguna dengan peran anggota.'])->withInput();
+            // Ensure danru can only create 'anggota' or 'backup'
+            if (!in_array($request->role, ['anggota', 'backup'])) {
+                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat membuat pengguna dengan peran anggota atau backup.'])->withInput();
             }
         }
 
