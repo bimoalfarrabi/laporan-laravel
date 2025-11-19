@@ -36,8 +36,13 @@
                     </div>
                     {{-- End Form Search dan Filter --}}
 
-                    <div id="attendance-results">
-                        @include('attendances._results')
+                    <div id="attendance-results-container" class="relative">
+                        <div id="loading-indicator" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 hidden">
+                            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+                        </div>
+                        <div id="attendance-results">
+                            @include('attendances._results')
+                        </div>
                     </div>
 
                 </div>
@@ -50,9 +55,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('filter-form');
     const resultsContainer = document.getElementById('attendance-results');
+    const loadingIndicator = document.getElementById('loading-indicator');
     let debounceTimeout;
 
     function fetchResults(url) {
+        loadingIndicator.classList.remove('hidden');
         fetch(url, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -65,7 +72,10 @@ document.addEventListener('DOMContentLoaded', function () {
             attachModalListeners();
             attachSortableListeners(); // Re-attach listeners for new content
         })
-        .catch(error => console.error('Error fetching results:', error));
+        .catch(error => console.error('Error fetching results:', error))
+        .finally(() => {
+            loadingIndicator.classList.add('hidden');
+        });
     }
 
     function handleFormChange() {
