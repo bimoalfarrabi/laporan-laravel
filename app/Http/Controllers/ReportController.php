@@ -229,14 +229,18 @@ class ReportController extends Controller
 
         $this->authorize('view', $report); // Otorisasi untuk melihat laporan spesifik
 
-        // Fetch previous and next reports based on ID, including soft-deleted ones
-        $previousReport = Report::withTrashed()
-            ->where('id', '<', $report->id)
+        // Fetch previous and next reports based on ID, excluding soft-deleted reports and reports from soft-deleted users
+        $previousReport = Report::where('id', '<', $report->id)
+            ->whereHas('user', function ($query) { // Ensure user is not soft-deleted
+                $query->whereNull('deleted_at');
+            })
             ->orderBy('id', 'desc')
             ->first();
 
-        $nextReport = Report::withTrashed()
-            ->where('id', '>', $report->id)
+        $nextReport = Report::where('id', '>', $report->id)
+            ->whereHas('user', function ($query) { // Ensure user is not soft-deleted
+                $query->whereNull('deleted_at');
+            })
             ->orderBy('id', 'asc')
             ->first();
 
