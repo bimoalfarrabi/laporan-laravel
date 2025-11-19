@@ -65,7 +65,7 @@ class LeaveRequestController extends Controller
             'leave_type' => 'required|string|max:255',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'nullable|string|max:1000',
+            'keterangan' => 'nullable|string|max:1000',
         ]);
 
         LeaveRequest::create([
@@ -73,7 +73,7 @@ class LeaveRequestController extends Controller
             'leave_type' => $request->leave_type,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'reason' => $request->reason,
+            'keterangan' => $request->keterangan,
             'status' => 'menunggu persetujuan',
         ]);
 

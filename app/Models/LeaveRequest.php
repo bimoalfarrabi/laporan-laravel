@@ -19,7 +19,7 @@ class LeaveRequest extends Model
         'user_id',
         'start_date',
         'end_date',
-        'reason',
+        'keterangan',
         'leave_type',
         'status',
         'approved_by',
