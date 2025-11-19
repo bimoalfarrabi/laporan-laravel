@@ -178,6 +178,25 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $now = now();
 
+        // Cek jika ada absensi dalam 2 jam terakhir untuk mencegah data ganda
+        $twoHoursAgo = $now->copy()->subHours(2);
+        $lastAction = Attendance::where('user_id', $user->id)
+            ->where(function ($query) use ($twoHoursAgo) {
+                $query->where('time_in', '>=', $twoHoursAgo)
+                      ->orWhere('time_out', '>=', $twoHoursAgo);
+            })
+            ->latest('updated_at')
+            ->first();
+
+        if ($lastAction) {
+            $lastActionTime = $lastAction->time_out ?? $lastAction->time_in;
+            if ($lastAction->time_out && $lastAction->time_in) {
+                 $lastActionTime = $lastAction->time_out > $lastAction->time_in ? $lastAction->time_out : $lastAction->time_in;
+            }
+            $errorMessage = 'Anda sudah melakukan absensi pada pukul ' . \Carbon\Carbon::parse($lastActionTime)->format('H:i') . '. Aksi dibatalkan untuk mencegah data ganda.';
+            return redirect()->back()->with('error', $errorMessage);
+        }
+
         // Define a "look-behind" window to find a potential open shift.
         // A shift won't be longer than 12 hours, so a 16-hour window is safe.
         $lookbehindTime = $now->copy()->subHours(16);
