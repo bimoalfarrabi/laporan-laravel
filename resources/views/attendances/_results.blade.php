@@ -188,7 +188,7 @@
                                     if ($expected_end_time) {
                                         $diff_minutes_out = $expected_end_time->diffInMinutes($time_out, false);
                                         if ($diff_minutes_out >= 0) { // On time or late (overtime)
-                                            $indicator_text_out = 'Tepat Waktu';
+                                            $indicator_text_out = 'Sesuai';
                                             if ($diff_minutes_out > 0) { // Overtime
                                                 $diff_in_seconds_out = abs($expected_end_time->diffInSeconds($time_out));
                                                 $hours_out = floor($diff_in_seconds_out / 3600);
@@ -410,7 +410,7 @@
                                             if ($expected_end_time_card) {
                                                 $diff_minutes_out_card = $expected_end_time_card->diffInMinutes($time_out_card, false);
                                                 if ($diff_minutes_out_card >= 0) { // On time or late (overtime)
-                                                    $indicator_text_out_card = 'Tepat Waktu';
+                                                    $indicator_text_out_card = 'Sesuai';
                                                     if ($diff_minutes_out_card > 0) { // Overtime
                                                         $diff_in_seconds_out_card = abs($expected_end_time_card->diffInSeconds($time_out_card));
                                                         $hours_out_card = floor($diff_in_seconds_out_card / 3600);
