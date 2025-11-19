@@ -125,17 +125,26 @@ document.addEventListener('DOMContentLoaded', function () {
             item.addEventListener('click', event => {
                 event.preventDefault();
                 const imageUrl = event.currentTarget.dataset.fullImageUrl;
+                const photoType = event.currentTarget.dataset.photoType; // 'Masuk' or 'Pulang'
+                const photoDate = event.currentTarget.dataset.photoDate; // Formatted date
+                const photoTime = event.currentTarget.dataset.photoTime; // Formatted time
+
+                let titleText = `Absensi ${photoType}`;
+                let htmlContent = `<div class="text-sm text-gray-600">${photoDate}, ${photoTime}</div>`;
+
                 Swal.fire({
-                    title: 'Foto Absensi',
+                    title: titleText,
+                    html: htmlContent, // Add HTML content for date and time
                     imageUrl: imageUrl,
-                    imageAlt: 'Foto Absensi',
+                    imageAlt: `Foto Absensi ${photoType}`,
                     showCloseButton: true,
                     showConfirmButton: false,
-                    width: '50%',
                     imageWidth: 'auto',
                     imageHeight: 'auto',
                     customClass: {
-                        image: 'rounded-lg'
+                        image: 'rounded-lg',
+                        title: 'text-lg md:text-xl', // Responsive title size
+                        htmlContainer: 'text-sm md:text-base' // Responsive text size
                     }
                 });
             });
