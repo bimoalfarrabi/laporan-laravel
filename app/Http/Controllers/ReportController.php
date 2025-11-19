@@ -222,14 +222,30 @@ class ReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Report $report)
+    public function show(Report $report, Request $request)
     {
         // mengambil laporan, termasuk yg sudah dihapus secara soft delete
         $report = Report::withTrashed()->with('reportType', 'user', 'lastEditedBy', 'deletedBy')->findOrFail($report->id);
 
         $this->authorize('view', $report); // Otorisasi untuk melihat laporan spesifik
-        return view('reports.show', compact('report'));
 
+        // Fetch previous and next reports based on ID, including soft-deleted ones
+        $previousReport = Report::withTrashed()
+            ->where('id', '<', $report->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nextReport = Report::withTrashed()
+            ->where('id', '>', $report->id)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        // If it's an AJAX request, return only the report details partial
+        if ($request->ajax()) {
+            return view('reports.partials.report_details', compact('report', 'previousReport', 'nextReport'))->render();
+        }
+
+        return view('reports.show', compact('report', 'previousReport', 'nextReport'));
     }
 
     /**
