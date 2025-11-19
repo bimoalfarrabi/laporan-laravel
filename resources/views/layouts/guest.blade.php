@@ -21,7 +21,7 @@
                     <a href="/">
                         <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                     </a>
-                    <a href="https://ptwba.com" target="_blank">
+                    <a href="/" target="_blank">
                         <img src="https://ptwba.com/assets/image/logowba.png" alt="WBA Logo" class="w-20 h-20 object-contain">
                     </a>
                 </div>
