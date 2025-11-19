@@ -24,7 +24,7 @@
                                 <option value="Izin mengurus administrasi resmi" {{ old('leave_type') == 'Izin mengurus administrasi resmi' ? 'selected' : '' }}>Izin mengurus administrasi resmi</option>
                                 <option value="Izin memenuhi panggilan instansi pemerintah" {{ old('leave_type') == 'Izin memenuhi panggilan instansi pemerintah' ? 'selected' : '' }}>Izin memenuhi panggilan instansi pemerintah</option>
                                 <option value="Izin keperluan keluarga mendadak" {{ old('leave_type') == 'Izin keperluan keluarga mendadak' ? 'selected' : '' }}>Izin keperluan keluarga mendadak</option>
-                                <option value="Izin menikah/izin menikah" {{ old('leave_type') == 'Izin menikah/izin menikah' ? 'selected' : '' }}>Izin menikah/izin menikah</option>
+                                <option value="Izin menikah" {{ old('leave_type') == 'Izin menikah' ? 'selected' : '' }}>Izin menikah</option>
                             </select>
                             <x-input-error :messages="$errors->get('leave_type')" class="mt-2" />
                         </div>
