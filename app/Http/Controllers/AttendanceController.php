@@ -644,8 +644,8 @@ class AttendanceController extends Controller
         // 1. Get all users with their roles
         $users = User::with("roles")
             ->whereHas("roles", function ($query) {
-                // Filter users who are not superadmin
-                $query->where("name", "!=", "superadmin");
+                // Filter users to only include specific roles
+                $query->whereIn("name", ["danru", "anggota", "backup"]);
             })
             ->orderBy("name")
             ->get();

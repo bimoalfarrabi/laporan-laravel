@@ -30,33 +30,16 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8px; /* Smaller font for table content */
+            font-size: 7px; /* Smaller font for table content */
         }
         th, td {
             border: 1px solid #777;
-            padding: 4px;
+            padding: 2px; /* Further reduce padding */
             text-align: left;
             vertical-align: top;
         }
-        th {
-            background-color: #f2f2f2;
-            text-align: center;
-            font-weight: bold;
-        }
-        .user-name {
-            white-space: nowrap;
-        }
-        .date-header {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            white-space: nowrap;
-            padding: 5px 2px;
-        }
-        .late {
-            color: red;
-        }
         .attendance-cell {
-            min-width: 60px; /* Give some space for content */
+            min-width: 40px; /* Further reduce min-width */
         }
         .present {
             background-color: #e6ffed;
@@ -87,7 +70,7 @@
                     <th>No</th>
                     <th>Nama</th>
                     @foreach ($dateRange as $date)
-                        <th class="date-header">{{ $date->format('d M') }}</th>
+                        <th class="date-header">{{ $date->format('d') }}</th>
                     @endforeach
                 </tr>
             </thead>
