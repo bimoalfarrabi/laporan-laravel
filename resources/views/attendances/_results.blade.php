@@ -91,7 +91,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
-                                -
+                                {{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}
                             @elseif ($attendance->time_in)
                                 @php
                                     $time_in = \Carbon\Carbon::parse($attendance->time_in);
@@ -248,7 +248,7 @@
                             <div class="w-2/3">
                                 <p>
                                     @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
-                                        -
+                                        {{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}
                                     @elseif ($attendance->time_in)
                                         @php
                                             $time_in_card = \Carbon\Carbon::parse($attendance->time_in);
