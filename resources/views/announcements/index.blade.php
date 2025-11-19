@@ -29,10 +29,10 @@
                                                 $columns = [
                                                     'title' => 'Judul',
                                                     'user_name' => 'Dibuat Oleh',
-                                                    'starts_at' => 'Starts At',
-                                                    'expires_at' => 'Expires At',
-                                                    'created_at' => 'Created At',
-                                                    'updated_at' => 'Updated At',
+                                                    'starts_at' => __('Mulai Pada'),
+                                                    'expires_at' => __('Kedaluwarsa Pada'),
+                                                    'created_at' => __('Dibuat Pada'),
+                                                    'updated_at' => __('Diperbarui Pada'),
                                                 ];
                                             @endphp
 
@@ -106,22 +106,22 @@
                                         </div>
                                         <div class="border-t border-gray-200 pt-2 space-y-1 text-sm">
                                             <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $announcement->user->name }}</p>
-                                            <p><strong class="text-gray-600">Starts At:</strong>
+                                            <p><strong class="text-gray-600">{{ __('Mulai Pada') }}:</strong>
                                                 @if ($announcement->starts_at)
                                                     <x-waktu-dibuat :date="$announcement->starts_at" />
                                                 @else
                                                     Langsung Aktif
                                                 @endif
                                             </p>
-                                            <p><strong class="text-gray-600">Expires At:</strong>
+                                            <p><strong class="text-gray-600">{{ __('Kedaluwarsa Pada') }}:</strong>
                                                 @if ($announcement->expires_at)
                                                     <x-waktu-dibuat :date="$announcement->expires_at" />
                                                 @else
                                                     Tidak Ada
                                                 @endif
                                             </p>
-                                            <p><strong class="text-gray-600">Created At:</strong> <x-waktu-dibuat :date="$announcement->created_at" /></p>
-                                            <p><strong class="text-gray-600">Updated At:</strong> <x-waktu-dibuat :date="$announcement->updated_at" /></p>
+                                            <p><strong class="text-gray-600">{{ __('Dibuat Pada') }}:</strong> <x-waktu-dibuat :date="$announcement->created_at" /></p>
+                                            <p><strong class="text-gray-600">{{ __('Diperbarui Pada') }}:</strong> <x-waktu-dibuat :date="$announcement->updated_at" /></p>
                                         </div>
                                         <div class="mt-3 flex justify-end space-x-2 text-sm">
                                             <a href="{{ route('announcements.show', $announcement->id) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
