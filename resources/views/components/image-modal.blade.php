@@ -70,7 +70,7 @@
         x-transition:leave-end="opacity-0 transform scale-95"
         class="relative z-10 flex flex-col items-center"
     >
-        <div class="relative">
+        <div class="relative max-w-[90vw] max-h-[80vh] flex items-center justify-center">
             <!-- Loading Spinner -->
             <div x-show="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-800/50 rounded-lg">
                 <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -79,22 +79,24 @@
                 </svg>
             </div>
 
-            <img :src="imageUrl" @load="isLoading = false" alt="Image" class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg shadow-lg" :style="{ transform: `rotate(${rotation}deg)` }" x-show="!isLoading">
+            <img :src="imageUrl" @load="isLoading = false" alt="Image" class="object-contain rounded-lg shadow-lg max-w-full max-h-full" :style="{ transform: `rotate(${rotation}deg)` }" x-show="!isLoading">
 
-            <button @click="rotation -= 90" class="absolute top-1/2 -translate-y-1/2 -left-16 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+            <!-- Rotation Buttons -->
+            <button @click="rotation -= 90" class="absolute bottom-2 left-2 md:top-1/2 md:-translate-y-1/2 md:left-4 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 19.5L3 15m0 0l4.5-4.5M3 15h13.5a6 6 0 000-12H3" />
                 </svg>
             </button>
 
-            <button @click="rotation += 90" class="absolute top-1/2 -translate-y-1/2 -right-16 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+            <button @click="rotation += 90" class="absolute bottom-2 right-2 md:top-1/2 md:-translate-y-1/2 md:right-4 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 19.5L21 15m0 0l-4.5-4.5M21 15H7.5a6 6 0 010-12H21" />
                 </svg>
             </button>
         </div>
 
-        <button @click="show = false" class="absolute -top-10 -right-2 sm:top-2 sm:right-2 text-white bg-gray-800 rounded-full p-1 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+        <!-- Close Button - positioned always at top-right of the modal wrapper -->
+        <button @click="show = false" class="absolute top-2 right-2 text-white bg-gray-800 rounded-full p-1 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
