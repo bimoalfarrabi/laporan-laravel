@@ -98,15 +98,41 @@
                                     $expected_start_hour = ($time_in->hour < 14) ? 7 : 19;
                                     $expected_start_time = $time_in->copy()->setTime($expected_start_hour, 0, 0);
                                     $diff_minutes = $expected_start_time->diffInMinutes($time_in, false);
-                                    $diff_formatted = ($diff_minutes >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes) * 60);
-                                    $color_class = $diff_minutes > 0 ? 'text-red-500' : 'text-green-500';
-                                    if ($diff_minutes === 0) {
-                                        $diff_formatted = '00:00';
-                                        $color_class = 'text-gray-500';
+                                    
+                                    $indicator_text = '';
+                                    $color_class = 'text-gray-500'; // Default color
+
+                                    if ($diff_minutes <= 0) { // Early or on time
+                                        $indicator_text = 'Tepat Waktu';
+                                        $color_class = 'text-green-500';
+                                    } elseif ($diff_minutes > 0) { // Late
+                                        $diff_in_seconds = abs($expected_start_time->diffInSeconds($time_in)); // Ensure positive difference
+                                        $hours = floor($diff_in_seconds / 3600);
+                                        $minutes = floor(($diff_in_seconds % 3600) / 60);
+                                        $seconds = $diff_in_seconds % 60;
+
+                                        $parts = [];
+                                        if ($hours > 0) {
+                                            $parts[] = $hours . ' jam';
+                                        }
+                                        if ($minutes > 0) {
+                                            $parts[] = $minutes . ' menit';
+                                        }
+                                        if ($seconds > 0 && empty($parts)) { // Only show seconds if less than a minute
+                                            $parts[] = $seconds . ' detik';
+                                        }
+
+                                        $formatted_duration = implode(' ', $parts);
+                                        if (empty($formatted_duration)) {
+                                            $formatted_duration = '0 detik';
+                                        }
+
+                                        $indicator_text = 'Terlambat selama ' . $formatted_duration;
+                                        $color_class = 'text-red-500';
                                     }
                                 @endphp
                                 {{ $time_in->format('d M Y, H:i') }}
-                                <div class="text-xs {{ $color_class }} font-semibold">{{ $diff_formatted }}</div>
+                                <div class="text-xs {{ $color_class }} font-semibold">{{ $indicator_text }}</div>
                             @else
                                 -
                             @endif
@@ -146,8 +172,6 @@
                                     $time_out = \Carbon\Carbon::parse($attendance->time_out);
                                     $time_in_for_calc = \Carbon\Carbon::parse($attendance->time_in);
                                     $diff_minutes_out = 0;
-                                    $diff_formatted_out = '';
-                                    $color_class_out = 'text-gray-500';
                                     $expected_end_time = null;
 
                                     if ($attendance->type == 'Reguler') {
@@ -158,19 +182,64 @@
                                         $expected_end_time = $time_in_for_calc->copy()->addDay()->setTime(7, 0, 0);
                                     }
 
+                                    $indicator_text_out = '';
+                                    $color_class_out = 'text-gray-500'; // Default color
+
                                     if ($expected_end_time) {
                                         $diff_minutes_out = $expected_end_time->diffInMinutes($time_out, false);
-                                        $diff_formatted_out = ($diff_minutes_out >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_out) * 60);
-                                        $color_class_out = $diff_minutes_out >= 0 ? 'text-green-500' : 'text-red-500';
-                                        if ($diff_minutes_out === 0) {
-                                            $diff_formatted_out = '00:00';
-                                            $color_class_out = 'text-gray-500';
+                                        if ($diff_minutes_out >= 0) { // On time or late (overtime)
+                                            $indicator_text_out = 'Tepat Waktu';
+                                            if ($diff_minutes_out > 0) { // Overtime
+                                                $diff_in_seconds_out = abs($expected_end_time->diffInSeconds($time_out));
+                                                $hours_out = floor($diff_in_seconds_out / 3600);
+                                                $minutes_out = floor(($diff_in_seconds_out % 3600) / 60);
+                                                $seconds_out = $diff_in_seconds_out % 60;
+
+                                                $parts_out = [];
+                                                if ($hours_out > 0) {
+                                                    $parts_out[] = $hours_out . ' jam';
+                                                }
+                                                if ($minutes_out > 0) {
+                                                    $parts_out[] = $minutes_out . ' menit';
+                                                }
+                                                if ($seconds_out > 0 && empty($parts_out)) {
+                                                    $parts_out[] = $seconds_out . ' detik';
+                                                }
+                                                $formatted_duration_out = implode(' ', $parts_out);
+                                                if (empty($formatted_duration_out)) {
+                                                    $formatted_duration_out = '0 detik';
+                                                }
+                                                $indicator_text_out = 'Pulang terlambat ' . $formatted_duration_out;
+                                            }
+                                            $color_class_out = 'text-green-500';
+                                        } else { // Early departure
+                                            $diff_in_seconds_out = abs($expected_end_time->diffInSeconds($time_out));
+                                            $hours_out = floor($diff_in_seconds_out / 3600);
+                                            $minutes_out = floor(($diff_in_seconds_out % 3600) / 60);
+                                            $seconds_out = $diff_in_seconds_out % 60;
+
+                                            $parts_out = [];
+                                            if ($hours_out > 0) {
+                                                $parts_out[] = $hours_out . ' jam';
+                                            }
+                                            if ($minutes_out > 0) {
+                                                $parts_out[] = $minutes_out . ' menit';
+                                            }
+                                            if ($seconds_out > 0 && empty($parts_out)) {
+                                                $parts_out[] = $seconds_out . ' detik';
+                                            }
+                                            $formatted_duration_out = implode(' ', $parts_out);
+                                            if (empty($formatted_duration_out)) {
+                                                $formatted_duration_out = '0 detik';
+                                            }
+                                            $indicator_text_out = 'Pulang lebih awal ' . $formatted_duration_out;
+                                            $color_class_out = 'text-red-500';
                                         }
                                     }
                                 @endphp
                                 {{ $time_out->format('d M Y, H:i') }}
                                 @if ($attendance->type && $expected_end_time)
-                                    <div class="text-xs {{ $color_class_out }} font-semibold">{{ $diff_formatted_out }}</div>
+                                    <div class="text-xs {{ $color_class_out }} font-semibold">{{ $indicator_text_out }}</div>
                                 @endif
                             @else
                                 -
@@ -255,15 +324,41 @@
                                             $expected_start_hour_card = ($time_in_card->hour < 14) ? 7 : 19;
                                             $expected_start_time_card = $time_in_card->copy()->setTime($expected_start_hour_card, 0, 0);
                                             $diff_minutes_card = $expected_start_time_card->diffInMinutes($time_in_card, false);
-                                            $diff_formatted_card = ($diff_minutes_card >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_card) * 60);
-                                            $color_class_card = $diff_minutes_card > 0 ? 'text-red-500' : 'text-green-500';
-                                            if ($diff_minutes_card === 0) {
-                                                $diff_formatted_card = '00:00';
-                                                $color_class_card = 'text-gray-500';
+                                            
+                                            $indicator_text_card = '';
+                                            $color_class_card = 'text-gray-500'; // Default color
+
+                                            if ($diff_minutes_card <= 0) { // Early or on time
+                                                $indicator_text_card = 'Tepat Waktu';
+                                                $color_class_card = 'text-green-500';
+                                            } elseif ($diff_minutes_card > 0) { // Late
+                                                $diff_in_seconds_card = abs($expected_start_time_card->diffInSeconds($time_in_card)); // Ensure positive difference
+                                                $hours_card = floor($diff_in_seconds_card / 3600);
+                                                $minutes_card = floor(($diff_in_seconds_card % 3600) / 60);
+                                                $seconds_card = $diff_in_seconds_card % 60;
+
+                                                $parts_card = [];
+                                                if ($hours_card > 0) {
+                                                    $parts_card[] = $hours_card . ' jam';
+                                                }
+                                                if ($minutes_card > 0) {
+                                                    $parts_card[] = $minutes_card . ' menit';
+                                                }
+                                                if ($seconds_card > 0 && empty($parts_card)) { // Only show seconds if less than a minute
+                                                    $parts_card[] = $seconds_card . ' detik';
+                                                }
+
+                                                $formatted_duration_card = implode(' ', $parts_card);
+                                                if (empty($formatted_duration_card)) {
+                                                    $formatted_duration_card = '0 detik';
+                                                }
+
+                                                $indicator_text_card = 'Terlambat selama ' . $formatted_duration_card;
+                                                $color_class_card = 'text-red-500';
                                             }
                                         @endphp
                                         {{ $time_in_card->format('d M Y, H:i') }}
-                                        <span class="block text-xs {{ $color_class_card }} font-semibold">{{ $diff_formatted_card }}</span>
+                                        <span class="block text-xs {{ $color_class_card }} font-semibold">{{ $indicator_text_card }}</span>
                                     @else
                                         -
                                     @endif
@@ -300,8 +395,6 @@
                                             $time_out_card = \Carbon\Carbon::parse($attendance->time_out);
                                             $time_in_for_calc_card = \Carbon\Carbon::parse($attendance->time_in);
                                             $diff_minutes_out_card = 0;
-                                            $diff_formatted_out_card = '';
-                                            $color_class_out_card = 'text-gray-500';
                                             $expected_end_time_card = null;
                                             if ($attendance->type == 'Reguler') {
                                                 $expected_end_time_card = $time_in_for_calc_card->copy()->setTime(15, 0, 0);
@@ -310,19 +403,65 @@
                                             } elseif ($attendance->type == 'Normal Malam') {
                                                 $expected_end_time_card = $time_in_for_calc_card->copy()->addDay()->setTime(7, 0, 0);
                                             }
+
+                                            $indicator_text_out_card = '';
+                                            $color_class_out_card = 'text-gray-500'; // Default color
+
                                             if ($expected_end_time_card) {
                                                 $diff_minutes_out_card = $expected_end_time_card->diffInMinutes($time_out_card, false);
-                                                $diff_formatted_out_card = ($diff_minutes_out_card >= 0 ? '+' : '-') . gmdate('H:i', abs($diff_minutes_out_card) * 60);
-                                                $color_class_out_card = $diff_minutes_out_card >= 0 ? 'text-green-500' : 'text-red-500';
-                                                if ($diff_minutes_out_card === 0) {
-                                                    $diff_formatted_out_card = '00:00';
-                                                    $color_class_out_card = 'text-gray-500';
+                                                if ($diff_minutes_out_card >= 0) { // On time or late (overtime)
+                                                    $indicator_text_out_card = 'Tepat Waktu';
+                                                    if ($diff_minutes_out_card > 0) { // Overtime
+                                                        $diff_in_seconds_out_card = abs($expected_end_time_card->diffInSeconds($time_out_card));
+                                                        $hours_out_card = floor($diff_in_seconds_out_card / 3600);
+                                                        $minutes_out_card = floor(($diff_in_seconds_out_card % 3600) / 60);
+                                                        $seconds_out_card = $diff_in_seconds_out_card % 60;
+
+                                                        $parts_out_card = [];
+                                                        if ($hours_out_card > 0) {
+                                                            $parts_out_card[] = $hours_out_card . ' jam';
+                                                        }
+                                                        if ($minutes_out_card > 0) {
+                                                            $parts_out_card[] = $minutes_out_card . ' menit';
+                                                        }
+                                                        if ($seconds_out_card > 0 && empty($parts_out_card)) {
+                                                            $parts_out_card[] = $seconds_out_card . ' detik';
+                                                        }
+                                                        $formatted_duration_out_card = implode(' ', $parts_out_card);
+                                                        if (empty($formatted_duration_out_card)) {
+                                                            $formatted_duration_out_card = '0 detik';
+                                                        }
+                                                        $indicator_text_out_card = 'Pulang terlambat ' . $formatted_duration_out_card;
+                                                    }
+                                                    $color_class_out_card = 'text-green-500';
+                                                } else { // Early departure
+                                                    $diff_in_seconds_out_card = abs($expected_end_time_card->diffInSeconds($time_out_card));
+                                                    $hours_out_card = floor($diff_in_seconds_out_card / 3600);
+                                                    $minutes_out_card = floor(($diff_in_seconds_out_card % 3600) / 60);
+                                                    $seconds_out_card = $diff_in_seconds_out_card % 60;
+
+                                                    $parts_out_card = [];
+                                                    if ($hours_out_card > 0) {
+                                                        $parts_out_card[] = $hours_out_card . ' jam';
+                                                    }
+                                                    if ($minutes_out_card > 0) {
+                                                        $parts_out_card[] = $minutes_out_card . ' menit';
+                                                    }
+                                                    if ($seconds_out_card > 0 && empty($parts_out_card)) {
+                                                        $parts_out_card[] = $seconds_out_card . ' detik';
+                                                    }
+                                                    $formatted_duration_out_card = implode(' ', $parts_out_card);
+                                                    if (empty($formatted_duration_out_card)) {
+                                                        $formatted_duration_out_card = '0 detik';
+                                                    }
+                                                    $indicator_text_out_card = 'Pulang lebih awal ' . $formatted_duration_out_card;
+                                                    $color_class_out_card = 'text-red-500';
                                                 }
                                             }
                                         @endphp
                                         {{ $time_out_card->format('d M Y, H:i') }}
                                         @if ($attendance->type && $expected_end_time_card)
-                                            <span class="block text-xs {{ $color_class_out_card }} font-semibold">{{ $diff_formatted_out_card }}</span>
+                                            <span class="block text-xs {{ $color_class_out_card }} font-semibold">{{ $indicator_text_out_card }}</span>
                                         @endif
                                     @else
                                         -
