@@ -641,11 +641,14 @@ class AttendanceController extends Controller
         $endDate = $carbonDate->copy()->endOfMonth();
         $monthName = $carbonDate->translatedFormat("F Y");
 
-        // 1. Get all users with their roles
-        $users = User::with("roles")
+        // 1. Get all users with their roles, including trashed users if they were active during the month
+        $users = User::withTrashed()
             ->whereHas("roles", function ($query) {
-                // Filter users to only include specific roles
                 $query->whereIn("name", ["danru", "anggota", "backup"]);
+            })
+            ->where(function ($query) use ($startDate) {
+                $query->whereNull('deleted_at') // Always include active users
+                      ->orWhere('deleted_at', '>=', $startDate); // Or include users deleted during or after the start of the month
             })
             ->orderBy("name")
             ->get();
