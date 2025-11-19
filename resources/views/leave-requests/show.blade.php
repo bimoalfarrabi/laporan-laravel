@@ -15,9 +15,9 @@
                         <p><strong>Pemohon:</strong> {{ $leaveRequest->user->name }}</p>
                         <p><strong>Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
                         <p><strong>Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }} ({{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari)</p>
-                        <p><strong>Alasan:</strong></p>
+                        <p><strong>Keterangan:</strong></p>
                         <div class="prose max-w-none p-4 bg-gray-50 rounded-md border border-gray-200">
-                            {{ $leaveRequest->reason }}
+                            {{ $leaveRequest->keterangan }}
                         </div>
                         <p><strong>Status:</strong>
                             @php
