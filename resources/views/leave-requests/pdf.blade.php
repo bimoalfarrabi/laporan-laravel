@@ -27,7 +27,7 @@
         <p>Banyuwangi, {{ \Carbon\Carbon::parse($leaveRequest->created_at)->format('d F Y') }}</p>
         <p>Kepada Yth.</p>
         <p>PT Wira Buana Arum</p>
-        <p class="indent-2">Di Tempat.</p>
+        <p>Di Tempat.</p>
 
         <p style="margin-top: 20px;">Dengan hormat,</p>
         <p>Saya yang bertanda tangan di bawah ini:</p>
