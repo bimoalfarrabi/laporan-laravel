@@ -136,9 +136,14 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $now = now();
 
-        // Attempt to find an open attendance record for the user
+        // Define a "look-behind" window to find a potential open shift.
+        // A shift won't be longer than 12 hours, so a 16-hour window is safe.
+        $lookbehindTime = $now->copy()->subHours(16);
+
+        // Find an open attendance record within the look-behind window.
         $openAttendance = Attendance::where('user_id', $user->id)
             ->whereNull('time_out')
+            ->where('time_in', '>=', $lookbehindTime)
             ->latest('time_in')
             ->first();
 
