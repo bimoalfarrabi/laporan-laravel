@@ -112,9 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.text())
         .then(html => {
             resultsContainer.innerHTML = html;
-            // Re-initialize any scripts if necessary, e.g., for modals or confirmation dialogs
-            // For now, we just need to re-attach pagination listeners
-            attachPaginationListeners();
+            attachAllListeners();
         })
         .catch(error => console.error('Error fetching results:', error));
     }
@@ -128,7 +126,18 @@ document.addEventListener('DOMContentLoaded', function () {
             
             history.pushState(null, '', url);
             fetchResults(url);
-        }, 300); // 300ms debounce
+        }, 300);
+    }
+
+    function attachSortableListeners() {
+        resultsContainer.querySelectorAll('thead a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                history.pushState(null, '', url);
+                fetchResults(url);
+            });
+        });
     }
 
     function attachPaginationListeners() {
@@ -142,14 +151,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function attachAllListeners() {
+        attachSortableListeners();
+        attachPaginationListeners();
+        // Re-attach listeners for confirmation dialogs if they are dynamically loaded
+        // This assumes you have a function or script that initializes them.
+        if (window.initializeConfirmDialogs) {
+            window.initializeConfirmDialogs();
+        }
+    }
+
     // Listen for changes on all form inputs
     form.querySelectorAll('input, select').forEach(input => {
         input.addEventListener('input', handleFormChange);
-        input.addEventListener('change', handleFormChange); // For select and date/checkbox
+        input.addEventListener('change', handleFormChange);
     });
 
-    // Initial attachment for pagination links
-    attachPaginationListeners();
+    // Initial attachment of listeners
+    attachAllListeners();
 
     // Handle back/forward browser buttons
     window.addEventListener('popstate', function () {

@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(html => {
             resultsContainer.innerHTML = html;
             attachPaginationListeners();
+            attachSortableListeners(); // Re-attach for new content
         })
         .catch(error => console.error('Error fetching results:', error));
     }
@@ -110,6 +111,17 @@ document.addEventListener('DOMContentLoaded', function () {
             history.pushState(null, '', url);
             fetchResults(url);
         }, 300); // 300ms debounce
+    }
+
+    function attachSortableListeners() {
+        resultsContainer.querySelectorAll('thead a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                history.pushState(null, '', url);
+                fetchResults(url);
+            });
+        });
     }
 
     function attachPaginationListeners() {
@@ -129,8 +141,9 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('change', handleFormChange); // For select
     });
 
-    // Initial attachment for pagination links
+    // Initial attachment of listeners
     attachPaginationListeners();
+    attachSortableListeners();
 
     // Handle back/forward browser buttons
     window.addEventListener('popstate', function () {
