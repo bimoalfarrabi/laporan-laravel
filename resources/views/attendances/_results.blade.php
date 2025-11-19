@@ -38,7 +38,7 @@
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi
                         Masuk</th>
-                    
+
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => 'time_out', 'sort_direction' => ($sortBy == 'time_out' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" class="flex items-center">
                             Waktu Pulang
@@ -98,7 +98,7 @@
                                     $expected_start_hour = ($time_in->hour < 14) ? 7 : 19;
                                     $expected_start_time = $time_in->copy()->setTime($expected_start_hour, 0, 0);
                                     $diff_minutes = $expected_start_time->diffInMinutes($time_in, false);
-                                    
+
                                     $indicator_text = '';
                                     $color_class = 'text-gray-500'; // Default color
 
@@ -127,7 +127,7 @@
                                             $formatted_duration = '0 detik';
                                         }
 
-                                        $indicator_text = 'Terlambat selama ' . $formatted_duration;
+                                        $indicator_text = 'Terlambat ' . $formatted_duration;
                                         $color_class = 'text-red-500';
                                     }
                                 @endphp
@@ -324,7 +324,7 @@
                                             $expected_start_hour_card = ($time_in_card->hour < 14) ? 7 : 19;
                                             $expected_start_time_card = $time_in_card->copy()->setTime($expected_start_hour_card, 0, 0);
                                             $diff_minutes_card = $expected_start_time_card->diffInMinutes($time_in_card, false);
-                                            
+
                                             $indicator_text_card = '';
                                             $color_class_card = 'text-gray-500'; // Default color
 
