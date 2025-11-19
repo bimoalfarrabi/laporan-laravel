@@ -17,11 +17,16 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div class="w-full px-4 sm:px-0">
-                <a href="/" class="flex justify-center">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+                <div class="flex justify-center items-center gap-4">
+                    <a href="/">
+                        <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    </a>
+                    <a href="https://ptwba.com" target="_blank">
+                        <img src="https://ptwba.com/assets/image/logowba.png" alt="WBA Logo" class="w-20 h-20 object-contain">
+                    </a>
+                </div>
                 <div class="text-center mt-2 text-gray-800 text-xl font-semibold">
-                    Sistem Informasi Satpam RSUD Blambangan
+                    e-Satpam RSUD Blambangan
                 </div>
             </div>
 
