@@ -18,6 +18,17 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewData = [];
 
+        // Fetch approved reports with pagination, specific to the user's role context
+        $approvedReports = Report::with('user', 'reportType')
+            ->where('status', 'disetujui')
+            ->latest()
+            ->paginate(5);
+
+        // If it's an AJAX request, return only the partial view for approved reports
+        if ($request->ajax()) {
+            return view('partials.approved-reports', compact('approvedReports'));
+        }
+
         $viewData['announcements'] = Announcement::with('user')
             ->where(function ($query) {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
@@ -39,10 +50,7 @@ class DashboardController extends Controller
                 })
                 ->latest()
                 ->get();
-            $viewData['approvedReports'] = Report::with('user', 'reportType')
-                ->where('status', 'disetujui')
-                ->latest()
-                ->paginate(5);
+            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
             $viewData['pendingLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->where('status', 'menunggu persetujuan')
                 ->latest()
@@ -61,10 +69,7 @@ class DashboardController extends Controller
                 })
                 ->latest()
                 ->get();
-            $viewData['approvedReports'] = Report::with('user', 'reportType')
-                ->where('status', 'disetujui')
-                ->latest()
-                ->paginate(5);
+            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
             $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->latest()
                 ->take(5)
@@ -74,10 +79,7 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(5)
                 ->get();
-            $viewData['approvedReports'] = Report::with('user', 'reportType')
-                ->where('status', 'disetujui')
-                ->latest()
-                ->paginate(5);
+            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
             $viewData['myLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->where('user_id', $user->id)
                 ->latest()

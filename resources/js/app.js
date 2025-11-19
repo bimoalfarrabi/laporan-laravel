@@ -36,3 +36,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 Alpine.start();
+
+import './dashboard-pagination';
