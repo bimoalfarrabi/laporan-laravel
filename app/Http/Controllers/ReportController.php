@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Models\ReportType;
 use App\Models\Role;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -73,11 +73,13 @@ class ReportController extends Controller
 
         // Apply sorting
         if ($sortBy == 'report_type_name') {
-            $query->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
+            $query
+                ->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
                 ->orderBy('report_types.name', $sortDirection)
                 ->select('reports.*');
         } elseif ($sortBy == 'user_name') {
-            $query->join('users', 'reports.user_id', '=', 'users.id')
+            $query
+                ->join('users', 'reports.user_id', '=', 'users.id')
                 ->orderBy('users.name', $sortDirection)
                 ->select('reports.*');
         } else {
@@ -115,7 +117,7 @@ class ReportController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('create', Report::class); // Otorisasi untuk membuat laporan
+        $this->authorize('create', Report::class);  // Otorisasi untuk membuat laporan
 
         $reportTypeId = $request->query('report_type_id');
 
@@ -147,13 +149,13 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create', Report::class); // Otorisasi untuk menyimpan laporan
+        $this->authorize('create', Report::class);  // Otorisasi untuk menyimpan laporan
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($request->report_type_id);
 
         // bangun aturan validasi dinamis berdasarkan reportTypeFields
         $validationRules = [];
-        $reportData = []; // untuk menyimpan data laporan
+        $reportData = [];  // untuk menyimpan data laporan
 
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
@@ -173,7 +175,7 @@ class ReportController extends Controller
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
                 $rules[] = 'file';
-                $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
+                $rules[] = 'mimes:jpg,jpeg,png';  // hanya file gambar
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
@@ -188,7 +190,7 @@ class ReportController extends Controller
         foreach ($reportType->reportTypeFields as $field) {
             if ($field->type === 'role_specific_text' && $field->role_id) {
                 if (!Auth::user()->hasRole(Role::find($field->role_id)->name)) {
-                    continue; // skip this field if user does not have the role
+                    continue;  // skip this field if user does not have the role
                 }
             }
 
@@ -197,7 +199,7 @@ class ReportController extends Controller
                 $file = $request->file($fieldName);
                 $reportData[$fieldName] = $this->compressAndStoreImage($file);
             } elseif ($field['type'] === 'checkbox') {
-                $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
+                $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
             }
@@ -206,8 +208,8 @@ class ReportController extends Controller
         $report = new Report();
         $report->report_type_id = $reportType->id;
         $report->user_id = Auth::id();
-        $report->data = $reportData; // simpan data
-        $report->status = 'belum disetujui'; // default status
+        $report->data = $reportData;  // simpan data
+        $report->status = 'belum disetujui';  // default status
         $report->last_edited_by_user_id = Auth::id();
 
         // Automatically record danru's shift for LHJ reports
@@ -227,18 +229,18 @@ class ReportController extends Controller
         // mengambil laporan, termasuk yg sudah dihapus secara soft delete
         $report = Report::withTrashed()->with('reportType', 'user', 'lastEditedBy', 'deletedBy')->findOrFail($report->id);
 
-        $this->authorize('view', $report); // Otorisasi untuk melihat laporan spesifik
+        $this->authorize('view', $report);  // Otorisasi untuk melihat laporan spesifik
 
         // Fetch previous and next reports based on ID, excluding soft-deleted reports and reports from soft-deleted users
         $previousReport = Report::where('id', '<', $report->id)
-            ->whereHas('user', function ($query) { // Ensure user is not soft-deleted
+            ->whereHas('user', function ($query) {  // Ensure user is not soft-deleted
                 $query->whereNull('deleted_at');
             })
             ->orderBy('id', 'desc')
             ->first();
 
         $nextReport = Report::where('id', '>', $report->id)
-            ->whereHas('user', function ($query) { // Ensure user is not soft-deleted
+            ->whereHas('user', function ($query) {  // Ensure user is not soft-deleted
                 $query->whereNull('deleted_at');
             })
             ->orderBy('id', 'asc')
@@ -257,7 +259,7 @@ class ReportController extends Controller
      */
     public function edit(Report $report)
     {
-        $this->authorize('update', $report); // Otorisasi untuk mengedit laporan
+        $this->authorize('update', $report);  // Otorisasi untuk mengedit laporan
         return view('reports.edit', compact('report'));
     }
 
@@ -266,12 +268,12 @@ class ReportController extends Controller
      */
     public function update(Request $request, Report $report)
     {
-        $this->authorize('update', $report); // Otorisasi untuk memperbarui laporan
+        $this->authorize('update', $report);  // Otorisasi untuk memperbarui laporan
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($report->report_type_id);
 
         $validationRules = [];
-        $reportData = $report->data; // untuk menyimpan data laporan
+        $reportData = $report->data;  // untuk menyimpan data laporan
 
         // bangun aturan validasi dinamis berdasarkan reportTypeFields
         foreach ($reportType->reportTypeFields as $field) {
@@ -297,7 +299,7 @@ class ReportController extends Controller
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
                 $rules[] = 'file';
-                $rules[] = 'mimes:jpg,jpeg,png'; // hanya file gambar
+                $rules[] = 'mimes:jpg,jpeg,png';  // hanya file gambar
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
@@ -312,19 +314,19 @@ class ReportController extends Controller
         // proses upload file dan upload data
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
-                        if ($field->type === 'file') {
-                            if ($request->hasFile($fieldName)) {
-                                // hapus file lama jika ada
-                                if (isset($reportData[$fieldName])) {
-                                    Storage::disk('public')->delete($reportData[$fieldName]);
-                                }
+            if ($field->type === 'file') {
+                if ($request->hasFile($fieldName)) {
+                    // hapus file lama jika ada
+                    if (isset($reportData[$fieldName])) {
+                        Storage::disk('public')->delete($reportData[$fieldName]);
+                    }
 
-                                $file = $request->file($fieldName);
-                                $reportData[$fieldName] = $this->compressAndStoreImage($file);
-                            }
-                            // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
-                        } elseif ($field->type === 'checkbox') {
-                $reportData[$fieldName] = $request->has($fieldName); // simpan true/false
+                    $file = $request->file($fieldName);
+                    $reportData[$fieldName] = $this->compressAndStoreImage($file);
+                }
+                // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
+            } elseif ($field->type === 'checkbox') {
+                $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
             }
@@ -342,24 +344,24 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
-        $this->authorize('delete', $report); // Otorisasi untuk menghapus laporan
+        $this->authorize('delete', $report);  // Otorisasi untuk menghapus laporan
 
-        $report->deleted_by_user_id = Auth::id(); // Catat siapa yang menghapus
-        $report->save(); // simpan perubahan sebelum menghapus
-        $report->delete(); // soft delete
+        $report->deleted_by_user_id = Auth::id();  // Catat siapa yang menghapus
+        $report->save();  // simpan perubahan sebelum menghapus
+        $report->delete();  // soft delete
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dihapus.');
     }
 
     public function archive()
     {
-        $this->authorize('viewAny', Report::class); // Otorisasi untuk melihat arsip laporan
+        $this->authorize('viewAny', Report::class);  // Otorisasi untuk melihat arsip laporan
 
         if (Auth::user()->hasRole('anggota')) {
-            abort(403, 'Anda tidak memiliki akses ke arsip laporan.'); // anggota tidak boleh mengakses arsip
+            abort(403, 'Anda tidak memiliki akses ke arsip laporan.');  // anggota tidak boleh mengakses arsip
         }
 
-        $reports = Report::onlyTrashed()->with('reportType', 'user', 'deletedBy')->latest()->get(); // hanya mengambil yang dihapus secara soft delete
+        $reports = Report::onlyTrashed()->with('reportType', 'user', 'deletedBy')->latest()->get();  // hanya mengambil yang dihapus secara soft delete
 
         return view('reports.archive', compact('reports'));
     }
@@ -367,7 +369,7 @@ class ReportController extends Controller
     public function restore($id)
     {
         $report = Report::withTrashed()->findOrFail($id);
-        $this->authorize('restore', $report); // Otorisasi untuk mengembalikan laporan
+        $this->authorize('restore', $report);  // Otorisasi untuk mengembalikan laporan
 
         $report->restore();
 
@@ -377,7 +379,7 @@ class ReportController extends Controller
     public function forceDelete($id)
     {
         $report = Report::withTrashed()->findOrFail($id);
-        $this->authorize('forceDelete', $report); // Otorisasi untuk menghapus permanen laporan
+        $this->authorize('forceDelete', $report);  // Otorisasi untuk menghapus permanen laporan
 
         $report->forceDelete();
 
@@ -386,7 +388,7 @@ class ReportController extends Controller
 
     public function approve(Report $report)
     {
-        $this->authorize('approve', $report); // Menggunakan policy approve
+        $this->authorize('approve', $report);  // Menggunakan policy approve
 
         $report->status = 'disetujui';
         $report->approved_by_user_id = Auth::id();
@@ -397,7 +399,7 @@ class ReportController extends Controller
 
     public function reject(Report $report)
     {
-        $this->authorize('reject', $report); // Menggunakan policy reject
+        $this->authorize('reject', $report);  // Menggunakan policy reject
 
         if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
             $report->status = 'ditolak';
@@ -412,9 +414,9 @@ class ReportController extends Controller
 
     public function exportPdf(Report $report)
     {
-        $this->authorize('view', $report); // Use the existing view policy
+        $this->authorize('view', $report);  // Use the existing view policy
 
-        $report->load('reportType.reportTypeFields'); // Eager load fields
+        $report->load('reportType.reportTypeFields');  // Eager load fields
 
         $pdf = Pdf::loadView('reports.pdf', compact('report'));
         $accountName = Str::slug(Auth::user()->name);
@@ -426,13 +428,13 @@ class ReportController extends Controller
 
     public function showExportForm()
     {
-        $this->authorize('exportMonthly', Report::class); // Re-use existing policy
+        $this->authorize('exportMonthly', Report::class);  // Re-use existing policy
         return view('reports.export');
     }
 
     public function exportMonthlyPdf(Request $request, $year, $month)
     {
-        $this->authorize('exportMonthly', Report::class); // New policy method for authorization
+        $this->authorize('exportMonthly', Report::class);  // New policy method for authorization
 
         $startDate = Carbon::create($year, $month, 1)->startOfMonth();
         $endDate = Carbon::create($year, $month, 1)->endOfMonth();
@@ -454,250 +456,200 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.monthly-pdf', compact('reports', 'year', 'month'));
         $filename = 'Laporan_Anggota_Bulan_' . $month . '_' . $year . '.pdf';
 
-                return $pdf->download($filename);
+        return $pdf->download($filename);
+    }
 
-            }
+    /**
+     * Helper method to compress and store an image.
+     *
+     *
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     *
+     * @return string The path to the stored image.
+     */
+    private function compressAndStoreImage($file): string
+    {
+        $originalPath = $file->getRealPath();
 
-        
+        $originalExtension = strtolower($file->getClientOriginalExtension());
 
-            /**
+        // Generate unique filename with desired extension (WebP if possible)
 
-             * Helper method to compress and store an image.
+        $accountName = Str::slug(Auth::user()->name);
 
-             *
+        $timestamp = now()->format('YmdHis');
 
-             * @param \Illuminate\Http\UploadedFile $file
+        $targetExtension = 'jpg';  // Default fallback
 
-             * @return string The path to the stored image.
+        if (function_exists('imagewebp')) {
+            $targetExtension = 'webp';
+        } elseif ($originalExtension === 'png') {
+            $targetExtension = 'png';
+        }
 
-             */
+        $filename = $accountName . '-' . $timestamp . '.' . $targetExtension;
 
-            private function compressAndStoreImage($file): string
+        // Create image resource from uploaded file
 
-            {
+        $imageResource = null;
 
-                $originalPath = $file->getRealPath();
+        switch ($originalExtension) {
+            case 'jpg':
+            case 'jpeg':
+                $imageResource = imagecreatefromjpeg($originalPath);
 
-                $originalExtension = strtolower($file->getClientOriginalExtension());
+                break;
 
-        
-
-                // Generate unique filename with .jpg extension
-
-                $accountName = Str::slug(Auth::user()->name);
-
-                $timestamp = now()->format('YmdHis');
-
-                $filename = $accountName . '-' . $timestamp . '.jpg';
-
-        
-
-                // Create image resource from uploaded file
-
-                $imageResource = null;
-
-                switch ($originalExtension) {
-
-                    case 'jpg':
-
-                    case 'jpeg':
-
-                        $imageResource = imagecreatefromjpeg($originalPath);
-
-                        break;
-
-                    case 'png':
-
-                        $imageResource = imagecreatefrompng($originalPath);
-
-                        // Preserve transparency for PNG
-
-                        imagealphablending($imageResource, true);
-
-                        imagesavealpha($imageResource, true);
-
-                        break;
-
-                    case 'gif':
-
-                        $imageResource = imagecreatefromgif($originalPath);
-
-                        break;
-
-                    default:
-
-                        // If file type is not supported, store it without compression
-
-                        return $file->store('reports/' . Auth::id(), 'public');
-
-                }
-
-        
-
-                if (!$imageResource) {
-
-                    // Fallback if image resource creation failed
-
-                    return $file->store('reports/' . Auth::id(), 'public');
-
-                }
-
-        
-
-                $originalWidth = imagesx($imageResource);
-
-                $originalHeight = imagesy($imageResource);
-
-        
-
-                $maxWidth = 1280; // Max width for images
-
-                $maxHeight = 1280; // Max height for images
-
-        
-
-                $newWidth = $originalWidth;
-
-                $newHeight = $originalHeight;
-
-        
-
-                // Resize if image is larger than max dimensions
-
-                if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
-
-                    $ratio = $originalWidth / $originalHeight;
-
-                    if ($ratio > 1) { // Landscape
-
-                        $newWidth = $maxWidth;
-
-                        $newHeight = $maxWidth / $ratio;
-
-                    } else { // Portrait or Square
-
-                        $newHeight = $maxHeight;
-
-                        $newWidth = $maxHeight * $ratio;
-
-                    }
-
-                }
-
-        
-
-                // Create a new true color image with the new dimensions
-
-                $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
-
-        
+            case 'png':
+                $imageResource = imagecreatefrompng($originalPath);
 
                 // Preserve transparency for PNG
 
-                if ($originalExtension === 'png') {
+                imagealphablending($imageResource, true);
 
-                    imagealphablending($newImageResource, false);
+                imagesavealpha($imageResource, true);
 
-                    imagesavealpha($newImageResource, true);
+                break;
 
-                    $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+            case 'gif':
+                $imageResource = imagecreatefromgif($originalPath);
 
-                    imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+                break;
 
+            default:
+                // If file type is not supported, store it without compression
+
+                // and use original extension if WebP not used
+
+                if ($targetExtension === 'jpg') {  // only fallback if not going to webp
+
+                    return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+                } else {
+                    return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $targetExtension, 'public');
                 }
-
-        
-
-                // Resample (resize) the image
-
-                imagecopyresampled(
-
-                    $newImageResource,
-
-                    $imageResource,
-
-                    0, 0, 0, 0,
-
-                    (int) $newWidth, (int) $newHeight,
-
-                    $originalWidth, $originalHeight
-
-                );
-
-        
-
-                // Define storage path
-
-                $year = now()->format('Y');
-
-                $month = now()->format('m');
-
-                $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
-
-                $publicPath = storage_path('app/public/' . $storagePath);
-
-        
-
-                // Ensure directory exists
-
-                if (!file_exists(dirname($publicPath))) {
-
-                    mkdir(dirname($publicPath), 0755, true);
-
-                }
-
-        
-
-                $quality = 90; // Start with high quality
-
-                $maxFileSize = 1024 * 1024; // 1MB in bytes
-
-                $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
-
-        
-
-                do {
-
-                    // Save the image with current quality to a temporary file
-
-                    imagejpeg($newImageResource, $tempPath, $quality);
-
-                    $fileSize = filesize($tempPath);
-
-        
-
-                    if ($fileSize > $maxFileSize && $quality > 10) {
-
-                        $quality -= 5; // Reduce quality
-
-                    } else {
-
-                        break; // Exit loop if size is acceptable or quality is too low
-
-                    }
-
-                } while ($quality >= 10);
-
-        
-
-                // Move the compressed image from temporary path to public storage
-
-                rename($tempPath, $publicPath);
-
-        
-
-                // Free up memory
-
-                imagedestroy($imageResource);
-
-                imagedestroy($newImageResource);
-
-        
-
-                return $storagePath;
-
-            }
-
         }
 
-        
+        if (!$imageResource) {
+            // Fallback if image resource creation failed
+
+            if ($targetExtension === 'jpg') {  // only fallback if not going to webp
+
+                return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+            } else {
+                return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $targetExtension, 'public');
+            }
+        }
+
+        $originalWidth = imagesx($imageResource);
+
+        $originalHeight = imagesy($imageResource);
+
+        $maxWidth = 120;  // Max width for images
+
+        $maxHeight = 120;  // Max height for images
+
+        $newWidth = $originalWidth;
+
+        $newHeight = $originalHeight;
+
+        // Resize if image is larger than max dimensions
+
+        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+            $ratio = $originalWidth / $originalHeight;
+
+            if ($ratio > 1) {  // Landscape
+
+                $newWidth = $maxWidth;
+
+                $newHeight = $maxWidth / $ratio;
+            } else {  // Portrait or Square
+
+                $newHeight = $maxHeight;
+
+                $newWidth = $maxHeight * $ratio;
+            }
+        }
+
+        // Create a new true color image with the new dimensions
+
+        $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+
+        // Preserve transparency for PNG
+
+        if ($originalExtension === 'png') {
+            imagealphablending($newImageResource, false);
+
+            imagesavealpha($newImageResource, true);
+
+            $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+
+            imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+        }
+
+        // Resample (resize) the image
+
+        imagecopyresampled(
+            $newImageResource,
+            $imageResource,
+            0, 0, 0, 0,
+            (int) $newWidth, (int) $newHeight,
+            $originalWidth, $originalHeight
+        );
+
+        // Define storage path
+
+        $year = now()->format('Y');
+
+        $month = now()->format('m');
+
+        $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
+
+        $publicPath = storage_path('app/public/' . $storagePath);
+
+        // Ensure directory exists
+
+        if (!file_exists(dirname($publicPath))) {
+            mkdir(dirname($publicPath), 0755, true);
+        }
+
+        $quality = 90;  // Start with high quality
+
+        $maxFileSize = 1024 * 1024;  // 1MB in bytes
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_');  // Temporary file for compression
+
+        do {
+            // Save the image with current quality to a temporary file
+
+            if ($targetExtension === 'webp') {
+                imagewebp($newImageResource, $tempPath, $quality);
+            } elseif ($targetExtension === 'png') {
+                imagepng($newImageResource, $tempPath, floor($quality / 10));  // PNG quality 0-9
+            } else {  // jpg fallback
+
+                imagejpeg($newImageResource, $tempPath, $quality);
+            }
+
+            $fileSize = filesize($tempPath);
+
+            if ($fileSize > $maxFileSize && $quality > 10) {
+                $quality -= 5;  // Reduce quality
+            } else {
+                break;  // Exit loop if size is acceptable or quality is too low
+            }
+        } while ($quality >= 10);
+
+        // Move the compressed image from temporary path to public storage
+
+        rename($tempPath, $publicPath);
+
+        // Free up memory
+
+        imagedestroy($imageResource);
+
+        imagedestroy($newImageResource);
+
+        return $storagePath;
+    }
+}

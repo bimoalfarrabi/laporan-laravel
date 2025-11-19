@@ -6,9 +6,15 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <meta name="description" content="e-Satpam RSUD Blambangan - Sistem Informasi Satpam RSUD Blambangan">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
+        {{-- Preload fonts for better performance --}}
+        <link rel="preload" href="https://fonts.bunny.net/figtree/files/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+        <link rel="preload" href="https://fonts.bunny.net/figtree/files/figtree-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+        <link rel="preload" href="https://fonts.bunny.net/figtree/files/figtree-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+        {{-- Fallback stylesheet for fonts --}}
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
@@ -19,10 +25,10 @@
             <div class="w-full px-4 sm:px-0">
                 <div class="flex justify-center items-center gap-4">
                     <a href="/">
-                        <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                        <x-application-logo class="w-20 h-20 fill-current text-gray-500" width="80" height="80" />
                     </a>
-                    <a href="/" target="_blank">
-                        <img src="https://ptwba.com/assets/image/logowba.png" alt="WBA Logo" class="w-20 h-20 object-contain">
+                    <a href="https://ptwba.com" target="_blank">
+                        <img src="https://ptwba.com/assets/image/logowba.png" alt="WBA Logo" class="w-20 h-20 object-contain" width="80" height="80">
                     </a>
                 </div>
                 <div class="text-center mt-2 text-gray-800 text-xl font-semibold">
