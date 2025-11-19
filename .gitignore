@@ -24,6 +24,7 @@ Thumbs.db
 node_modules/
 npm-debug.log
 yarn-error.log
+vendor/
 
 # Laravel 4 specific
 bootstrap/compiled.php
@@ -52,5 +53,3 @@ Homestead.json
 auth.json
 content
 data
-
-/vendor
