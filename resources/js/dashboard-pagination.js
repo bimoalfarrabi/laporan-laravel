@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (approvedReportsSection) {
         approvedReportsSection.addEventListener('click', function (e) {
-            // Check if a pagination link was clicked
-            if (e.target.tagName === 'A' && e.target.closest('.pagination')) {
+            // Check if a pagination link (an <a> tag inside a <nav> that contains pagination links) was clicked
+            if (e.target.tagName === 'A' && e.target.closest('nav') && e.target.href) {
                 e.preventDefault(); // Prevent default link behavior
 
                 const url = e.target.href;
