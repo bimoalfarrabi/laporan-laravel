@@ -62,6 +62,20 @@
                     });
                 @endif
 
+                // SweetAlert for validation errors
+                @if ($errors->any())
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan Validasi!',
+                        html: '<ul>' +
+                                @foreach ($errors->all() as $error)
+                                    '<li>{{ $error }}</li>' +
+                                @endforeach
+                              '</ul>',
+                        showConfirmButton: true,
+                    });
+                @endif
+
                 // SweetAlert for confirmation dialogs (e.g., delete, reset password)
                 document.querySelectorAll('[data-confirm-dialog="true"]').forEach(button => {
                     button.addEventListener('click', function(event) {
