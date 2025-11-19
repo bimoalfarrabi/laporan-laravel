@@ -19,7 +19,7 @@
                     <div class="bg-gray-50 p-4 rounded-lg mb-4">
                         <form id="filter-form" method="GET" action="{{ route('attendances.index') }}">
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                                <input type="date" name="date" value="{{ request('date', now()->format('Y-m-d')) }}"
+                                <input type="date" name="date" value="{{ request('date') }}"
                                     class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     title="Filter Tanggal">
 
