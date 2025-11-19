@@ -81,10 +81,15 @@ class UserController extends Controller
 
     public function create()
     {
-        if (Auth::user()->hasRole('superadmin')) {
+        $user = Auth::user();
+        $roles = collect(); // Default to an empty collection
+
+        if ($user->hasRole('superadmin')) {
             $roles = Role::all(); // Superadmin can assign any role
+        } elseif ($user->hasRole('danru')) {
             $roles = Role::whereIn('name', ['anggota', 'backup'])->get(); // Danru can assign 'anggota' or 'backup'
         }
+
         return view('users.create', compact('roles'));
     }
 
@@ -149,12 +154,15 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $this->authorize('update', $user);
-        if (Auth::user()->hasRole('superadmin')) {
+        $loggedInUser = Auth::user();
+        $roles = collect(); // Default to an empty collection
+
+        if ($loggedInUser->hasRole('superadmin')) {
             $roles = Role::all(); // Superadmin can assign any role
+        } elseif ($loggedInUser->hasRole('danru')) {
+            $roles = Role::whereIn('name', ['anggota', 'backup'])->get(); // Danru can assign 'anggota' or 'backup'
         }
-        else {
-            $roles = Role::where('name', 'anggota')->get(); // Danru can only assign 'anggota'
-        }
+
         return view('users.edit', compact('user', 'roles'));
     }
 
