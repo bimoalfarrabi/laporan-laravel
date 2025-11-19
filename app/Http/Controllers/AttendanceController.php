@@ -36,6 +36,7 @@ class AttendanceController extends Controller
         $filterDate = $request->input("date")
             ? Carbon::parse($request->input("date"))
             : null;
+        $search = $request->input("search");
 
         // Base query for attendances
         $attendanceQuery = Attendance::with("user.roles");
