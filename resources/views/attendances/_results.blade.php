@@ -94,7 +94,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->latitude_in) && $attendance->latitude_in)
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_in }},{{ $attendance->longitude_in }}"
+                                <a href="https://www.google.com/maps/@{{ $attendance->latitude_in }},{{ $attendance->longitude_in }},18z"
                                     target="_blank" class="text-blue-500 hover:underline">
                                     Lihat Peta
                                 </a>
@@ -153,7 +153,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->latitude_out) && $attendance->longitude_out)
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_out }},{{ $attendance->longitude_out }}"
+                                <a href="https://www.google.com/maps/@{{ $attendance->latitude_out }},{{ $attendance->longitude_out }},18z"
                                     target="_blank" class="text-blue-500 hover:underline">
                                     Lihat Peta
                                 </a>
@@ -231,7 +231,7 @@
                                         </a>
                                     @endif
                                     @if (isset($attendance->latitude_in) && $attendance->latitude_in)
-                                        <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_in }},{{ $attendance->longitude_in }}"
+                                        <a href="https://www.google.com/maps/@{{ $attendance->latitude_in }},{{ $attendance->longitude_in }},18z"
                                             target="_blank" class="text-blue-500 hover:underline">
                                             Lihat Lokasi
                                         </a>
@@ -288,7 +288,7 @@
                                             </a>
                                         @endif
                                         @if (isset($attendance->latitude_out) && $attendance->longitude_out)
-                                            <a href="https://www.google.com/maps/search/?api=1&query={{ $attendance->latitude_out }},{{ $attendance->longitude_out }}"
+                                            <a href="https://www.google.com/maps/@{{ $attendance->latitude_out }},{{ $attendance->longitude_out }},18z"
                                                 target="_blank" class="text-blue-500 hover:underline">
                                                 Lihat Lokasi
                                             </a>
