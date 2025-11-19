@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
             resultsContainer.innerHTML = html;
             attachPaginationListeners();
             attachModalListeners();
+            attachSortableListeners(); // Re-attach listeners for new content
         })
         .catch(error => console.error('Error fetching results:', error));
     }
@@ -77,6 +78,17 @@ document.addEventListener('DOMContentLoaded', function () {
             history.pushState(null, '', url);
             fetchResults(url);
         }, 300);
+    }
+
+    function attachSortableListeners() {
+        resultsContainer.querySelectorAll('thead a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                history.pushState(null, '', url);
+                fetchResults(url);
+            });
+        });
     }
 
     function attachPaginationListeners() {
@@ -117,8 +129,10 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('change', handleFormChange);
     });
 
+    // Initial attachment of listeners
     attachPaginationListeners();
     attachModalListeners();
+    attachSortableListeners();
 
     window.addEventListener('popstate', function () {
         fetchResults(location.href);

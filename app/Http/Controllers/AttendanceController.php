@@ -121,8 +121,15 @@ class AttendanceController extends Controller
         // Merge the two collections
         $combined = $attendances->toBase()->merge($filteredUsersOnLeave);
 
-        // Sort the combined collection (e.g., by user name)
-        $sorted = $combined->sortBy("user.name")->values();
+        // Sort the combined collection
+        $sortBy = $request->query('sort_by', 'user.name');
+        $sortDirection = $request->query('sort_direction', 'asc');
+
+        if ($sortDirection === 'desc') {
+            $sorted = $combined->sortByDesc($sortBy)->values();
+        } else {
+            $sorted = $combined->sortBy($sortBy)->values();
+        }
 
         // Manually paginate the collection
         $perPage = 15;
@@ -142,13 +149,17 @@ class AttendanceController extends Controller
             ],
         );
 
+        $viewData = [
+            'attendances' => $paginatedItems,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+        ];
+
         if ($request->ajax()) {
-            return view("attendances._results", [
-                "attendances" => $paginatedItems,
-            ])->render();
+            return view("attendances._results", $viewData)->render();
         }
 
-        return view("attendances.index", ["attendances" => $paginatedItems]);
+        return view("attendances.index", $viewData);
     }
 
     /**

@@ -8,25 +8,50 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu
-                        Masuk</th>
+                    @php
+                    $columns = [
+                        'user.name' => 'Nama',
+                        'type' => 'Tipe',
+                        'status' => 'Status',
+                        'time_in' => 'Waktu Masuk',
+                    ];
+                    @endphp
+
+                    @foreach ($columns as $column => $title)
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => $column, 'sort_direction' => ($sortBy == $column && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" class="flex items-center">
+                                {{ $title }}
+                                @if ($sortBy == $column)
+                                    @if ($sortDirection == 'asc')
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                    @else
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    @endif
+                                @endif
+                            </a>
+                        </th>
+                    @endforeach
+
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto
                         Masuk</th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi
                         Masuk</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu
-                        Pulang</th>
+                    
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => 'time_out', 'sort_direction' => ($sortBy == 'time_out' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" class="flex items-center">
+                            Waktu Pulang
+                            @if ($sortBy == 'time_out')
+                                @if ($sortDirection == 'asc')
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                @else
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                @endif
+                            @endif
+                        </a>
+                    </th>
+
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto
                         Pulang</th>
