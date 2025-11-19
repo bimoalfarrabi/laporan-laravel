@@ -35,20 +35,24 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $filterDate = $request->input("date")
             ? Carbon::parse($request->input("date"))
-            : now();
-        $search = $request->input("search");
+            : null;
 
         // Base query for attendances
-        $attendanceQuery = Attendance::with("user.roles")->whereDate(
-            "time_in",
-            $filterDate,
-        );
+        $attendanceQuery = Attendance::with("user.roles");
+        if ($filterDate) {
+            $attendanceQuery->whereDate("time_in", $filterDate);
+        }
 
         // Base query for leave requests
-        $leaveQuery = LeaveRequest::with("user.roles")
-            ->where("status", "disetujui")
-            ->where("start_date", "<=", $filterDate->format("Y-m-d"))
-            ->where("end_date", ">=", $filterDate->format("Y-m-d"));
+        $leaveQuery = LeaveRequest::with("user.roles")->where(
+            "status",
+            "disetujui",
+        );
+        if ($filterDate) {
+            $leaveQuery
+                ->where("start_date", "<=", $filterDate->format("Y-m-d"))
+                ->where("end_date", ">=", $filterDate->format("Y-m-d"));
+        }
 
         // Apply role-based restrictions
         if ($user->hasRole("anggota")) {
@@ -87,27 +91,32 @@ class AttendanceController extends Controller
         }
 
         $attendances = $attendanceQuery->get();
-        $leaveRequests = $leaveQuery->get();
+        $leaveRequests = collect();
+        $usersOnLeave = collect();
 
-        // Create virtual records for users on leave
-        $usersOnLeave = $leaveRequests->map(function ($leave) use (
-            $filterDate,
-        ) {
-            return (object) [
-                "user" => $leave->user,
-                "status" => "Izin",
-                "type" => $leave->leave_type,
-                "time_in" => $filterDate->copy()->startOfDay(), // for sorting
-                "time_out" => null,
-                "photo_in_path" => null,
-                "latitude_in" => null,
-                "longitude_in" => null,
-                "photo_out_path" => null,
-                "latitude_out" => null,
-                "longitude_out" => null,
-                "leaveRequest" => $leave, // <-- Add this line
-            ];
-        });
+        if ($filterDate) {
+            $leaveRequests = $leaveQuery->get();
+
+            // Create virtual records for users on leave
+            $usersOnLeave = $leaveRequests->map(function ($leave) use (
+                $filterDate,
+            ) {
+                return (object) [
+                    "user" => $leave->user,
+                    "status" => "Izin",
+                    "type" => $leave->leave_type,
+                    "time_in" => $filterDate->copy()->startOfDay(), // for sorting
+                    "time_out" => null,
+                    "photo_in_path" => null,
+                    "latitude_in" => null,
+                    "longitude_in" => null,
+                    "photo_out_path" => null,
+                    "latitude_out" => null,
+                    "longitude_out" => null,
+                    "leaveRequest" => $leave, // <-- Add this line
+                ];
+            });
+        }
 
         // Get user IDs of those who have actual attendance records
         $usersWithAttendance = $attendances->pluck("user_id");
