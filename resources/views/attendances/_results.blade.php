@@ -353,7 +353,7 @@
                                                     $formatted_duration_card = '0 detik';
                                                 }
 
-                                                $indicator_text_card = 'Terlambat selama ' . $formatted_duration_card;
+                                                $indicator_text_card = 'Terlambat ' . $formatted_duration_card;
                                                 $color_class_card = 'text-red-500';
                                             }
                                         @endphp
