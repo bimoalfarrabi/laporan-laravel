@@ -85,7 +85,9 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @if ($attendance->time_in && $attendance->status != 'Izin')
+                            @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
+                                -
+                            @elseif ($attendance->time_in)
                                 @php
                                     $time_in = \Carbon\Carbon::parse($attendance->time_in);
                                     $expected_start_hour = ($time_in->hour < 14) ? 7 : 19;
@@ -101,11 +103,13 @@
                                 {{ $time_in->format('d M Y, H:i') }}
                                 <div class="text-xs {{ $color_class }} font-semibold">{{ $diff_formatted }}</div>
                             @else
-                                {{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                                -
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @if (isset($attendance->photo_in_path) &&
+                            @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
+                                -
+                            @elseif (isset($attendance->photo_in_path) &&
                                     $attendance->photo_in_path &&
                                     Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
                                 <a class="open-photo-modal cursor-pointer"
@@ -118,7 +122,9 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @if (isset($attendance->latitude_in) && $attendance->latitude_in)
+                            @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
+                                -
+                            @elseif (isset($attendance->latitude_in) && $attendance->latitude_in)
                                 @php
                                     $url_in = "https://www.google.com/maps/@" . $attendance->latitude_in . "," . $attendance->longitude_in . ",18z";
                                 @endphp
@@ -230,7 +236,9 @@
                             <strong class="text-gray-600 w-1/3">Masuk:</strong>
                             <div class="w-2/3">
                                 <p>
-                                    @if ($attendance->time_in && $attendance->status != 'Izin')
+                                    @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
+                                        -
+                                    @elseif ($attendance->time_in)
                                         @php
                                             $time_in_card = \Carbon\Carbon::parse($attendance->time_in);
                                             $expected_start_hour_card = ($time_in_card->hour < 14) ? 7 : 19;
@@ -246,28 +254,30 @@
                                         {{ $time_in_card->format('d M Y, H:i') }}
                                         <span class="block text-xs {{ $color_class_card }} font-semibold">{{ $diff_formatted_card }}</span>
                                     @else
-                                        {{ $attendance->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('d M Y, H:i') : '-' }}
+                                        -
                                     @endif
                                 </p>
-                                <div class="flex items-center mt-1">
-                                    @if (isset($attendance->photo_in_path) &&
-                                            $attendance->photo_in_path &&
-                                            Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
-                                        <a class="open-photo-modal cursor-pointer mr-2"
-                                            data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}">
-                                            <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
-                                                alt="Foto Masuk" class="h-10 w-10 rounded-md object-cover">
-                                        </a>
-                                    @endif
-                                    @if (isset($attendance->latitude_in) && $attendance->latitude_in)
-                                        @php
-                                            $url_in_card = "https://www.google.com/maps/@" . $attendance->latitude_in . "," . $attendance->longitude_in . ",18z";
-                                        @endphp
-                                        <a href="{{ $url_in_card }}" target="_blank" class="text-blue-500 hover:underline">
-                                            Lihat Lokasi
-                                        </a>
-                                    @endif
-                                </div>
+                                @if ($attendance->status != 'Izin' && $attendance->status != 'libur')
+                                    <div class="flex items-center mt-1">
+                                        @if (isset($attendance->photo_in_path) &&
+                                                $attendance->photo_in_path &&
+                                                Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
+                                            <a class="open-photo-modal cursor-pointer mr-2"
+                                                data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}">
+                                                <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
+                                                    alt="Foto Masuk" class="h-10 w-10 rounded-md object-cover">
+                                            </a>
+                                        @endif
+                                        @if (isset($attendance->latitude_in) && $attendance->latitude_in)
+                                            @php
+                                                $url_in_card = "https://www.google.com/maps/@" . $attendance->latitude_in . "," . $attendance->longitude_in . ",18z";
+                                            @endphp
+                                            <a href="{{ $url_in_card }}" target="_blank" class="text-blue-500 hover:underline">
+                                                Lihat Lokasi
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-start">
