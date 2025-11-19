@@ -232,7 +232,7 @@
                                             if (empty($formatted_duration_out)) {
                                                 $formatted_duration_out = '0 detik';
                                             }
-                                            $indicator_text_out = 'Pulang lebih awal ' . $formatted_duration_out;
+                                            $indicator_text_out = 'Lebih awal ' . $formatted_duration_out;
                                             $color_class_out = 'text-red-500';
                                         }
                                     }
@@ -454,7 +454,7 @@
                                                     if (empty($formatted_duration_out_card)) {
                                                         $formatted_duration_out_card = '0 detik';
                                                     }
-                                                    $indicator_text_out_card = 'Pulang lebih awal ' . $formatted_duration_out_card;
+                                                    $indicator_text_out_card = 'Lebih awal ' . $formatted_duration_out_card;
                                                     $color_class_out_card = 'text-red-500';
                                                 }
                                             }
