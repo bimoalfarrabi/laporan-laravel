@@ -70,7 +70,6 @@
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
 
-                        @if(Auth::user()->hasRole('superadmin'))
                         <!-- Role -->
                         <div class="mt-4">
                             <x-input-label for="role" :value="__('Peran')" />
@@ -78,18 +77,17 @@
                                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                 required>
                                 <option value="">Pilih Peran</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->name }}"
-                                        {{ old('role') == $role->name ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
-                                @endforeach
+                                @if (!empty($roles))
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->name }}"
+                                            {{ old('role') == $role->name ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
-                        @else
-                            <input type="hidden" name="role" value="anggota" />
-                        @endif
 
                         @if(Auth::user()->hasRole('superadmin'))
                         <!-- Shift -->
