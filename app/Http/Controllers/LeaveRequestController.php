@@ -65,7 +65,7 @@ class LeaveRequestController extends Controller
             'leave_type' => 'required|string|max:255',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string|max:1000',
+            'reason' => 'nullable|string|max:1000',
         ]);
 
         LeaveRequest::create([
