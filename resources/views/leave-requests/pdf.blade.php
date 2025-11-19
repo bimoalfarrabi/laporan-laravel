@@ -27,7 +27,7 @@
         <p>Banyuwangi, {{ \Carbon\Carbon::parse($leaveRequest->created_at)->format('d F Y') }}</p>
         <p>Kepada Yth.</p>
         <p>PT Wira Buana Arum</p>
-        <p class="indent-2">Di Tempat.</p>
+        <p>Di Tempat.</p>
 
         <p style="margin-top: 20px;">Dengan hormat,</p>
         <p>Saya yang bertanda tangan di bawah ini:</p>
@@ -58,7 +58,7 @@
                 <p>Mengetahui</p>
                 @if($leaveRequest->approvedBy)
                     <div style="height: 10px;"></div>
-                    <img src="data:image/png;base64,{{ base64_encode(QrCode::size(80)->generate($leaveRequest->approvedBy->nik)) }}">
+                    <img src="data:image/png;base64,{{ base64_encode(QrCode::size(80)->generate($leaveRequest->approvedBy->nik ?? '')) }}">
                     <p><strong>{{ $leaveRequest->approvedBy->name }}</strong></p>
                     <p>{{ ucfirst($leaveRequest->approvedBy->roles->first()->name ?? 'Atasan') }}</p>
                 @else
@@ -69,7 +69,7 @@
             <div class="signatures-right">
                 <p>Hormat saya,</p>
                 <div style="height: 10px;"></div>
-                <img src="data:image/png;base64,{{ base64_encode(QrCode::size(80)->generate($leaveRequest->user->nik)) }}">
+                <img src="data:image/png;base64,{{ base64_encode(QrCode::size(80)->generate($leaveRequest->user->nik ?? '')) }}">
                 <p><strong>{{ $leaveRequest->user->name }}</strong></p>
                 <p>{{ ucfirst($leaveRequest->user->roles->first()->name ?? 'Karyawan') }}</p>
             </div>
