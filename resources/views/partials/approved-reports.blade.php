@@ -30,7 +30,7 @@
         {{-- Card View for Small Screens --}}
         <div class="mt-6 sm:hidden grid gap-4">
             @foreach ($approvedReports as $report)
-                <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+                <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200 mb-4">
                                             <div class="flex justify-between items-start mb-2">
                                                 <div class="font-bold text-lg text-gray-800 mr-2">{{ $report->reportType->name }}</div>
                                                 <span class="flex-shrink-0 px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">
