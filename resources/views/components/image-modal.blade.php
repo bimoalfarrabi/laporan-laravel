@@ -3,6 +3,7 @@
     x-data="{
         show: false,
         imageUrl: '',
+        fullImageUrl: '',
         rotation: 0,
         isLoading: true,
         async setRotationFromExif(url) {
@@ -41,7 +42,7 @@
         }
     }"
     x-show="show"
-    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; setRotationFromExif($event.detail.imageUrl)"
+    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; fullImageUrl = $event.detail.fullImageUrl; setRotationFromExif($event.detail.imageUrl)"
     x-on:keydown.escape.window="show = false"
     style="display: none;"
     class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -94,6 +95,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 19.5L21 15m0 0l-4.5-4.5M21 15H7.5a6 6 0 010-12H21" />
                 </svg>
             </button>
+            <a :href="fullImageUrl" target="_blank" class="absolute top-2 left-2 text-white bg-gray-800/75 rounded-full p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition" title="Buka gambar ukuran penuh">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+            </a>
         </div>
 
         <!-- Close Button - positioned always at top-right of the modal wrapper -->

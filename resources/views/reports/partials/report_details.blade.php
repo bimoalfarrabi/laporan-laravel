@@ -130,7 +130,7 @@
                                         $thumbnailUrl = route('files.serve', ['path' => $path, 'size' => '400x400']);
                                     @endphp
                                     <a href="#"
-                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $fullImageUrl }}' })"
+                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', fullImageUrl: '{{ $fullImageUrl }}' })"
                                         class="flex flex-col group flex-shrink-0 mt-2 gap-2">
 
                                         <!-- Outer Wrapper (final visual size) -->
