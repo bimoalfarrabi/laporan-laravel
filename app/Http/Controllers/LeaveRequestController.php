@@ -61,21 +61,32 @@ class LeaveRequestController extends Controller
     {
         $this->authorize('create', LeaveRequest::class);
 
-        $request->validate([
+        $isIzinTerlambat = $request->input('leave_type') === 'Izin terlambat';
+
+        $validatedData = $request->validate([
             'leave_type' => 'required|string|max:255',
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'keterangan' => 'nullable|string|max:1000',
+            'end_date' => $isIzinTerlambat ? 'nullable|date' : 'required|date|after_or_equal:start_date',
+            'start_time' => $isIzinTerlambat ? 'required' : 'nullable',
+            'end_time' => $isIzinTerlambat ? 'required|after:start_time' : 'nullable',
+            'keterangan' => $isIzinTerlambat ? 'required|string|max:1000' : 'nullable|string|max:1000',
         ]);
 
-        LeaveRequest::create([
+        $data = [
             'user_id' => Auth::id(),
-            'leave_type' => $request->leave_type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'keterangan' => $request->keterangan,
+            'leave_type' => $validatedData['leave_type'],
+            'start_date' => $validatedData['start_date'],
+            'end_date' => $isIzinTerlambat ? $validatedData['start_date'] : $validatedData['end_date'],
+            'keterangan' => $validatedData['keterangan'],
             'status' => 'menunggu persetujuan',
-        ]);
+        ];
+
+        if ($isIzinTerlambat) {
+            $data['start_time'] = $validatedData['start_time'];
+            $data['end_time'] = $validatedData['end_time'];
+        }
+
+        LeaveRequest::create($data);
 
         return redirect()->route('leave-requests.index')->with('success', 'Pengajuan izin berhasil dibuat.');
     }

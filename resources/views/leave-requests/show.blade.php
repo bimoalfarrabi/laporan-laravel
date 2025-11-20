@@ -14,7 +14,12 @@
                     <div class="space-y-4 mb-6">
                         <p><strong>Pemohon:</strong> {{ $leaveRequest->user->name }}</p>
                         <p><strong>Jenis Izin:</strong> {{ $leaveRequest->leave_type }}</p>
-                        <p><strong>Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }} ({{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari)</p>
+                        @if ($leaveRequest->leave_type === 'Izin terlambat')
+                            <p><strong>Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }}</p>
+                            <p><strong>Jam:</strong> {{ \Carbon\Carbon::parse($leaveRequest->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($leaveRequest->end_time)->format('H:i') }}</p>
+                        @else
+                            <p><strong>Tanggal:</strong> {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }} ({{ $leaveRequest->start_date->diffInDays($leaveRequest->end_date) + 1 }} hari)</p>
+                        @endif
                         <p><strong>Keterangan:</strong></p>
                         <div class="prose max-w-none p-4 bg-gray-50 rounded-md border border-gray-200">
                             {{ $leaveRequest->keterangan }}

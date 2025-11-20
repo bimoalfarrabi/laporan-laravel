@@ -25,22 +25,39 @@
                                 <option value="Izin memenuhi panggilan instansi pemerintah" {{ old('leave_type') == 'Izin memenuhi panggilan instansi pemerintah' ? 'selected' : '' }}>Izin memenuhi panggilan instansi pemerintah</option>
                                 <option value="Izin keperluan keluarga mendadak" {{ old('leave_type') == 'Izin keperluan keluarga mendadak' ? 'selected' : '' }}>Izin keperluan keluarga mendadak</option>
                                 <option value="Izin menikah" {{ old('leave_type') == 'Izin menikah' ? 'selected' : '' }}>Izin menikah</option>
+                                <option value="Izin terlambat" {{ old('leave_type') == 'Izin terlambat' ? 'selected' : '' }}>Izin terlambat</option>
                             </select>
                             <x-input-error :messages="$errors->get('leave_type')" class="mt-2" />
                         </div>
 
                         <!-- Start Date -->
                         <div class="mt-4">
-                            <x-input-label for="start_date" :value="__('Tanggal Mulai Izin')" />
+                            <x-input-label for="start_date" id="start_date_label" :value="__('Tanggal Mulai Izin')" />
                             <x-text-input id="start_date" class="block mt-1 w-full" type="date" name="start_date" :value="old('start_date')" required />
                             <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
                         </div>
 
                         <!-- End Date -->
-                        <div class="mt-4">
+                        <div class="mt-4" id="end_date_wrapper">
                             <x-input-label for="end_date" :value="__('Tanggal Selesai Izin')" />
                             <x-text-input id="end_date" class="block mt-1 w-full" type="date" name="end_date" :value="old('end_date')" required />
                             <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
+                        </div>
+
+                        <div id="time-fields" style="display: none;">
+                            <!-- Start Time -->
+                            <div class="mt-4">
+                                <x-input-label for="start_time" :value="__('Mulai Jam')" />
+                                <x-text-input id="start_time" class="block mt-1 w-full" type="time" name="start_time" :value="old('start_time')" />
+                                <x-input-error :messages="$errors->get('start_time')" class="mt-2" />
+                            </div>
+
+                            <!-- End Time -->
+                            <div class="mt-4">
+                                <x-input-label for="end_time" :value="__('Hingga Jam')" />
+                                <x-text-input id="end_time" class="block mt-1 w-full" type="time" name="end_time" :value="old('end_time')" />
+                                <x-input-error :messages="$errors->get('end_time')" class="mt-2" />
+                            </div>
                         </div>
 
                         <!-- Reason -->
@@ -64,4 +81,48 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const leaveTypeSelect = document.getElementById('leave_type');
+                const timeFields = document.getElementById('time-fields');
+                const endDateWrapper = document.getElementById('end_date_wrapper');
+                const startDateLabel = document.getElementById('start_date_label');
+
+                const startDateInput = document.getElementById('start_date');
+                const endDateInput = document.getElementById('end_date');
+                const startTimeInput = document.getElementById('start_time');
+                const endTimeInput = document.getElementById('end_time');
+                const keteranganTextarea = document.getElementById('keterangan');
+
+                function toggleFields() {
+                    if (leaveTypeSelect.value === 'Izin terlambat') {
+                        timeFields.style.display = 'block';
+                        endDateWrapper.style.display = 'none';
+                        startDateLabel.textContent = 'Tanggal';
+                        
+                        endDateInput.removeAttribute('required');
+                        startTimeInput.setAttribute('required', '');
+                        endTimeInput.setAttribute('required', '');
+                        keteranganTextarea.setAttribute('required', '');
+                    } else {
+                        timeFields.style.display = 'none';
+                        endDateWrapper.style.display = 'block';
+                        startDateLabel.textContent = 'Tanggal Mulai Izin';
+
+                        endDateInput.setAttribute('required', '');
+                        startTimeInput.removeAttribute('required');
+                        endTimeInput.removeAttribute('required');
+                        keteranganTextarea.removeAttribute('required');
+                    }
+                }
+
+                leaveTypeSelect.addEventListener('change', toggleFields);
+                
+                // Initial check
+                toggleFields();
+            });
+        </script>
+    @endpush
 </x-app-layout>

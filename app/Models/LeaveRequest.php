@@ -19,6 +19,8 @@ class LeaveRequest extends Model
         'user_id',
         'start_date',
         'end_date',
+        'start_time',
+        'end_time',
         'keterangan',
         'leave_type',
         'status',
