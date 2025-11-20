@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <div
     x-data="{
         show: false,

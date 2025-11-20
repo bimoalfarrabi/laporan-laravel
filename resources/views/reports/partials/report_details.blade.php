@@ -117,23 +117,26 @@
                         @elseif ($field->type === 'file')
                             @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
                                 @php
-                                    $filePath = $report->data[$field->name];
-                                    $imageUrl = route('files.serve', ['filePath' => $filePath]);
+                                    $path = $report->data[$field->name];
                                     $isImage = in_array(
-                                        strtolower(pathinfo($filePath, PATHINFO_EXTENSION)),
+                                        strtolower(pathinfo($path, PATHINFO_EXTENSION)),
                                         ['jpg', 'jpeg', 'png', 'gif', 'svg'],
                                     );
+                                    $fullImageUrl = route('files.serve', ['path' => $path]);
                                 @endphp
 
                                 @if ($isImage)
+                                    @php
+                                        $thumbnailUrl = route('files.serve', ['path' => $path, 'size' => '400x400']);
+                                    @endphp
                                     <a href="#"
-                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $imageUrl }}' })"
+                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ $fullImageUrl }}' })"
                                         class="flex flex-col group flex-shrink-0 mt-2 gap-2">
 
                                         <!-- Outer Wrapper (final visual size) -->
                                         <div
                                             class="w-40 h-52 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200">
-                                            <img src="{{ $imageUrl }}"
+                                            <img src="{{ $thumbnailUrl }}"
                                                 alt="{{ $field->label }}"
                                                 class="w-full h-full object-cover report-image">
                                         </div>
@@ -144,11 +147,11 @@
 
                                     </a>
                                 @else
-                                    <a href="{{ $imageUrl }}" target="_blank"
+                                    <a href="{{ $fullImageUrl }}" target="_blank"
                                         class="text-blue-600 hover:underline text-base">
 
                                         Lihat File
-                                        ({{ strtoupper(pathinfo($filePath, PATHINFO_EXTENSION)) }})
+                                        ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
 
                                     </a>
                                 @endif

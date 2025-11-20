@@ -18,8 +18,8 @@ Route::get('/', function () {
 });
 
 // Route untuk menyajikan file dari storage
-Route::get('storage/files/{filePath}', [FileController::class, 'serve'])
-    ->where('filePath', '.*')
+Route::get('storage/files/{path}', [FileController::class, 'serve'])
+    ->where('path', '.*')
     ->name('files.serve');
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
