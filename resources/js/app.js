@@ -1,6 +1,4 @@
 import './bootstrap';
-import 'exif-js';
-
 
 import Alpine from 'alpinejs';
 import Swal from 'sweetalert2';
@@ -33,9 +31,14 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    // Conditionally load EXIF and report navigation scripts
+    if (document.getElementById('report-detail-wrapper')) {
+        require('exif-js');
+        require('./report-navigation');
+    }
 });
 
 Alpine.start();
 
 import './dashboard-pagination';
-import './report-navigation';
