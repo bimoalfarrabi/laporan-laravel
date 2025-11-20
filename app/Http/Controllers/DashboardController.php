@@ -18,15 +18,38 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewData = [];
 
-        // Fetch approved reports with pagination, specific to the user's role context
         $approvedReports = Report::with('user', 'reportType')
             ->where('status', 'disetujui')
             ->latest()
-            ->paginate(5);
+            ->paginate(5, ['*'], 'approved_reports_page');
 
-        // If it's an AJAX request, return only the partial view for approved reports
+        $reportsForApprovalQuery = Report::with('user', 'reportType')
+            ->where('status', 'belum disetujui')
+            ->latest();
+
+        if ($user->hasRole('danru')) {
+            $reportsForApprovalQuery->whereHas('user', function ($query) {
+                $query->whereHas('roles', function ($q) {
+                    $q->where('name', 'anggota');
+                });
+            });
+        } elseif ($user->hasRole('manajemen')) {
+            $reportsForApprovalQuery->whereHas('user', function ($query) {
+                $query->whereHas('roles', function ($q) {
+                    $q->where('name', 'danru');
+                });
+            });
+        }
+
+        $reportsForApproval = $reportsForApprovalQuery->paginate(5, ['*'], 'reports_for_approval_page');
+
         if ($request->ajax()) {
-            return view('partials.approved-reports', compact('approvedReports'));
+            if ($request->has('approved_reports_page')) {
+                return view('partials.approved-reports', compact('approvedReports'));
+            }
+            if ($request->has('reports_for_approval_page')) {
+                return view('partials.reports-for-approval', compact('reportsForApproval'));
+            }
         }
 
         $viewData['announcements'] = Announcement::with('user')
@@ -41,16 +64,8 @@ class DashboardController extends Controller
             ->get();
 
         if ($user->hasRole('danru')) {
-            $viewData['reportsForApproval'] = Report::with('user', 'reportType')
-                ->where('status', 'belum disetujui')
-                ->whereHas('user', function ($query) {
-                    $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'anggota');
-                    });
-                })
-                ->latest()
-                ->get();
-            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
+            $viewData['reportsForApproval'] = $reportsForApproval;
+            $viewData['approvedReports'] = $approvedReports;
             $viewData['pendingLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->where('status', 'menunggu persetujuan')
                 ->latest()
@@ -60,16 +75,8 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
         } elseif ($user->hasRole('manajemen')) {
-            $viewData['reportsForApproval'] = Report::with('user', 'reportType')
-                ->where('status', 'belum disetujui')
-                ->whereHas('user', function ($query) {
-                    $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'danru');
-                    });
-                })
-                ->latest()
-                ->get();
-            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
+            $viewData['reportsForApproval'] = $reportsForApproval;
+            $viewData['approvedReports'] = $approvedReports;
             $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->latest()
                 ->take(5)
@@ -79,7 +86,7 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(5)
                 ->get();
-            $viewData['approvedReports'] = $approvedReports; // Use the already fetched paginated data
+            $viewData['approvedReports'] = $approvedReports;
             $viewData['myLeaveRequests'] = \App\Models\LeaveRequest::with('user')
                 ->where('user_id', $user->id)
                 ->latest()
