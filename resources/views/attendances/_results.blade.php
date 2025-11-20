@@ -144,11 +144,11 @@
                                     $attendance->photo_in_path &&
                                     Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
                                 <a class="open-photo-modal cursor-pointer"
-                                    data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
+                                    data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_in_path]) }}"
                                     data-photo-type="Masuk"
                                     data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}"
                                     data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_in)->format('H:i') }}">
-                                    <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
+                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '100x100']) }}"
                                         alt="Foto Masuk" class="h-10 w-10 rounded-full object-cover">
                                 </a>
                             @else
@@ -253,11 +253,11 @@
                                     $attendance->photo_out_path &&
                                     Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
                                 <a class="open-photo-modal cursor-pointer"
-                                    data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}"
+                                    data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_out_path]) }}"
                                     data-photo-type="Pulang"
                                     data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_out)->format('d M Y') }}"
                                     data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_out)->format('H:i') }}">
-                                    <img src="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}"
+                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '100x100']) }}"
                                         alt="Foto Pulang" class="h-10 w-10 rounded-full object-cover">
                                 </a>
                             @else
@@ -375,11 +375,11 @@
                                                 $attendance->photo_in_path &&
                                                 Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
                                             <a class="open-photo-modal cursor-pointer mr-2"
-                                                data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
+                                                data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_in_path]) }}"
                                                 data-photo-type="Masuk"
                                                 data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}"
                                                 data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_in)->format('H:i') }}">
-                                                <img src="{{ route('files.serve', ['filePath' => $attendance->photo_in_path]) }}"
+                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '100x100']) }}"
                                                     alt="Foto Masuk" class="h-10 w-10 rounded-md object-cover">
                                             </a>
                                         @endif
@@ -482,11 +482,11 @@
                                                 $attendance->photo_out_path &&
                                                 Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
                                             <a class="open-photo-modal cursor-pointer mr-2"
-                                                data-full-image-url="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}"
+                                                data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_out_path]) }}"
                                                 data-photo-type="Pulang"
                                                 data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_out)->format('d M Y') }}"
                                                 data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_out)->format('H:i') }}">
-                                                <img src="{{ route('files.serve', ['filePath' => $attendance->photo_out_path]) }}"
+                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '100x100']) }}"
                                                     alt="Foto Pulang" class="h-10 w-10 rounded-md object-cover">
                                             </a>
                                         @endif
