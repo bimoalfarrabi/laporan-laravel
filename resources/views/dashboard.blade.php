@@ -91,7 +91,7 @@
                             </div>
 
                             {{-- Card View for Small Screens --}}
-                            <div class="mt-6 sm:hidden space-y-4">
+                            <div class="mt-6 sm:hidden grid gap-4">
                                 @foreach ($reportsForApproval as $report)
                                     <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
                                                                             <div class="flex justify-between items-start mb-2">
