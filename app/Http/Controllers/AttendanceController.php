@@ -416,6 +416,24 @@ class AttendanceController extends Controller
             $now = now();
             $dateString = $now->toDateString();
 
+            // Cek apakah user sedang izin (kecuali Izin Terlambat)
+            $activeLeave = LeaveRequest::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->where('start_date', '<=', $dateString)
+                ->where('end_date', '>=', $dateString)
+                ->get()
+                ->first(function ($leave) {
+                    return strtolower($leave->leave_type) !== 'izin terlambat';
+                });
+
+            if ($activeLeave) {
+                $errorMessage = "Anda sedang dalam masa izin (" . $activeLeave->leave_type . "). Tidak dapat melakukan absensi.";
+                if ($request->expectsJson()) {
+                    return response()->json(["message" => $errorMessage], 422);
+                }
+                return redirect()->back()->with("error", $errorMessage);
+            }
+
             // Determine the most likely shift based on the current time.
             // This heuristic assumes clock-ins between midnight and 2 PM are for the morning shift,
             // and the rest are for the night shift.
