@@ -45,19 +45,53 @@ class AttendanceController extends Controller
             : now();
         $search = $request->input("search");
 
-        // Base query for attendances
+        // Base queries
         $attendanceQuery = Attendance::with("user.roles")->whereDate(
             "time_in",
             $filterDate,
         );
 
-        // Base query for leave requests
         $leaveQuery = LeaveRequest::with("user.roles")
             ->where("status", "disetujui")
             ->where("start_date", "<=", $filterDate->format("Y-m-d"))
             ->where("end_date", ">=", $filterDate->format("Y-m-d"));
 
-        // Apply role-based restrictions
+        // Apply filters
+        $this->applyRoleBasedFilters($attendanceQuery, $leaveQuery, $user);
+        $this->applySearchFilter($attendanceQuery, $leaveQuery, $search);
+
+        $attendances = $attendanceQuery->get();
+        $leaveRequests = $leaveQuery->get();
+
+        // Attach leave requests to attendances
+        $this->attachLeaveRequestsToAttendances($attendances, $leaveRequests);
+
+        // Create virtual records and merge
+        $usersOnLeave = $this->getVirtualLeaveRecords($leaveRequests, $filterDate);
+        $combined = $this->mergeRecords($attendances, $usersOnLeave);
+
+        // Sort and paginate
+        $sortBy = $request->query("sort_by", "user.name");
+        $sortDirection = $request->query("sort_direction", "asc");
+        
+        $sorted = $this->sortRecords($combined, $sortBy, $sortDirection);
+        $paginatedItems = $this->paginateRecords($sorted, 15, $request);
+
+        $viewData = [
+            "attendances" => $paginatedItems,
+            "sortBy" => $sortBy,
+            "sortDirection" => $sortDirection,
+        ];
+
+        if ($request->ajax()) {
+            return view("attendances._results", $viewData)->render();
+        }
+
+        return view("attendances.index", $viewData);
+    }
+
+    private function applyRoleBasedFilters($attendanceQuery, $leaveQuery, $user)
+    {
         if ($user->hasRole("anggota")) {
             $attendanceQuery->where("user_id", $user->id);
             $leaveQuery->where("user_id", $user->id);
@@ -80,8 +114,10 @@ class AttendanceController extends Controller
                 fn($q) => $q->whereIn("name", ["anggota", "danru"]),
             );
         }
+    }
 
-        // Apply search filter
+    private function applySearchFilter($attendanceQuery, $leaveQuery, $search)
+    {
         if ($search) {
             $attendanceQuery->whereHas(
                 "user",
@@ -92,11 +128,10 @@ class AttendanceController extends Controller
                 fn($q) => $q->where("name", "like", "%" . $search . "%"),
             );
         }
+    }
 
-        $attendances = $attendanceQuery->get();
-        $leaveRequests = $leaveQuery->get();
-
-        // Attach leave requests to attendances if they exist (e.g. for "Izin Terlambat")
+    private function attachLeaveRequestsToAttendances($attendances, $leaveRequests)
+    {
         foreach ($attendances as $attendance) {
             $leave = $leaveRequests->first(function ($item) use ($attendance) {
                 return $item->user_id == $attendance->user_id;
@@ -105,11 +140,11 @@ class AttendanceController extends Controller
                 $attendance->leaveRequest = $leave;
             }
         }
+    }
 
-        // Create virtual records for users on leave
-        $usersOnLeave = $leaveRequests->map(function ($leave) use (
-            $filterDate,
-        ) {
+    private function getVirtualLeaveRecords($leaveRequests, $filterDate)
+    {
+        return $leaveRequests->map(function ($leave) use ($filterDate) {
             return (object) [
                 "user" => $leave->user,
                 "status" => "Izin",
@@ -122,40 +157,40 @@ class AttendanceController extends Controller
                 "photo_out_path" => null,
                 "latitude_out" => null,
                 "longitude_out" => null,
-                "leaveRequest" => $leave, // <-- Add this line
+                "leaveRequest" => $leave,
             ];
         });
+    }
 
-        // Get user IDs of those who have actual attendance records
+    private function mergeRecords($attendances, $usersOnLeave)
+    {
         $usersWithAttendance = $attendances->pluck("user_id");
-
-        // Filter out users on leave who also have an attendance record (edge case)
+        
         $filteredUsersOnLeave = $usersOnLeave->whereNotIn(
             "user.id",
             $usersWithAttendance,
         );
 
-        // Merge the two collections
-        $combined = $attendances->toBase()->merge($filteredUsersOnLeave);
+        return $attendances->toBase()->merge($filteredUsersOnLeave);
+    }
 
-        // Sort the combined collection
-        $sortBy = $request->query("sort_by", "user.name");
-        $sortDirection = $request->query("sort_direction", "asc");
-
+    private function sortRecords($combined, $sortBy, $sortDirection)
+    {
         if ($sortDirection === "desc") {
-            $sorted = $combined->sortByDesc($sortBy)->values();
-        } else {
-            $sorted = $combined->sortBy($sortBy)->values();
+            return $combined->sortByDesc($sortBy)->values();
         }
+        return $combined->sortBy($sortBy)->values();
+    }
 
-        // Manually paginate the collection
-        $perPage = 15;
+    private function paginateRecords($sorted, $perPage, $request)
+    {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentPageItems = $sorted->slice(
             ($currentPage - 1) * $perPage,
             $perPage,
         );
-        $paginatedItems = new LengthAwarePaginator(
+        
+        return new LengthAwarePaginator(
             $currentPageItems,
             $sorted->count(),
             $perPage,
@@ -165,18 +200,6 @@ class AttendanceController extends Controller
                 "query" => $request->query(),
             ],
         );
-
-        $viewData = [
-            "attendances" => $paginatedItems,
-            "sortBy" => $sortBy,
-            "sortDirection" => $sortDirection,
-        ];
-
-        if ($request->ajax()) {
-            return view("attendances._results", $viewData)->render();
-        }
-
-        return view("attendances.index", $viewData);
     }
 
     /**
