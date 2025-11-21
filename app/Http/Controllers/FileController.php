@@ -100,7 +100,12 @@ class FileController extends Controller
         $originalWidth = imagesx($imageResource);
         $originalHeight = imagesy($imageResource);
 
-        $newImageResource = imagecreatetruecolor($width, $height);
+        // Calculate new dimensions while maintaining aspect ratio
+        $ratio = min($width / $originalWidth, $height / $originalHeight);
+        $newWidth = (int) ($originalWidth * $ratio);
+        $newHeight = (int) ($originalHeight * $ratio);
+
+        $newImageResource = imagecreatetruecolor($newWidth, $newHeight);
 
         // Handle transparency for PNG and GIF
         $extension = strtolower(pathinfo($originalPath, PATHINFO_EXTENSION));
@@ -117,8 +122,8 @@ class FileController extends Controller
             0,
             0,
             0,
-            $width,
-            $height,
+            $newWidth,
+            $newHeight,
             $originalWidth,
             $originalHeight
         );

@@ -2,10 +2,13 @@
     {{-- Simplified Report Metadata --}}
     <div class="space-y-4 mb-6">
         <div class="text-lg">
-            <p class="text-gray-600"><strong>ID Laporan:</strong> <span class="font-mono bg-gray-100 px-2 py-1 rounded">#{{ $report->id }}</span></p>
-            <p class="text-gray-600"><strong>Jenis Laporan:</strong> <span class="font-semibold text-gray-800">{{ $report->reportType->name }}</span></p>
+            <p class="text-gray-600"><strong>ID Laporan:</strong> <span
+                    class="font-mono bg-gray-100 px-2 py-1 rounded">#{{ $report->id }}</span></p>
+            <p class="text-gray-600"><strong>Jenis Laporan:</strong> <span
+                    class="font-semibold text-gray-800">{{ $report->reportType->name }}</span></p>
             @if ($report->shift)
-                <p class="text-gray-600"><strong>Shift:</strong> <span class="font-semibold text-gray-800">{{ $report->shift }}</span></p>
+                <p class="text-gray-600"><strong>Shift:</strong> <span
+                        class="font-semibold text-gray-800">{{ $report->shift }}</span></p>
             @endif
             <p class="text-gray-600"><strong>Status:</strong>
                 @php
@@ -24,8 +27,7 @@
                             break;
                     }
                 @endphp
-                <span
-                    class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $bgColor }}">
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $bgColor }}">
                     {{ ucfirst($report->status) }}
                 </span>
             </p>
@@ -35,19 +37,23 @@
     {{-- Signature/History Block --}}
     <div class="mt-8 pt-6 border-t border-gray-200">
         <h3 class="font-semibold text-lg text-gray-800 mb-4">Riwayat Laporan</h3>
-        <div
-            class="flex flex-col md:flex-row md:justify-between text-base text-gray-700 space-y-3 md:space-y-0">
+        <div class="flex flex-col md:flex-row md:justify-between text-base text-gray-700 space-y-3 md:space-y-0">
             {{-- Left Side --}}
             <div class="space-y-3">
                 <p><strong>Dibuat oleh:</strong> {{ $report->user->name }} @if ($report->user->roles->isNotEmpty())
                         <span class="text-sm text-gray-500">({{ $report->user->roles->first()->name }})</span>
                     @endif pada
-                    <span class="font-medium">{{ $report->created_at->format('d-m-Y H:i') }}</span></p>
+                    <span class="font-medium">{{ $report->created_at->format('d-m-Y H:i') }}</span>
+                </p>
                 @if ($report->lastEditedBy && $report->updated_at != $report->created_at)
                     <p><strong>Terakhir diperbarui oleh:</strong> {{ $report->lastEditedBy->name }}
-                        @if ($report->lastEditedBy->roles->isNotEmpty())<span class="text-sm text-gray-500">({{ $report->lastEditedBy->roles->first()->name }})</span>@endif
+                        @if ($report->lastEditedBy->roles->isNotEmpty())
+                            <span
+                                class="text-sm text-gray-500">({{ $report->lastEditedBy->roles->first()->name }})</span>
+                        @endif
                         pada
-                        <span class="font-medium">{{ $report->updated_at->format('d-m-Y H:i') }}</span></p>
+                        <span class="font-medium">{{ $report->updated_at->format('d-m-Y H:i') }}</span>
+                    </p>
                 @endif
             </div>
 
@@ -55,17 +61,23 @@
             <div class="space-y-3 md:text-right">
                 @if ($report->approvedBy)
                     <p><strong>Disetujui oleh:</strong> {{ $report->approvedBy->name }}
-                        @if ($report->approvedBy->roles->isNotEmpty())<span class="text-sm text-gray-500">({{ $report->approvedBy->roles->first()->name }})</span>@endif pada
-                        <span class="font-medium">{{ $report->approved_at->format('d-m-Y H:i') }}</span></p>
+                        @if ($report->approvedBy->roles->isNotEmpty())
+                            <span
+                                class="text-sm text-gray-500">({{ $report->approvedBy->roles->first()->name }})</span>
+                        @endif pada
+                        <span class="font-medium">{{ $report->approved_at->format('d-m-Y H:i') }}</span>
+                    </p>
                 @endif
                 @if ($report->rejectedBy)
                     <p><strong>Ditolak oleh:</strong> {{ $report->rejectedBy->name }} pada
-                        <span class="font-medium">{{ $report->rejected_at->format('d-m-Y H:i') }}</span></p>
+                        <span class="font-medium">{{ $report->rejected_at->format('d-m-Y H:i') }}</span>
+                    </p>
                 @endif
                 @if ($report->deleted_at)
                     <p class="text-red-700"><strong>Dihapus oleh:</strong>
                         {{ $report->deletedBy?->name ?? 'Pengguna telah dihapus' }} pada
-                        <span class="font-medium">{{ $report->deleted_at->format('d-m-Y H:i') }}</span></p>
+                        <span class="font-medium">{{ $report->deleted_at->format('d-m-Y H:i') }}</span>
+                    </p>
                 @endif
             </div>
         </div>
@@ -99,9 +111,7 @@
                         @if ($field->name === 'date' || $field->name === 'tanggal')
                             @php
                                 $dateData = $report->data['date'] ?? ($report->data['tanggal'] ?? null);
-                                $dateValue = $dateData
-                                    ? Carbon\Carbon::parse($dateData)->format('d-m-Y')
-                                    : null;
+                                $dateValue = $dateData ? Carbon\Carbon::parse($dateData)->format('d-m-Y') : null;
                             @endphp
                             <span class="font-medium">{{ $dateValue ?? '-' }}</span>
                             @if ($timeFieldValue)
@@ -118,16 +128,19 @@
                             @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
                                 @php
                                     $path = $report->data[$field->name];
-                                    $isImage = in_array(
-                                        strtolower(pathinfo($path, PATHINFO_EXTENSION)),
-                                        ['jpg', 'jpeg', 'png', 'gif', 'svg'],
-                                    );
+                                    $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
+                                        'jpg',
+                                        'jpeg',
+                                        'png',
+                                        'gif',
+                                        'svg',
+                                    ]);
                                     $fullImageUrl = route('files.serve', ['path' => $path]);
                                 @endphp
 
                                 @if ($isImage)
                                     @php
-                                        $thumbnailUrl = route('files.serve', ['path' => $path, 'size' => '400x400']);
+                                        $thumbnailUrl = route('files.serve', ['path' => $path, 'size' => '200x200']);
                                     @endphp
                                     <a href="#"
                                         @click.prevent="$dispatch('open-modal', { imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', fullImageUrl: '{{ $fullImageUrl }}' })"
@@ -135,14 +148,12 @@
 
                                         <!-- Outer Wrapper (final visual size) -->
                                         <div
-                                            class="w-40 h-52 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200">
-                                            <img src="{{ $thumbnailUrl }}"
-                                                alt="{{ $field->label }}"
-                                                class="w-full h-full object-cover report-image">
+                                            class="w-40 h-52 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                            <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}" loading="lazy"
+                                                class="max-w-full max-h-full object-contain report-image">
                                         </div>
 
-                                        <span
-                                            class="text-blue-600 group-hover:underline text-base block mt-1">Lihat
+                                        <span class="text-blue-600 group-hover:underline text-base block mt-1">Lihat
                                             Gambar Penuh</span>
 
                                     </a>
