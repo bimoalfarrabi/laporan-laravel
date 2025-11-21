@@ -14,6 +14,11 @@ class LeaveRequest extends Model
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
+     *
+     * @property \Illuminate\Support\Carbon $start_date
+     * @property \Illuminate\Support\Carbon|null $end_date
+     * @property \Illuminate\Support\Carbon|null $approved_at
+     * @property \Illuminate\Support\Carbon|null $rejected_at
      */
     protected $fillable = [
         'user_id',

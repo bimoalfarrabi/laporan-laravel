@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class LeaveRequestController extends Controller
 {
@@ -170,7 +171,7 @@ class LeaveRequestController extends Controller
         $pdf = Pdf::loadView('leave-requests.pdf', compact('leaveRequest'));
         
         $applicantName = Str::slug($leaveRequest->user->name);
-        $startDate = $leaveRequest->start_date->format('Ymd');
+        $startDate = Carbon::parse($leaveRequest->start_date)->format('Ymd');
         $filename = "surat-izin-{$applicantName}-{$startDate}.pdf";
 
         return $pdf->download($filename);
