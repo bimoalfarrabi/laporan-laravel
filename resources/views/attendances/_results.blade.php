@@ -178,8 +178,8 @@
                                     data-photo-type="Masuk"
                                     data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}"
                                     data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_in)->format('H:i') }}">
-                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '100x100']) }}"
-                                        alt="Foto Masuk" class="h-10 w-10 rounded-full object-cover">
+                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '50x50']) }}"
+                                        alt="Foto Masuk" loading="lazy" class="h-10 w-10 rounded-full object-cover">
                                 </a>
                             @else
                                 -
@@ -298,8 +298,8 @@
                                     data-photo-type="Pulang"
                                     data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_out)->format('d M Y') }}"
                                     data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_out)->format('H:i') }}">
-                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '100x100']) }}"
-                                        alt="Foto Pulang" class="h-10 w-10 rounded-full object-cover">
+                                    <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '50x50']) }}"
+                                        alt="Foto Pulang" loading="lazy" class="h-10 w-10 rounded-full object-cover">
                                 </a>
                             @else
                                 -
@@ -443,8 +443,9 @@
                                                 data-photo-type="Masuk"
                                                 data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}"
                                                 data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_in)->format('H:i') }}">
-                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '100x100']) }}"
-                                                    alt="Foto Masuk" class="h-10 w-10 rounded-md object-cover">
+                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '50x50']) }}"
+                                                    alt="Foto Masuk" loading="lazy"
+                                                    class="h-10 w-10 rounded-md object-cover">
                                             </a>
                                         @endif
                                         @if (isset($attendance->latitude_in) && $attendance->latitude_in)
@@ -577,8 +578,9 @@
                                                 data-photo-type="Pulang"
                                                 data-photo-date="{{ \Carbon\Carbon::parse($attendance->time_out)->format('d M Y') }}"
                                                 data-photo-time="{{ \Carbon\Carbon::parse($attendance->time_out)->format('H:i') }}">
-                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '100x100']) }}"
-                                                    alt="Foto Pulang" class="h-10 w-10 rounded-md object-cover">
+                                                <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '50x50']) }}"
+                                                    alt="Foto Pulang" loading="lazy"
+                                                    class="h-10 w-10 rounded-md object-cover">
                                             </a>
                                         @endif
                                         @if (isset($attendance->latitude_out) && $attendance->longitude_out)
