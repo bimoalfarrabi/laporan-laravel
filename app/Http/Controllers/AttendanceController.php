@@ -657,102 +657,18 @@ class AttendanceController extends Controller
         $endDate = $carbonDate->copy()->endOfMonth();
         $monthName = $carbonDate->translatedFormat("F Y");
 
-        // 1. Get all users with their roles, including trashed users if they were active during the month
-        $users = User::withTrashed()
-            ->whereHas("roles", function ($query) {
-                $query->whereIn("name", ["danru", "anggota", "backup"]);
-            })
-            ->where(function ($query) use ($startDate) {
-                $query->whereNull('deleted_at') // Always include active users
-                      ->orWhere('deleted_at', '>=', $startDate); // Or include users deleted during or after the start of the month
-            })
-            ->orderBy("name")
-            ->get();
-
-        // 2. Get all relevant attendances and leaves for the month
-        $attendances = Attendance::with("user")
-            ->whereBetween("time_in", [$startDate, $endDate])
-            ->get()
-            ->keyBy(function ($item) {
-                return $item->user_id .
-                    "_" .
-                    Carbon::parse($item->time_in)->format("Y-m-d");
-            });
-
-        $leaveRequests = LeaveRequest::with("user")
-            ->where("status", "disetujui")
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query
-                    ->where("start_date", "<=", $endDate->format("Y-m-d"))
-                    ->where("end_date", ">=", $startDate->format("Y-m-d"));
-            })
-            ->get();
-
-        // 3. Create a data matrix
+        $users = $this->getUsersForExport($startDate);
+        $attendances = $this->getAttendancesForExport($startDate, $endDate);
+        $leaveRequests = $this->getLeaveRequestsForExport($startDate, $endDate);
         $dateRange = CarbonPeriod::create($startDate, $endDate);
-        $dataMatrix = [];
 
-        foreach ($users as $user) {
-            $dataMatrix[$user->id]["user_name"] = $user->name;
-            $dataMatrix[$user->id]["dates"] = [];
-            $dataMatrix[$user->id]["dates"] = [];
+        $dataMatrix = $this->buildExportDataMatrix(
+            $users,
+            $attendances,
+            $leaveRequests,
+            $dateRange
+        );
 
-            foreach ($dateRange as $date) {
-                $dateString = $date->format("Y-m-d");
-                $attendanceKey = $user->id . "_" . $dateString;
-
-                if (isset($attendances[$attendanceKey])) {
-                    $attendance = $attendances[$attendanceKey];
-                    $timeIn = Carbon::parse($attendance->time_in);
-
-                    // Lateness logic from store method
-                    $pagiShiftStart = $timeIn->copy()->setTime(7, 0, 0);
-                    $malamShiftStart = $timeIn->copy()->setTime(19, 0, 0);
-
-                    $expectedStartTime =
-                        $timeIn->hour >= 0 && $timeIn->hour < 14
-                            ? $pagiShiftStart
-                            : $malamShiftStart;
-                    $isLate = $timeIn->isAfter($expectedStartTime);
-
-                    $dataMatrix[$user->id]["dates"][$dateString] = [
-                        "type" => $attendance->type ?? "N/A",
-                        "time_in" => $timeIn->format("H:i:s"),
-                        "time_out" => $attendance->time_out
-                            ? Carbon::parse($attendance->time_out)->format(
-                                "H:i:s",
-                            )
-                            : "-",
-                        "is_late" => $isLate,
-                        "status" => "Hadir",
-                    ];
-                } else {
-                    // Check if the user is on leave
-                    $isOnLeave = false;
-                    foreach ($leaveRequests as $leave) {
-                        if (
-                            $leave->user_id == $user->id &&
-                            $date->between($leave->start_date, $leave->end_date)
-                        ) {
-                            $dataMatrix[$user->id]["dates"][$dateString] = [
-                                "status" => "Izin",
-                                "type" => $leave->leave_type,
-                            ];
-                            $isOnLeave = true;
-                            break;
-                        }
-                    }
-
-                    if (!$isOnLeave) {
-                        $dataMatrix[$user->id]["dates"][$dateString] = [
-                            "status" => "Tidak Hadir",
-                        ];
-                    }
-                }
-            }
-        }
-
-        // 4. Generate PDF
         $pdf = Pdf::loadView("attendances.export-pdf", [
             "dataMatrix" => $dataMatrix,
             "dateRange" => $dateRange,
@@ -761,5 +677,113 @@ class AttendanceController extends Controller
 
         $filename = "Laporan_Absensi_" . Str::slug($monthName) . ".pdf";
         return $pdf->stream($filename);
+    }
+
+    private function getUsersForExport($startDate)
+    {
+        return User::withTrashed()
+            ->whereHas("roles", function ($query) {
+                $query->whereIn("name", ["danru", "anggota", "backup"]);
+            })
+            ->where(function ($query) use ($startDate) {
+                $query->whereNull('deleted_at')
+                      ->orWhere('deleted_at', '>=', $startDate);
+            })
+            ->orderBy("name")
+            ->get();
+    }
+
+    private function getAttendancesForExport($startDate, $endDate)
+    {
+        return Attendance::with("user")
+            ->whereBetween("time_in", [$startDate, $endDate])
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->user_id .
+                    "_" .
+                    Carbon::parse($item->time_in)->format("Y-m-d");
+            });
+    }
+
+    private function getLeaveRequestsForExport($startDate, $endDate)
+    {
+        return LeaveRequest::with("user")
+            ->where("status", "disetujui")
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query
+                    ->where("start_date", "<=", $endDate->format("Y-m-d"))
+                    ->where("end_date", ">=", $startDate->format("Y-m-d"));
+            })
+            ->get();
+    }
+
+    private function buildExportDataMatrix($users, $attendances, $leaveRequests, $dateRange)
+    {
+        $dataMatrix = [];
+
+        foreach ($users as $user) {
+            $dataMatrix[$user->id]["user_name"] = $user->name;
+            $dataMatrix[$user->id]["dates"] = [];
+
+            foreach ($dateRange as $date) {
+                $dateString = $date->format("Y-m-d");
+                $dataMatrix[$user->id]["dates"][$dateString] = $this->calculateDailyStatus(
+                    $user,
+                    $date,
+                    $attendances,
+                    $leaveRequests
+                );
+            }
+        }
+
+        return $dataMatrix;
+    }
+
+    private function calculateDailyStatus($user, $date, $attendances, $leaveRequests)
+    {
+        $dateString = $date->format("Y-m-d");
+        $attendanceKey = $user->id . "_" . $dateString;
+
+        if (isset($attendances[$attendanceKey])) {
+            $attendance = $attendances[$attendanceKey];
+            $timeIn = Carbon::parse($attendance->time_in);
+
+            // Lateness logic
+            $pagiShiftStart = $timeIn->copy()->setTime(7, 0, 0);
+            $malamShiftStart = $timeIn->copy()->setTime(19, 0, 0);
+
+            $expectedStartTime =
+                $timeIn->hour >= 0 && $timeIn->hour < 14
+                    ? $pagiShiftStart
+                    : $malamShiftStart;
+            $isLate = $timeIn->isAfter($expectedStartTime);
+
+            return [
+                "type" => $attendance->type ?? "N/A",
+                "time_in" => $timeIn->format("H:i:s"),
+                "time_out" => $attendance->time_out
+                    ? Carbon::parse($attendance->time_out)->format("H:i:s")
+                    : "-",
+                "is_late" => $isLate,
+                "status" => "Hadir",
+            ];
+        }
+
+        // Check if the user is on leave
+        foreach ($leaveRequests as $leave) {
+            if (
+                $leave->user_id == $user->id &&
+                $date->between($leave->start_date, $leave->end_date)
+            ) {
+                return [
+                    "status" => "Izin",
+                    "type" => $leave->leave_type,
+                ];
+            }
+        }
+
+        return [
+            "status" => "Tidak Hadir",
+        ];
     }
 }
