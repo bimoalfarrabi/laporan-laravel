@@ -72,18 +72,23 @@ class ReportController extends Controller
         }
 
         // Apply sorting
-        if ($sortBy == 'report_type_name') {
-            $query
-                ->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
-                ->orderBy('report_types.name', $sortDirection)
-                ->select('reports.*');
-        } elseif ($sortBy == 'user_name') {
-            $query
-                ->join('users', 'reports.user_id', '=', 'users.id')
-                ->orderBy('users.name', $sortDirection)
-                ->select('reports.*');
-        } else {
-            $query->orderBy($sortBy, $sortDirection);
+        // Apply sorting
+        switch ($sortBy) {
+            case 'report_type_name':
+                $query
+                    ->join('report_types', 'reports.report_type_id', '=', 'report_types.id')
+                    ->orderBy('report_types.name', $sortDirection)
+                    ->select('reports.*');
+                break;
+            case 'user_name':
+                $query
+                    ->join('users', 'reports.user_id', '=', 'users.id')
+                    ->orderBy('users.name', $sortDirection)
+                    ->select('reports.*');
+                break;
+            default:
+                $query->orderBy($sortBy, $sortDirection);
+                break;
         }
 
         // Paginate the results
