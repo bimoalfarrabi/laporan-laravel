@@ -227,7 +227,7 @@ class AttendanceController extends Controller
             }
             $errorMessage =
                 "Anda sudah melakukan absensi pada pukul " .
-                \Carbon\Carbon::parse($lastActionTime)->format("H:i") .
+                Carbon::parse($lastActionTime)->format("H:i") .
                 ". Aksi dibatalkan untuk mencegah data ganda.";
             return redirect()->back()->with("error", $errorMessage);
         }
@@ -492,28 +492,16 @@ class AttendanceController extends Controller
             $timeInDateString = $timeIn->toDateString();
             $shifts = [
                 "Reguler" => [
-                    "start" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 07:00",
-                    ),
-                    "end" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 15:00",
-                    ), // 8 hours
+                    "start" => Carbon::parse("$timeInDateString 07:00"),
+                    "end" => Carbon::parse("$timeInDateString 15:00"), // 8 hours
                 ],
                 "Normal Pagi" => [
-                    "start" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 07:00",
-                    ),
-                    "end" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 19:00",
-                    ), // 12 hours
+                    "start" => Carbon::parse("$timeInDateString 07:00"),
+                    "end" => Carbon::parse("$timeInDateString 19:00"), // 12 hours
                 ],
                 "Normal Malam" => [
-                    "start" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 19:00",
-                    ),
-                    "end" => \Carbon\Carbon::parse(
-                        $timeInDateString . " 07:00",
-                    )->addDay(), // 12 hours
+                    "start" => Carbon::parse("$timeInDateString 19:00"),
+                    "end" => Carbon::parse("$timeInDateString 07:00")->addDay(), // 12 hours
                 ],
             ];
 
