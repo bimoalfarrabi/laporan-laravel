@@ -17,7 +17,7 @@ class FileController extends Controller
      *
      * @param Request $request
      * @param string $path
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function serve(Request $request, $path)
     {
@@ -43,13 +43,13 @@ class FileController extends Controller
 
             // If thumbnail exists, serve it directly
             if (Storage::disk('public')->exists($thumbnailPath)) {
-                return Storage::disk('public')->response($thumbnailPath);
+                return response()->file(Storage::disk('public')->path($thumbnailPath));
             }
 
             // If not, generate the thumbnail
             try {
                 $this->generateThumbnail($path, $thumbnailPath, $width, $height);
-                return Storage::disk('public')->response($thumbnailPath);
+                return response()->file(Storage::disk('public')->path($thumbnailPath));
             } catch (\Exception $e) {
                 // If thumbnail generation fails, log the error and consider falling back
                 \Illuminate\Support\Facades\Log::error("Thumbnail generation failed for {$path}: " . $e->getMessage());
@@ -58,7 +58,7 @@ class FileController extends Controller
         }
 
         // Return the original file if no size is requested or if it's not an image
-        return Storage::disk('public')->response($path);
+        return response()->file(Storage::disk('public')->path($path));
     }
 
     /**
