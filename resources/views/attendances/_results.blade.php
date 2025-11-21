@@ -9,23 +9,33 @@
             <thead class="bg-gray-50">
                 <tr>
                     @php
-                    $columns = [
-                        'user.name' => 'Nama',
-                        'type' => 'Tipe',
-                        'status' => 'Status',
-                        'time_in' => 'Waktu Masuk',
-                    ];
+                        $columns = [
+                            'user.name' => 'Nama',
+                            'type' => 'Tipe',
+                            'status' => 'Status',
+                            'time_in' => 'Waktu Masuk',
+                        ];
                     @endphp
 
                     @foreach ($columns as $column => $title)
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => $column, 'sort_direction' => ($sortBy == $column && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" class="flex items-center">
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => $column, 'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                class="flex items-center">
                                 {{ $title }}
                                 @if ($sortBy == $column)
                                     @if ($sortDirection == 'asc')
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 15l7-7 7 7"></path>
+                                        </svg>
                                     @else
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7"></path>
+                                        </svg>
                                     @endif
                                 @endif
                             </a>
@@ -39,14 +49,24 @@
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi
                         Masuk</th>
 
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => 'time_out', 'sort_direction' => ($sortBy == 'time_out' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" class="flex items-center">
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => 'time_out', 'sort_direction' => $sortBy == 'time_out' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                            class="flex items-center">
                             Waktu Pulang
                             @if ($sortBy == 'time_out')
                                 @if ($sortDirection == 'asc')
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 15l7-7 7 7"></path>
+                                    </svg>
                                 @else
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
                                 @endif
                             @endif
                         </a>
@@ -84,7 +104,14 @@
                                     Izin
                                 </a>
                             @elseif($attendance->status == 'Terlambat')
-                                <span class="text-red-500 font-semibold">{{ $attendance->status }}</span>
+                                @if (isset($attendance->leaveRequest) && strtolower($attendance->leaveRequest->leave_type) == 'izin terlambat')
+                                    <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}"
+                                        class="text-yellow-600 hover:underline font-semibold">
+                                        Izin Terlambat
+                                    </a>
+                                @else
+                                    <span class="text-red-500 font-semibold">{{ $attendance->status }}</span>
+                                @endif
                             @else
                                 {{ $attendance->status }}
                             @endif
@@ -95,17 +122,19 @@
                             @elseif ($attendance->time_in)
                                 @php
                                     $time_in = \Carbon\Carbon::parse($attendance->time_in);
-                                    $expected_start_hour = ($time_in->hour < 14) ? 7 : 19;
+                                    $expected_start_hour = $time_in->hour < 14 ? 7 : 19;
                                     $expected_start_time = $time_in->copy()->setTime($expected_start_hour, 0, 0);
                                     $diff_minutes = $expected_start_time->diffInMinutes($time_in, false);
 
                                     $indicator_text = '';
                                     $color_class = 'text-gray-500'; // Default color
 
-                                    if ($diff_minutes <= 0) { // Early or on time
+                                    if ($diff_minutes <= 0) {
+                                        // Early or on time
                                         $indicator_text = 'Tepat Waktu';
                                         $color_class = 'text-green-500';
-                                    } elseif ($diff_minutes > 0) { // Late
+                                    } elseif ($diff_minutes > 0) {
+                                        // Late
                                         $diff_in_seconds = abs($expected_start_time->diffInSeconds($time_in)); // Ensure positive difference
                                         $hours = floor($diff_in_seconds / 3600);
                                         $minutes = floor(($diff_in_seconds % 3600) / 60);
@@ -118,7 +147,8 @@
                                         if ($minutes > 0) {
                                             $parts[] = $minutes . ' menit';
                                         }
-                                        if ($seconds > 0 && empty($parts)) { // Only show seconds if less than a minute
+                                        if ($seconds > 0 && empty($parts)) {
+                                            // Only show seconds if less than a minute
                                             $parts[] = $seconds . ' detik';
                                         }
 
@@ -160,7 +190,12 @@
                                 -
                             @elseif (isset($attendance->latitude_in) && $attendance->latitude_in)
                                 @php
-                                    $url_in = "https://www.google.com/maps?q=" . $attendance->latitude_in . "," . $attendance->longitude_in . "&z=18";
+                                    $url_in =
+                                        'https://www.google.com/maps?q=' .
+                                        $attendance->latitude_in .
+                                        ',' .
+                                        $attendance->longitude_in .
+                                        '&z=18';
                                 @endphp
                                 <a href="{{ $url_in }}" target="_blank" class="text-blue-500 hover:underline">
                                     Lihat Peta
@@ -190,10 +225,14 @@
 
                                     if ($expected_end_time) {
                                         $diff_minutes_out = $expected_end_time->diffInMinutes($time_out, false);
-                                        if ($diff_minutes_out >= 0) { // On time or late (overtime)
+                                        if ($diff_minutes_out >= 0) {
+                                            // On time or late (overtime)
                                             $indicator_text_out = 'Sesuai';
-                                            if ($diff_minutes_out > 0) { // Overtime
-                                                $diff_in_seconds_out = abs($expected_end_time->diffInSeconds($time_out));
+                                            if ($diff_minutes_out > 0) {
+                                                // Overtime
+                                                $diff_in_seconds_out = abs(
+                                                    $expected_end_time->diffInSeconds($time_out),
+                                                );
                                                 $hours_out = floor($diff_in_seconds_out / 3600);
                                                 $minutes_out = floor(($diff_in_seconds_out % 3600) / 60);
                                                 $seconds_out = $diff_in_seconds_out % 60;
@@ -215,7 +254,8 @@
                                                 $indicator_text_out = 'Sesuai';
                                             }
                                             $color_class_out = 'text-green-500';
-                                        } else { // Early departure
+                                        } else {
+                                            // Early departure
                                             $diff_in_seconds_out = abs($expected_end_time->diffInSeconds($time_out));
                                             $hours_out = floor($diff_in_seconds_out / 3600);
                                             $minutes_out = floor(($diff_in_seconds_out % 3600) / 60);
@@ -242,7 +282,8 @@
                                 @endphp
                                 {{ $time_out->format('d M Y, H:i') }}
                                 @if ($attendance->type && $expected_end_time)
-                                    <div class="text-xs {{ $color_class_out }} font-semibold">{{ $indicator_text_out }}</div>
+                                    <div class="text-xs {{ $color_class_out }} font-semibold">
+                                        {{ $indicator_text_out }}</div>
                                 @endif
                             @else
                                 -
@@ -267,7 +308,12 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->latitude_out) && $attendance->longitude_out)
                                 @php
-                                    $url_out = "https://www.google.com/maps?q=" . $attendance->latitude_out . "," . $attendance->longitude_out . "&z=18";
+                                    $url_out =
+                                        'https://www.google.com/maps?q=' .
+                                        $attendance->latitude_out .
+                                        ',' .
+                                        $attendance->longitude_out .
+                                        '&z=18';
                                 @endphp
                                 <a href="{{ $url_out }}" target="_blank" class="text-blue-500 hover:underline">
                                     Lihat Peta
@@ -300,8 +346,15 @@
                                 Izin
                             </a>
                         @elseif($attendance->status == 'Terlambat')
-                            <span
-                                class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-red-200 text-red-800 text-xs">{{ $attendance->status }}</span>
+                            @if (isset($attendance->leaveRequest) && strtolower($attendance->leaveRequest->leave_type) == 'izin terlambat')
+                                <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}"
+                                    class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-yellow-200 text-yellow-800 text-xs hover:underline">
+                                    Izin Terlambat
+                                </a>
+                            @else
+                                <span
+                                    class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-red-200 text-red-800 text-xs">{{ $attendance->status }}</span>
+                            @endif
                         @else
                             <span
                                 class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">{{ $attendance->status }}</span>
@@ -327,18 +380,27 @@
                                     @elseif ($attendance->time_in)
                                         @php
                                             $time_in_card = \Carbon\Carbon::parse($attendance->time_in);
-                                            $expected_start_hour_card = ($time_in_card->hour < 14) ? 7 : 19;
-                                            $expected_start_time_card = $time_in_card->copy()->setTime($expected_start_hour_card, 0, 0);
-                                            $diff_minutes_card = $expected_start_time_card->diffInMinutes($time_in_card, false);
+                                            $expected_start_hour_card = $time_in_card->hour < 14 ? 7 : 19;
+                                            $expected_start_time_card = $time_in_card
+                                                ->copy()
+                                                ->setTime($expected_start_hour_card, 0, 0);
+                                            $diff_minutes_card = $expected_start_time_card->diffInMinutes(
+                                                $time_in_card,
+                                                false,
+                                            );
 
                                             $indicator_text_card = '';
                                             $color_class_card = 'text-gray-500'; // Default color
 
-                                            if ($diff_minutes_card <= 0) { // Early or on time
+                                            if ($diff_minutes_card <= 0) {
+                                                // Early or on time
                                                 $indicator_text_card = 'Tepat Waktu';
                                                 $color_class_card = 'text-green-500';
-                                            } elseif ($diff_minutes_card > 0) { // Late
-                                                $diff_in_seconds_card = abs($expected_start_time_card->diffInSeconds($time_in_card)); // Ensure positive difference
+                                            } elseif ($diff_minutes_card > 0) {
+                                                // Late
+                                                $diff_in_seconds_card = abs(
+                                                    $expected_start_time_card->diffInSeconds($time_in_card),
+                                                ); // Ensure positive difference
                                                 $hours_card = floor($diff_in_seconds_card / 3600);
                                                 $minutes_card = floor(($diff_in_seconds_card % 3600) / 60);
                                                 $seconds_card = $diff_in_seconds_card % 60;
@@ -350,7 +412,8 @@
                                                 if ($minutes_card > 0) {
                                                     $parts_card[] = $minutes_card . ' menit';
                                                 }
-                                                if ($seconds_card > 0 && empty($parts_card)) { // Only show seconds if less than a minute
+                                                if ($seconds_card > 0 && empty($parts_card)) {
+                                                    // Only show seconds if less than a minute
                                                     $parts_card[] = $seconds_card . ' detik';
                                                 }
 
@@ -364,7 +427,8 @@
                                             }
                                         @endphp
                                         {{ $time_in_card->format('d M Y, H:i') }}
-                                        <span class="block text-xs {{ $color_class_card }} font-semibold">{{ $indicator_text_card }}</span>
+                                        <span
+                                            class="block text-xs {{ $color_class_card }} font-semibold">{{ $indicator_text_card }}</span>
                                     @else
                                         -
                                     @endif
@@ -385,9 +449,15 @@
                                         @endif
                                         @if (isset($attendance->latitude_in) && $attendance->latitude_in)
                                             @php
-                                                $url_in_card = "https://www.google.com/maps?q=" . $attendance->latitude_in . "," . $attendance->longitude_in . "&z=18";
+                                                $url_in_card =
+                                                    'https://www.google.com/maps?q=' .
+                                                    $attendance->latitude_in .
+                                                    ',' .
+                                                    $attendance->longitude_in .
+                                                    '&z=18';
                                             @endphp
-                                            <a href="{{ $url_in_card }}" target="_blank" class="text-blue-500 hover:underline">
+                                            <a href="{{ $url_in_card }}" target="_blank"
+                                                class="text-blue-500 hover:underline">
                                                 Lihat Lokasi
                                             </a>
                                         @endif
@@ -406,24 +476,40 @@
                                             $diff_minutes_out_card = 0;
                                             $expected_end_time_card = null;
                                             if ($attendance->type == 'Reguler') {
-                                                $expected_end_time_card = $time_in_for_calc_card->copy()->setTime(15, 0, 0);
+                                                $expected_end_time_card = $time_in_for_calc_card
+                                                    ->copy()
+                                                    ->setTime(15, 0, 0);
                                             } elseif ($attendance->type == 'Normal Pagi') {
-                                                $expected_end_time_card = $time_in_for_calc_card->copy()->setTime(19, 0, 0);
+                                                $expected_end_time_card = $time_in_for_calc_card
+                                                    ->copy()
+                                                    ->setTime(19, 0, 0);
                                             } elseif ($attendance->type == 'Normal Malam') {
-                                                $expected_end_time_card = $time_in_for_calc_card->copy()->addDay()->setTime(7, 0, 0);
+                                                $expected_end_time_card = $time_in_for_calc_card
+                                                    ->copy()
+                                                    ->addDay()
+                                                    ->setTime(7, 0, 0);
                                             }
 
                                             $indicator_text_out_card = '';
                                             $color_class_out_card = 'text-gray-500'; // Default color
 
                                             if ($expected_end_time_card) {
-                                                $diff_minutes_out_card = $expected_end_time_card->diffInMinutes($time_out_card, false);
-                                                if ($diff_minutes_out_card >= 0) { // On time or late (overtime)
+                                                $diff_minutes_out_card = $expected_end_time_card->diffInMinutes(
+                                                    $time_out_card,
+                                                    false,
+                                                );
+                                                if ($diff_minutes_out_card >= 0) {
+                                                    // On time or late (overtime)
                                                     $indicator_text_out_card = 'Sesuai';
-                                                    if ($diff_minutes_out_card > 0) { // Overtime
-                                                        $diff_in_seconds_out_card = abs($expected_end_time_card->diffInSeconds($time_out_card));
+                                                    if ($diff_minutes_out_card > 0) {
+                                                        // Overtime
+                                                        $diff_in_seconds_out_card = abs(
+                                                            $expected_end_time_card->diffInSeconds($time_out_card),
+                                                        );
                                                         $hours_out_card = floor($diff_in_seconds_out_card / 3600);
-                                                        $minutes_out_card = floor(($diff_in_seconds_out_card % 3600) / 60);
+                                                        $minutes_out_card = floor(
+                                                            ($diff_in_seconds_out_card % 3600) / 60,
+                                                        );
                                                         $seconds_out_card = $diff_in_seconds_out_card % 60;
 
                                                         $parts_out_card = [];
@@ -443,8 +529,11 @@
                                                         $indicator_text_out_card = 'Sesuai';
                                                     }
                                                     $color_class_out_card = 'text-green-500';
-                                                } else { // Early departure
-                                                    $diff_in_seconds_out_card = abs($expected_end_time_card->diffInSeconds($time_out_card));
+                                                } else {
+                                                    // Early departure
+                                                    $diff_in_seconds_out_card = abs(
+                                                        $expected_end_time_card->diffInSeconds($time_out_card),
+                                                    );
                                                     $hours_out_card = floor($diff_in_seconds_out_card / 3600);
                                                     $minutes_out_card = floor(($diff_in_seconds_out_card % 3600) / 60);
                                                     $seconds_out_card = $diff_in_seconds_out_card % 60;
@@ -463,14 +552,16 @@
                                                     if (empty($formatted_duration_out_card)) {
                                                         $formatted_duration_out_card = '0 detik';
                                                     }
-                                                    $indicator_text_out_card = 'Lebih awal ' . $formatted_duration_out_card;
+                                                    $indicator_text_out_card =
+                                                        'Lebih awal ' . $formatted_duration_out_card;
                                                     $color_class_out_card = 'text-red-500';
                                                 }
                                             }
                                         @endphp
                                         {{ $time_out_card->format('d M Y, H:i') }}
                                         @if ($attendance->type && $expected_end_time_card)
-                                            <span class="block text-xs {{ $color_class_out_card }} font-semibold">{{ $indicator_text_out_card }}</span>
+                                            <span
+                                                class="block text-xs {{ $color_class_out_card }} font-semibold">{{ $indicator_text_out_card }}</span>
                                         @endif
                                     @else
                                         -
@@ -492,9 +583,15 @@
                                         @endif
                                         @if (isset($attendance->latitude_out) && $attendance->longitude_out)
                                             @php
-                                                $url_out_card = "https://www.google.com/maps?q=" . $attendance->latitude_out . "," . $attendance->longitude_out . "&z=18";
+                                                $url_out_card =
+                                                    'https://www.google.com/maps?q=' .
+                                                    $attendance->latitude_out .
+                                                    ',' .
+                                                    $attendance->longitude_out .
+                                                    '&z=18';
                                             @endphp
-                                            <a href="{{ $url_out_card }}" target="_blank" class="text-blue-500 hover:underline">
+                                            <a href="{{ $url_out_card }}" target="_blank"
+                                                class="text-blue-500 hover:underline">
                                                 Lihat Lokasi
                                             </a>
                                         @endif

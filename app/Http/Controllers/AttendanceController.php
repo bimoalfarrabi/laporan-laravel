@@ -96,6 +96,16 @@ class AttendanceController extends Controller
         $attendances = $attendanceQuery->get();
         $leaveRequests = $leaveQuery->get();
 
+        // Attach leave requests to attendances if they exist (e.g. for "Izin Terlambat")
+        foreach ($attendances as $attendance) {
+            $leave = $leaveRequests->first(function ($item) use ($attendance) {
+                return $item->user_id == $attendance->user_id;
+            });
+            if ($leave) {
+                $attendance->leaveRequest = $leave;
+            }
+        }
+
         // Create virtual records for users on leave
         $usersOnLeave = $leaveRequests->map(function ($leave) use (
             $filterDate,
