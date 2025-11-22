@@ -17,17 +17,23 @@
                             <div class="mt-4">
                                 <x-input-label for="{{ $field->name }}" :value="__($field->label)" />
 
-                                @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number' || $field->type === 'role_specific_text')
+                                @if (
+                                    $field->type === 'text' ||
+                                        $field->type === 'date' ||
+                                        $field->type === 'time' ||
+                                        $field->type === 'number' ||
+                                        $field->type === 'role_specific_text')
                                     <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}" name="{{ $field->name }}"
-                                        value="{{ old($field->name) }}"
+                                        type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}"
+                                        name="{{ $field->name }}" value="{{ old($field->name) }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
                                     <textarea id="{{ $field->name }}" name="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                         {{ $field->required ? 'required' : '' }}>{{ old($field->name) }}</textarea>
-                                @elseif ($field->type === 'select') {{-- Assuming 'select' type will still have options --}}
+                                @elseif ($field->type === 'select')
+                                    {{-- Assuming 'select' type will still have options --}}
                                     {{-- This part needs significant re-evaluation: where do options come from now? --}}
                                     {{-- For now, commenting out or simplifying --}}
                                     {{-- You would likely need to store options in ReportTypeField or a related model --}}
@@ -35,17 +41,40 @@
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                         {{ $field->required ? 'required' : '' }}>
                                         <option value="">Pilih {{ $field->label }}</option>
-                                        
+
                                     </select>
                                 @elseif ($field->type === 'checkbox')
                                     <input type="checkbox" id="{{ $field->name }}" name="{{ $field->name }}"
                                         value="1" {{ old($field->name) ? 'checked' : '' }}
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                 @elseif ($field->type === 'file')
-                                    <input id="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="file" name="{{ $field->name }}"
-                                        {{ $field->required ? 'required' : '' }} />
+                                    <div x-data="fileUploadHandler('{{ $field->name }}')" class="space-y-2">
+                                        <input id="{{ $field->name }}" type="file" multiple accept="image/*"
+                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                            @change="handleFileSelect" />
+
+                                        {{-- Hidden input to store actual files for form submission (managed by DataTransfer in JS) --}}
+                                        <input type="file" name="{{ $field->name }}[]"
+                                            id="{{ $field->name }}_actual" multiple class="hidden">
+
+                                        <div class="grid grid-cols-3 gap-4 mt-2" id="{{ $field->name }}_preview">
+                                            <template x-for="(image, index) in images" :key="index">
+                                                <div class="relative group">
+                                                    <img :src="image.url"
+                                                        class="w-full h-24 object-cover rounded-md border border-gray-300">
+                                                    <button type="button" @click="removeImage(index)"
+                                                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <p class="text-sm text-gray-500">Maksimal 3 gambar.</p>
+                                    </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
                             </div>
@@ -61,4 +90,57 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('fileUploadHandler', (fieldName) => ({
+                images: [],
+                files: [],
+                init() {
+                    // No initial files for create
+                },
+                handleFileSelect(event) {
+                    const newFiles = Array.from(event.target.files);
+                    const totalFiles = this.files.length + newFiles.length;
+
+                    if (totalFiles > 3) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Maksimal 3 gambar yang diperbolehkan.',
+                        });
+                        event.target.value = ''; // Reset input
+                        return;
+                    }
+
+                    newFiles.forEach(file => {
+                        if (!file.type.startsWith('image/')) return;
+
+                        this.files.push(file);
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.images.push({
+                                url: e.target.result,
+                                file: file
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    });
+
+                    this.updateActualInput();
+                    event.target.value = ''; // Reset input to allow selecting same file again if needed
+                },
+                removeImage(index) {
+                    this.images.splice(index, 1);
+                    this.files.splice(index, 1);
+                    this.updateActualInput();
+                },
+                updateActualInput() {
+                    const dataTransfer = new DataTransfer();
+                    this.files.forEach(file => dataTransfer.items.add(file));
+                    document.getElementById(fieldName + '_actual').files = dataTransfer.files;
+                }
+            }));
+        });
+    </script>
 </x-app-layout>

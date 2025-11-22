@@ -18,17 +18,24 @@
                             <div class="mt-4">
                                 <x-input-label for="{{ $field->name }}" :value="__($field->label)" />
 
-                                @if ($field->type === 'text' || $field->type === 'date' || $field->type === 'time' || $field->type === 'number' || $field->type === 'role_specific_text')
+                                @if (
+                                    $field->type === 'text' ||
+                                        $field->type === 'date' ||
+                                        $field->type === 'time' ||
+                                        $field->type === 'number' ||
+                                        $field->type === 'role_specific_text')
                                     <input id="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}" name="{{ $field->name }}"
+                                        type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}"
+                                        name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
                                     <textarea id="{{ $field->name }}" name="{{ $field->name }}"
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                         {{ $field->required ? 'required' : '' }}>{{ old($field->name, $report->data[$field->name] ?? '') }}</textarea>
-                                @elseif ($field->type === 'select') {{-- Assuming 'select' type will still have options --}}
+                                @elseif ($field->type === 'select')
+                                    {{-- Assuming 'select' type will still have options --}}
                                     {{-- This part needs significant re-evaluation: where do options come from now? --}}
                                     {{-- For now, commenting out or simplifying --}}
                                     {{-- You would likely need to store options in ReportTypeField or a related model --}}
@@ -36,34 +43,72 @@
                                         class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                         {{ $field->required ? 'required' : '' }}>
                                         <option value="">Pilih {{ $field->label }}</option>
-                                        
+
                                     </select>
                                 @elseif ($field->type === 'checkbox')
                                     <input type="checkbox" id="{{ $field->name }}" name="{{ $field->name }}"
-                                        value="1" {{ old($field->name, $report->data[$field->name] ?? false) ? 'checked' : '' }}
+                                        value="1"
+                                        {{ old($field->name, $report->data[$field->name] ?? false) ? 'checked' : '' }}
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                 @elseif ($field->type === 'file')
-                                    @if (isset($report->data[$field->name]) && $report->data[$field->name] && Storage::disk('public')->exists($report->data[$field->name]))
-                                        <div class="mb-2">
-                                            <p>{{ __('File saat ini:') }} <a
-                                                    href="{{ Storage::url($report->data[$field->name]) }}"
-                                                    target="_blank"
-                                                    class="text-blue-600 hover:underline">{{ basename($report->data[$field->name]) }}</a>
-                                            </p>
-                                            <img src="{{ Storage::url($report->data[$field->name]) }}"
-                                                alt="Bukti Foto" class="h-20 w-auto object-cover rounded-md mt-1">
+                                    <div x-data="fileEditHandler('{{ $field->name }}', {{ json_encode($report->data[$field->name] ?? []) }})" class="space-y-2">
+
+                                        {{-- Existing Images --}}
+                                        <div class="grid grid-cols-3 gap-4 mb-4" x-show="existingImages.length > 0">
+                                            <template x-for="(path, index) in existingImages" :key="index">
+                                                <div class="relative group" x-show="!deletedImages.includes(path)">
+                                                    <img :src="'/storage/' + path"
+                                                        class="w-full h-24 object-cover rounded-md border border-gray-300">
+                                                    <button type="button" @click="markForDeletion(path)"
+                                                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                    {{-- Hidden input for deletion --}}
+                                                    <input type="hidden" :name="'delete_{{ $field->name }}[]'"
+                                                        :value="path" x-if="deletedImages.includes(path)">
+                                                </div>
+                                            </template>
                                         </div>
-                                    @else
-                                        <p class="text-red-500">foto telah dihapus</p>
-                                    @endif
-                                    <input id="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        type="file" name="{{ $field->name }}"
-                                        {{ $field->required && !(isset($report->data[$field->name]) && $report->data[$field->name] && Storage::disk('public')->exists($report->data[$field->name])) ? 'required' : '' }} />
-                                    @if ($field->required && isset($report->data[$field->name]) && $report->data[$field->name] && Storage::disk('public')->exists($report->data[$field->name]))
-                                        <p class="text-sm text-gray-600 mt-1">
-                                            {{ __('Kosongkan jika tidak ingin mengubah file.') }}</p>
-                                    @endif
+
+                                        {{-- Hidden inputs for deleted images (rendered outside loop to ensure submission) --}}
+                                        <template x-for="path in deletedImages" :key="path">
+                                            <input type="hidden" name="delete_{{ $field->name }}[]"
+                                                :value="path">
+                                        </template>
+
+                                        {{-- New File Input --}}
+                                        <input id="{{ $field->name }}" type="file" multiple accept="image/*"
+                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                            @change="handleFileSelect" />
+
+                                        {{-- Hidden input to store actual new files --}}
+                                        <input type="file" name="{{ $field->name }}[]"
+                                            id="{{ $field->name }}_actual" multiple class="hidden">
+
+                                        {{-- New Images Preview --}}
+                                        <div class="grid grid-cols-3 gap-4 mt-2" id="{{ $field->name }}_new_preview">
+                                            <template x-for="(image, index) in newImages" :key="index">
+                                                <div class="relative group">
+                                                    <img :src="image.url"
+                                                        class="w-full h-24 object-cover rounded-md border border-gray-300">
+                                                    <button type="button" @click="removeNewImage(index)"
+                                                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <p class="text-sm text-gray-500">Maksimal 3 gambar total (termasuk yang sudah
+                                            ada).</p>
+                                    </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
                             </div>
@@ -79,4 +124,79 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('fileEditHandler', (fieldName, initialData) => ({
+                existingImages: [],
+                deletedImages: [],
+                newImages: [],
+                newFiles: [],
+
+                init() {
+                    // Handle legacy string format or array format
+                    if (typeof initialData === 'string') {
+                        this.existingImages = [initialData];
+                    } else if (Array.isArray(initialData)) {
+                        this.existingImages = initialData;
+                    }
+                },
+
+                markForDeletion(path) {
+                    if (!this.deletedImages.includes(path)) {
+                        this.deletedImages.push(path);
+                    }
+                },
+
+                handleFileSelect(event) {
+                    const incomingFiles = Array.from(event.target.files);
+
+                    // Calculate current total: (existing - deleted) + (current new) + (incoming)
+                    const currentActiveCount = this.existingImages.length - this.deletedImages.length;
+                    const totalAfterAdd = currentActiveCount + this.newFiles.length + incomingFiles
+                        .length;
+
+                    if (totalAfterAdd > 3) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Maksimal total 3 gambar yang diperbolehkan.',
+                        });
+                        event.target.value = ''; // Reset input
+                        return;
+                    }
+
+                    incomingFiles.forEach(file => {
+                        if (!file.type.startsWith('image/')) return;
+
+                        this.newFiles.push(file);
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.newImages.push({
+                                url: e.target.result,
+                                file: file
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    });
+
+                    this.updateActualInput();
+                    event.target.value = ''; // Reset input
+                },
+
+                removeNewImage(index) {
+                    this.newImages.splice(index, 1);
+                    this.newFiles.splice(index, 1);
+                    this.updateActualInput();
+                },
+
+                updateActualInput() {
+                    const dataTransfer = new DataTransfer();
+                    this.newFiles.forEach(file => dataTransfer.items.add(file));
+                    document.getElementById(fieldName + '_actual').files = dataTransfer.files;
+                }
+            }));
+        });
+    </script>
 </x-app-layout>

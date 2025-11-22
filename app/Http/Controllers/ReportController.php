@@ -179,11 +179,19 @@ class ReportController extends Controller
             } elseif ($field->type === 'number') {
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
-                $rules[] = 'file';
-                $rules[] = 'mimes:jpg,jpeg,png';  // hanya file gambar
+                // Remove 'file' rule because input might be array
+                // $rules[] = 'file'; 
+                // $rules[] = 'mimes:jpg,jpeg,png';
+                $rules[] = 'array';
+                $rules[] = 'max:3'; // Max 3 files
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
+            
+            // Add validation for individual files in the array
+            if ($field->type === 'file') {
+                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
+            }
         }
 
         $validator = Validator::make($request->all(), $validationRules);
@@ -201,8 +209,17 @@ class ReportController extends Controller
 
             $fieldName = $field->name;
             if ($field->type === 'file' && $request->hasFile($fieldName)) {
-                $file = $request->file($fieldName);
-                $reportData[$fieldName] = $this->compressAndStoreImage($file);
+                $files = $request->file($fieldName);
+                $filePaths = [];
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                         $filePaths[] = $this->compressAndStoreImage($file);
+                    }
+                } else {
+                    // Fallback for single file (should not happen with array validation but good for safety)
+                    $filePaths[] = $this->compressAndStoreImage($files);
+                }
+                $reportData[$fieldName] = $filePaths;
             } elseif ($field['type'] === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
             } else {
@@ -286,9 +303,23 @@ class ReportController extends Controller
             $rules = [];
 
             if ($field->required) {
-                // jika required dan type file, hanya required jika tidak ada file lama
-                if ($field->type === 'file' && !isset($reportData[$fieldName])) {
-                    $rules[] = 'required';
+                // jika required dan type file, hanya required jika tidak ada file lama (atau file lama kosong)
+                if ($field->type === 'file') {
+                    $existingFiles = $reportData[$fieldName] ?? [];
+                    // Handle legacy string format
+                    if (is_string($existingFiles)) {
+                         $existingFiles = [$existingFiles];
+                    }
+                    
+                    // Check if we have existing files that are NOT marked for deletion
+                    $filesToDelete = $request->input('delete_' . $fieldName, []);
+                    $remainingFilesCount = count($existingFiles) - count($filesToDelete);
+                    
+                    if ($remainingFilesCount <= 0) {
+                         $rules[] = 'required'; // Must upload new if all old ones are deleted
+                    } else {
+                         $rules[] = 'nullable';
+                    }
                 } elseif ($field->type !== 'file') {
                     $rules[] = 'required';
                 } else {
@@ -303,14 +334,40 @@ class ReportController extends Controller
             } elseif ($field->type === 'number') {
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
-                $rules[] = 'file';
-                $rules[] = 'mimes:jpg,jpeg,png';  // hanya file gambar
+                $rules[] = 'array';
+                // Max 3 logic is complex here because it depends on remaining files + new files.
+                // We'll handle strict count validation manually or via custom rule if needed, 
+                // but 'max:3' on the upload array itself is a safe start.
+                $rules[] = 'max:3'; 
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
+             if ($field->type === 'file') {
+                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
+            }
         }
 
         $validator = Validator::make($request->all(), $validationRules);
+        
+        // Additional manual validation for total file count
+        $validator->after(function ($validator) use ($request, $reportData, $reportType) {
+             foreach ($reportType->reportTypeFields as $field) {
+                if ($field->type === 'file') {
+                    $fieldName = $field->name;
+                    $existingFiles = $reportData[$fieldName] ?? [];
+                    if (is_string($existingFiles)) $existingFiles = [$existingFiles];
+                    
+                    $filesToDelete = $request->input('delete_' . $fieldName, []);
+                    $newFiles = $request->file($fieldName, []);
+                    
+                    $totalFiles = count($existingFiles) - count($filesToDelete) + count($newFiles);
+                    
+                    if ($totalFiles > 3) {
+                        $validator->errors()->add($fieldName, 'Maksimal total 3 gambar diperbolehkan.');
+                    }
+                }
+             }
+        });
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -320,16 +377,36 @@ class ReportController extends Controller
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
             if ($field->type === 'file') {
-                if ($request->hasFile($fieldName)) {
-                    // hapus file lama jika ada
-                    if (isset($reportData[$fieldName])) {
-                        Storage::disk('public')->delete($reportData[$fieldName]);
+                
+                // 1. Handle deletions
+                $existingFiles = $reportData[$fieldName] ?? [];
+                if (is_string($existingFiles)) $existingFiles = [$existingFiles];
+                
+                $filesToDelete = $request->input('delete_' . $fieldName, []);
+                
+                $updatedFiles = [];
+                foreach ($existingFiles as $path) {
+                    if (in_array($path, $filesToDelete)) {
+                        Storage::disk('public')->delete($path);
+                    } else {
+                        $updatedFiles[] = $path;
                     }
-
-                    $file = $request->file($fieldName);
-                    $reportData[$fieldName] = $this->compressAndStoreImage($file);
                 }
-                // jika tidak ada file baru, biarkan file lama (jangan lakukan apa-apa)
+                
+                // 2. Handle new uploads
+                if ($request->hasFile($fieldName)) {
+                    $files = $request->file($fieldName);
+                    if (is_array($files)) {
+                        foreach ($files as $file) {
+                             $updatedFiles[] = $this->compressAndStoreImage($file);
+                        }
+                    } else {
+                         $updatedFiles[] = $this->compressAndStoreImage($files);
+                    }
+                }
+                
+                $reportData[$fieldName] = $updatedFiles;
+
             } elseif ($field->type === 'checkbox') {
                 $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
             } else {

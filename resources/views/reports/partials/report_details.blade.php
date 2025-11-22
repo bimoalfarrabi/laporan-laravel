@@ -125,54 +125,70 @@
                                 {{ $report->data[$field->name] ?? false ? 'Ya' : 'Tidak' }}
                             </span>
                         @elseif ($field->type === 'file')
-                            @if (!empty($report->data[$field->name]) && Storage::disk('public')->exists($report->data[$field->name]))
-                                @php
-                                    $path = $report->data[$field->name];
-                                    $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
-                                        'jpg',
-                                        'jpeg',
-                                        'png',
-                                        'gif',
-                                        'svg',
-                                    ]);
-                                    $fullImageUrl = route('files.serve', ['path' => $path]);
-                                @endphp
+                            @php
+                                $filePaths = $report->data[$field->name] ?? [];
+                                if (is_string($filePaths)) {
+                                    $filePaths = [$filePaths];
+                                }
+                            @endphp
 
-                                @if ($isImage)
-                                    @php
-                                        $thumbnailUrl = route('files.serve', ['path' => $path, 'size' => '200x200']);
-                                    @endphp
-                                    <a href="#"
-                                        @click.prevent="$dispatch('open-modal', { imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', fullImageUrl: '{{ $fullImageUrl }}' })"
-                                        class="flex flex-col group flex-shrink-0 mt-2 gap-2">
+                            @if (!empty($filePaths))
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                                    @foreach ($filePaths as $path)
+                                        @if (Storage::disk('public')->exists($path))
+                                            @php
+                                                $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
+                                                    'jpg',
+                                                    'jpeg',
+                                                    'png',
+                                                    'gif',
+                                                    'svg',
+                                                ]);
+                                                $fullImageUrl = route('files.serve', ['path' => $path]);
+                                            @endphp
 
-                                        <!-- Outer Wrapper (final visual size) -->
-                                        <div
-                                            class="w-40 h-52 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                            <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}" loading="lazy"
-                                                class="max-w-full max-h-full object-contain report-image">
-                                        </div>
+                                            @if ($isImage)
+                                                @php
+                                                    $thumbnailUrl = route('files.serve', [
+                                                        'path' => $path,
+                                                        'size' => '200x200',
+                                                    ]);
+                                                @endphp
+                                                <a href="#"
+                                                    @click.prevent="$dispatch('open-modal', { imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', fullImageUrl: '{{ $fullImageUrl }}' })"
+                                                    class="flex flex-col group flex-shrink-0 gap-2">
 
-                                        <span class="text-blue-600 group-hover:underline text-base block mt-1">Lihat
-                                            Gambar Penuh</span>
+                                                    <!-- Outer Wrapper (final visual size) -->
+                                                    <div
+                                                        class="w-full h-40 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                                        <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
+                                                            loading="lazy"
+                                                            class="max-w-full max-h-full object-contain report-image">
+                                                    </div>
 
-                                    </a>
-                                @else
-                                    <a href="{{ $fullImageUrl }}" target="_blank"
-                                        class="text-blue-600 hover:underline text-base">
+                                                    <span
+                                                        class="text-blue-600 group-hover:underline text-sm block mt-1 text-center">Lihat
+                                                        Gambar</span>
 
-                                        Lihat File
-                                        ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
-
-                                    </a>
-                                @endif
+                                                </a>
+                                            @else
+                                                <a href="{{ $fullImageUrl }}" target="_blank"
+                                                    class="text-blue-600 hover:underline text-base flex items-center justify-center h-40 border rounded-lg bg-gray-50">
+                                                    Lihat File
+                                                    ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
+                                                </a>
+                                            @endif
+                                        @else
+                                            <div
+                                                class="h-40 border rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-sm p-4 text-center">
+                                                File tidak ditemukan
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
                             @else
                                 <p class="text-gray-500 text-base">
-                                    @if (!empty($report->data[$field->name]))
-                                        File telah dihapus atau tidak dapat ditemukan.
-                                    @else
-                                        Tidak ada file yang diunggah.
-                                    @endif
+                                    Tidak ada file yang diunggah.
                                 </p>
                             @endif
                         @else
