@@ -546,7 +546,7 @@ class ReportController extends Controller
     
         $year = now()->format('Y');
         $month = now()->format('m');
-        $storagePath = 'reports/' . $year . '/' . $month;
+        $storagePath = 'satpam/reports/' . $year . '/' . $month;
     
         // Ensure directory exists
         if (!Storage::disk('nextcloud')->exists($storagePath)) {
@@ -594,12 +594,12 @@ class ReportController extends Controller
                     break;
                 default:
                     // If file type is not supported, store it without compression
-                    return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    return $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                return $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             $originalWidth = imagesx($imageResource);
@@ -677,7 +677,7 @@ class ReportController extends Controller
             // Define storage path
             $year = now()->format('Y');
             $month = now()->format('m');
-            $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
+            $storagePath = 'satpam/reports/' . $year . '/' . $month . '/' . $filename;
             $quality = 90; // Start with high quality
             $maxFileSize = 1024 * 1024; // 1MB in bytes
             $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
@@ -700,7 +700,7 @@ class ReportController extends Controller
             } while ($quality >= 10);
 
             // Ensure directory exists before upload
-            $directoryPath = 'reports/' . $year . '/' . $month;
+            $directoryPath = 'satpam/reports/' . $year . '/' . $month;
             if (!Storage::disk('nextcloud')->exists($directoryPath)) {
                 Storage::disk('nextcloud')->makeDirectory($directoryPath);
             }

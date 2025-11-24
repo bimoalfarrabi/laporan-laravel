@@ -585,12 +585,12 @@ class AttendanceController extends Controller
                     break;
                 default:
                     // If file type is not supported, store it without compression
-                    return $file->storeAs('attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    return $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                return $file->storeAs('attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                return $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             $imageResource = $this->rotateLandscapeToPortrait($imageResource);
@@ -670,7 +670,7 @@ class AttendanceController extends Controller
             // Define storage path
             $year = now()->format('Y');
             $month = now()->format('m');
-            $storagePath = 'attendances/' . $year . '/' . $month . '/' . $filename;
+            $storagePath = 'satpam/attendances/' . $year . '/' . $month . '/' . $filename;
             $quality = 90; // Start with high quality
             $maxFileSize = 1024 * 1024; // 1MB in bytes
             $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
@@ -693,7 +693,7 @@ class AttendanceController extends Controller
             } while ($quality >= 10);
 
             // Ensure directory exists before upload
-            $directoryPath = 'attendances/' . $year . '/' . $month;
+            $directoryPath = 'satpam/attendances/' . $year . '/' . $month;
             if (!Storage::disk('nextcloud')->exists($directoryPath)) {
                 Storage::disk('nextcloud')->makeDirectory($directoryPath);
             }
