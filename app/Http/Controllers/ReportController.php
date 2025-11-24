@@ -552,20 +552,47 @@ class ReportController extends Controller
         // Ensure directory exists with robust error handling
         $directoryExists = false;
         try {
+            \Log::info('[Report Video] Checking Nextcloud directory existence', ['path' => $storagePath]);
             $directoryExists = Storage::disk('nextcloud')->exists($storagePath);
+            \Log::info('[Report Video] Directory exists check result', ['exists' => $directoryExists]);
         } catch (\Exception $e) {
             // If check fails (e.g. network issue), assume false and try to create
+            \Log::error('[Report Video] Failed to check directory existence', [
+                'path' => $storagePath,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $directoryExists = false;
         }
 
         if (!$directoryExists) {
-            if (!Storage::disk('nextcloud')->makeDirectory($storagePath)) {
-                 throw ValidationException::withMessages([
-                    'video' => 'Gagal membuat direktori penyimpanan video. Silakan coba lagi.',
+            \Log::info('[Report Video] Attempting to create directory', ['path' => $storagePath]);
+            try {
+                $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($storagePath);
+                \Log::info('[Report Video] Make directory result', ['success' => $makeDirectoryResult]);
+                if (!$makeDirectoryResult) {
+                     throw ValidationException::withMessages([
+                        'video' => 'Gagal membuat direktori penyimpanan video. Silakan coba lagi.',
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('[Report Video] Failed to create directory', [
+                    'path' => $storagePath,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                throw ValidationException::withMessages([
+                    'video' => 'Gagal membuat direktori penyimpanan video: ' . $e->getMessage(),
                 ]);
             }
         }
-    
+
+        \Log::info('[Report Video] Attempting to upload video file', [
+            'storage_path' => $storagePath,
+            'filename' => $filename,
+            'file_size' => $file->getSize()
+        ]);
+        
         $path = $file->storeAs($storagePath, $filename, 'nextcloud');
         if ($path === false) {
             throw ValidationException::withMessages([
@@ -706,29 +733,72 @@ class ReportController extends Controller
             $directoryPath = 'satpam/reports/' . $year . '/' . $month;
             $directoryExists = false;
             try {
+                \Log::info('[Report Image] Checking Nextcloud directory existence', ['path' => $directoryPath]);
                 $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
+                \Log::info('[Report Image] Directory exists check result', ['exists' => $directoryExists]);
             } catch (\Exception $e) {
+                \Log::error('[Report Image] Failed to check directory existence', [
+                    'path' => $directoryPath,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
                 $directoryExists = false;
             }
 
             if (!$directoryExists) {
-                if (!Storage::disk('nextcloud')->makeDirectory($directoryPath)) {
+                \Log::info('[Report Image] Attempting to create directory', ['path' => $directoryPath]);
+                try {
+                    $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($directoryPath);
+                    \Log::info('[Report Image] Make directory result', ['success' => $makeDirectoryResult]);
+                    if (!$makeDirectoryResult) {
+                        unlink($tempPath);
+                        throw ValidationException::withMessages([
+                            'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('[Report Image] Failed to create directory', [
+                        'path' => $directoryPath,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
                     unlink($tempPath);
                     throw ValidationException::withMessages([
-                        'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
+                        'photo' => 'Gagal membuat direktori penyimpanan: ' . $e->getMessage(),
                     ]);
                 }
             }
-            
+
             // Upload to Nextcloud
-            if (!Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'))) {
+            \Log::info('[Report Image] Attempting to upload file to Nextcloud', [
+                'storage_path' => $storagePath,
+                'temp_path' => $tempPath,
+                'file_size' => filesize($tempPath)
+            ]);
+            
+            try {
+                $uploadResult = Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
+                \Log::info('[Report Image] Upload result', ['success' => $uploadResult]);
+                
+                if (!$uploadResult) {
+                    unlink($tempPath);
+                    throw ValidationException::withMessages([
+                        'photo' => 'Gagal mengunggah foto ke penyimpanan. Silakan coba lagi.',
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('[Report Image] Failed to upload file', [
+                    'storage_path' => $storagePath,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
                 unlink($tempPath);
                 throw ValidationException::withMessages([
-                    'photo' => 'Gagal mengunggah foto ke penyimpanan. Silakan coba lagi.',
+                    'photo' => 'Gagal mengunggah foto: ' . $e->getMessage(),
                 ]);
             }
-            
-            // Remove temp file
+
+            // Clean up temp file
             unlink($tempPath);
     
             // Free up memory
