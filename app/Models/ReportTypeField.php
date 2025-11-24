@@ -19,6 +19,10 @@ class ReportTypeField extends Model
         'role_id',
     ];
 
+    protected $casts = [
+        'required' => 'boolean',
+    ];
+
     public function reportType()
     {
         return $this->belongsTo(ReportType::class);
