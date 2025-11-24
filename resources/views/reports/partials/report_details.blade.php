@@ -177,11 +177,9 @@
                                                 <!-- Image -->
                                                 <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
                                                     loading="lazy" data-path="{{ $path }}"
-                                                    @load="imageLoaded = true" x-show="imageLoaded"
-                                                    x-transition:enter="transition ease-out duration-300"
-                                                    x-transition:enter-start="opacity-0"
-                                                    x-transition:enter-end="opacity-100"
-                                                    class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
+                                                    @load="imageLoaded = true"
+                                                    class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105 transition-opacity"
+                                                    :class="{ 'opacity-0': !imageLoaded }">
 
                                                 <!-- Hover Overlay -->
                                                 <div x-show="imageLoaded"
