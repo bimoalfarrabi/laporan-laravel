@@ -51,8 +51,14 @@
                         </div>
                         
                         <div class="flex items-center justify-center mt-4">
-                            <x-primary-button id="submit-attendance-button">
-                                {{ __('Kirim Absensi') }}
+                            <x-primary-button id="submit-attendance-button" class="flex items-center">
+                                <span id="button-text">{{ __('Kirim Absensi') }}</span>
+                                <span id="loading-spinner" class="hidden ml-2">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
                             </x-primary-button>
                         </div>
 
@@ -153,6 +159,8 @@
             const attendanceMessageDiv = document.getElementById('attendance-message');
             const dynamicAttendanceStatusSpan = document.getElementById('dynamic-attendance-status');
             const submitButton = document.getElementById('submit-attendance-button');
+            const buttonTextSpan = document.getElementById('button-text'); // New
+            const loadingSpinnerSpan = document.getElementById('loading-spinner'); // New
             const form = document.getElementById('attendance-form');
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
@@ -164,6 +172,8 @@
             const displayLatitudeSpan = document.getElementById('display-latitude'); // New
             const displayLongitudeSpan = document.getElementById('display-longitude'); // New
             const todayAttendance = @json($todayAttendance);
+
+            let originalButtonText = buttonTextSpan.textContent; // Store original text
 
             // Function to update current time
             function updateCurrentTime() {
@@ -184,25 +194,27 @@
 
             function initializeUI() {
                 let message = '';
-                let buttonText = '';
+                let buttonCurrentText = '';
                 let isFormDisabled = false;
 
                 if (!todayAttendance) {
                     message = '<p class="font-bold">Anda akan melakukan Absen Masuk.</p><p class="text-sm">Posisikan wajah Anda di dalam bingkai dan klik tombol Absen Masuk.</p>';
-                    buttonText = 'Absen Masuk';
+                    buttonCurrentText = 'Absen Masuk';
                 } else if (!todayAttendance.time_out) {
                     message = `<p class="font-bold">Anda akan melakukan Absen Pulang.</p><p class="text-sm">Anda sudah absen masuk pada: ${new Date(todayAttendance.time_in).toLocaleString('id-ID')}</p>`;
-                    buttonText = 'Absen Pulang';
+                    buttonCurrentText = 'Absen Pulang';
                 } else {
                     message = `<p class="font-bold">Anda sudah melakukan Absen Masuk dan Pulang hari ini.</p><p class="text-sm">Masuk: ${new Date(todayAttendance.time_in).toLocaleString('id-ID')}</p><p class="text-sm">Pulang: ${new Date(todayAttendance.time_out).toLocaleString('id-ID')}</p><p class="text-sm">Tipe Absensi: ${todayAttendance.type || 'N/A'}</p><p class="text-sm mt-2">Anda tidak dapat melakukan absensi lagi hari ini.</p>`;
-                    buttonText = 'Absensi Selesai';
+                    buttonCurrentText = 'Absensi Selesai';
                     isFormDisabled = true;
                 }
 
                 dynamicAttendanceStatusSpan.innerHTML = message;
-                submitButton.textContent = buttonText;
+                buttonTextSpan.textContent = buttonCurrentText;
+                originalButtonText = buttonCurrentText; // Update original text
                 if (isFormDisabled) {
                     submitButton.setAttribute('disabled', 'true');
+                    loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                     document.getElementById('camera').style.display = 'none';
                 } else {
                     startCamera();
@@ -217,6 +229,7 @@
                     console.error("Error accessing camera: ", err);
                     dynamicAttendanceStatusSpan.innerHTML = '<p class="font-bold text-red-700">Error: Tidak dapat mengakses kamera.</p><p class="text-sm text-red-600">Pastikan Anda memberikan izin akses kamera di browser Anda dan menggunakan koneksi HTTPS.</p>';
                     submitButton.setAttribute('disabled', 'true');
+                    loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                 }
             }
 
@@ -246,6 +259,7 @@
                                 window.location.href = "{{ route('attendances.index') }}";
                             });
                             submitButton.setAttribute('disabled', 'true');
+                            loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                             mapLoadingIndicator.classList.add('hidden');
                             displayLatitudeSpan.textContent = 'Deteksi Palsu';
                             displayLongitudeSpan.textContent = 'Deteksi Palsu';
@@ -264,6 +278,7 @@
                                 window.location.href = "{{ route('attendances.index') }}";
                             });
                             submitButton.setAttribute('disabled', 'true');
+                            loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                             mapLoadingIndicator.classList.add('hidden');
                             displayLatitudeSpan.textContent = 'Kedaluwarsa';
                             displayLongitudeSpan.textContent = 'Kedaluwarsa';
@@ -300,6 +315,7 @@
                             window.location.href = "{{ route('attendances.index') }}";
                         });
                         submitButton.setAttribute('disabled', 'true');
+                        loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                         mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator on error
                         displayLatitudeSpan.textContent = 'Error';
                         displayLongitudeSpan.textContent = 'Error';
@@ -319,6 +335,7 @@
                         window.location.href = "{{ route('attendances.index') }}";
                     });
                     submitButton.setAttribute('disabled', 'true');
+                    loadingSpinnerSpan.classList.add('hidden'); // Ensure spinner is hidden
                     mapLoadingIndicator.classList.add('hidden'); // Hide loading indicator if not supported
                     displayLatitudeSpan.textContent = 'Tidak tersedia';
                     displayLongitudeSpan.textContent = 'Tidak tersedia';
@@ -329,7 +346,8 @@
                 event.preventDefault();
                 
                 submitButton.setAttribute('disabled', 'true');
-                submitButton.textContent = 'Mengirim...';
+                buttonTextSpan.textContent = 'Memproses...'; // Update text
+                loadingSpinnerSpan.classList.remove('hidden'); // Show spinner
 
                 const imageBlob = await new Promise(resolve => {
                     const context = canvas.getContext('2d');
@@ -361,7 +379,8 @@
                         window.location.href = "{{ route('attendances.index') }}";
                     });
                     submitButton.removeAttribute('disabled');
-                    submitButton.textContent = todayAttendance && !todayAttendance.time_out ? 'Absen Pulang' : 'Absen Masuk';
+                    buttonTextSpan.textContent = originalButtonText; // Revert text
+                    loadingSpinnerSpan.classList.add('hidden'); // Hide spinner
                     return;
                 }
 
@@ -408,7 +427,10 @@
                     Swal.fire({ icon: 'error', title: 'Error!', text: 'Tidak dapat terhubung ke server.' }).then(() => {
                         window.location.href = "{{ route('attendances.index') }}";
                     });
+                } finally {
                     submitButton.removeAttribute('disabled');
+                    buttonTextSpan.textContent = originalButtonText; // Revert text
+                    loadingSpinnerSpan.classList.add('hidden'); // Hide spinner
                 }
             });
 
