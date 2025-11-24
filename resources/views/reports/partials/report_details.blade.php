@@ -155,14 +155,19 @@
                                                     ]);
                                                 @endphp
                                                 <a href="#"
-                                                    @click.prevent="$dispatch('open-modal', { imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', fullImageUrl: '{{ $fullImageUrl }}' })"
+                                                    @click.prevent="$dispatch('open-modal', { 
+                                                        imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
+                                                        fullImageUrl: '{{ $fullImageUrl }}',
+                                                        reportId: '{{ $report->id }}',
+                                                        imagePath: '{{ $path }}'
+                                                    })"
                                                     class="flex flex-col group flex-shrink-0 gap-2">
 
                                                     <!-- Outer Wrapper (final visual size) -->
                                                     <div
                                                         class="w-full h-40 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200 bg-gray-100 flex items-center justify-center">
                                                         <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
-                                                            loading="lazy"
+                                                            loading="lazy" data-path="{{ $path }}"
                                                             class="max-w-full max-h-full object-contain report-image">
                                                     </div>
 
@@ -203,4 +208,26 @@
             @endforeach
         </div>
     </div>
+</div>
+
+<script>
+    window.addEventListener('image-rotated', function(e) {
+        const path = e.detail.imagePath;
+        const timestamp = e.detail.timestamp;
+
+        // Find the thumbnail image with matching data-path
+        // Escape backslashes just in case, though unlikely on Linux
+        const selector = `img[data-path="${path.replace(/\\/g, '\\\\')}"]`;
+
+        const thumbnail = document.querySelector(selector);
+        if (thumbnail) {
+            let currentSrc = thumbnail.src;
+            // Remove existing timestamp if any to avoid stacking
+            currentSrc = currentSrc.replace(/[?&]t=\d+/, '');
+
+            const separator = currentSrc.includes('?') ? '&' : '?';
+            thumbnail.src = currentSrc + separator + 't=' + timestamp;
+        }
+    });
+</script>
 </div>

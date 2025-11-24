@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/{report}/approve', [ReportController::class, 'approve'])->name('reports.approve');
     Route::post('/reports/{report}/reject', [ReportController::class, 'reject'])->name('reports.reject');
     Route::resource('reports', ReportController::class)->withTrashed();
+    Route::post('/reports/{report}/rotate-image', [ReportController::class, 'rotateImage'])->name('reports.rotateImage');
     Route::post('/reports/{id}/restore', [ReportController::class, 'restore'])->name('reports.restore');
     Route::delete('/reports/{id}/force-delete', [ReportController::class, 'forceDelete'])->name('reports.forceDelete');
 

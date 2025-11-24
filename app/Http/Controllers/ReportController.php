@@ -700,4 +700,130 @@ class ReportController extends Controller
     
             return $storagePath;
         }
+
+    /**
+     * Rotate an image permanently.
+     */
+    public function rotateImage(Request $request, Report $report)
+    {
+        $this->authorize('update', $report);
+
+        $request->validate([
+            'image_path' => 'required|string',
+            'angle' => 'required|integer|in:90,-90,180',
+        ]);
+
+        $imagePath = $request->input('image_path');
+        $angle = $request->input('angle');
+
+        // Verify that the image belongs to the report
+        $found = false;
+        foreach ($report->data as $key => $value) {
+            if (is_array($value)) {
+                if (in_array($imagePath, $value)) {
+                    $found = true;
+                    break;
+                }
+            } elseif ($value === $imagePath) {
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            return response()->json(['message' => 'Image not found in report.'], 404);
+        }
+
+        $fullPath = storage_path('app/public/' . $imagePath);
+
+        if (!file_exists($fullPath)) {
+            return response()->json(['message' => 'File not found.'], 404);
+        }
+
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $imageResource = null;
+
+        switch ($extension) {
+            case 'jpg':
+            case 'jpeg':
+                $imageResource = imagecreatefromjpeg($fullPath);
+                break;
+            case 'png':
+                $imageResource = imagecreatefrompng($fullPath);
+                imagealphablending($imageResource, true);
+                imagesavealpha($imageResource, true);
+                break;
+            default:
+                return response()->json(['message' => 'Unsupported image type.'], 400);
+        }
+
+        if (!$imageResource) {
+            return response()->json(['message' => 'Failed to load image.'], 500);
+        }
+
+        // Rotate
+        // imagerotate rotates counter-clockwise.
+        // If angle is 90 (CW), we need -90 (CCW) or 270.
+        // If angle is -90 (CCW), we need 90 (CCW).
+        // Wait, the frontend sends what?
+        // Let's assume frontend sends standard degrees: 90 means 90 degrees CW.
+        // imagerotate: "The angle of rotation, in degrees. The rotation direction is counter-clockwise."
+        // So 90 CW = 270 CCW.
+        // -90 CW = 90 CCW.
+        
+        // Let's stick to standard math: positive is usually CCW in math, but in UI "Rotate Right" is CW.
+        // If user clicks "Rotate Right" (+90), we want the image to turn right.
+        // imagerotate(image, angle, bg_color)
+        // angle: Rotation angle, in degrees. The rotation angle is interpreted as the number of degrees to rotate the image anticlockwise.
+        
+        // So if I want to rotate 90 degrees Clockwise (Right), I must pass 270 (or -90) to imagerotate.
+        // If I want to rotate 90 degrees Counter-Clockwise (Left), I must pass 90 to imagerotate.
+        
+        // The frontend logic I saw earlier:
+        // rotation += 90 (Right button)
+        // rotation -= 90 (Left button)
+        
+        // So if frontend sends 90 (Right), we should rotate -90 (or 270) in imagerotate.
+        // If frontend sends -90 (Left), we should rotate 90 in imagerotate.
+        
+        $rotationAngle = 0;
+        if ($angle == 90) {
+            $rotationAngle = 270;
+        } elseif ($angle == -90) {
+            $rotationAngle = 90;
+        } elseif ($angle == 180) {
+            $rotationAngle = 180;
+        }
+
+        $rotatedImage = imagerotate($imageResource, $rotationAngle, 0);
+        
+        if ($extension === 'png') {
+            imagealphablending($rotatedImage, false);
+            imagesavealpha($rotatedImage, true);
+            imagepng($rotatedImage, $fullPath);
+        } else {
+            imagejpeg($rotatedImage, $fullPath, 90);
+        }
+
+        imagedestroy($imageResource);
+        imagedestroy($rotatedImage);
+
+        // Clear cached thumbnails
+        $directory = pathinfo($imagePath, PATHINFO_DIRNAME);
+        $filename = pathinfo($imagePath, PATHINFO_FILENAME);
+        $thumbnailDir = $directory . '/thumbnails';
+        
+        if (Storage::disk('public')->exists($thumbnailDir)) {
+            $files = Storage::disk('public')->files($thumbnailDir);
+            foreach ($files as $file) {
+                // Check if file matches pattern: filename_WIDTHxHEIGHT.ext
+                // Simple check: starts with filename_
+                if (str_starts_with(basename($file), $filename . '_')) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Image rotated successfully.']);
+    }
 }
