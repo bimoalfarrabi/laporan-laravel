@@ -387,8 +387,18 @@ class ReportController extends Controller
                 $reportData[$fieldName] = $updatedFiles;
             } elseif ($field->type === 'video') {
                 $existingVideo = $reportData[$fieldName] ?? null;
+                $videoToDelete = $request->input('delete_' . $fieldName);
+                
+                // Handle deletion of existing video
+                if ($videoToDelete && $existingVideo && Storage::disk('public')->exists($existingVideo)) {
+                    Storage::disk('public')->delete($existingVideo);
+                    $reportData[$fieldName] = null; // Clear the field
+                }
+                
+                // Handle new video upload
                 if ($request->hasFile($fieldName)) {
-                    if ($existingVideo) {
+                    // Delete old video if exists and not already deleted above
+                    if ($existingVideo && !$videoToDelete && Storage::disk('public')->exists($existingVideo)) {
                         Storage::disk('public')->delete($existingVideo);
                     }
                     $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));

@@ -76,15 +76,36 @@
                                         <p class="text-sm text-gray-500">Maksimal 3 gambar.</p>
                                     </div>
                                 @elseif ($field->type === 'video')
-                                    <div x-data="videoUploadHandler('{{ $field->name }}')" class="space-y-2">
+                                    <div x-data="videoUploadHandler('{{ $field->name }}')" class="space-y-3">
                                         <input id="{{ $field->name }}_display" type="file" accept="video/*"
                                             class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                             @change="handleFileSelect" />
-                                        <input type="file" name="{{ $field->name }}" id="{{ $field->name }}" class="hidden">
-                                        <div class="mt-2" x-show="videoUrl">
-                                            <video :src="videoUrl" controls class="w-full rounded-md border border-gray-300"></video>
-                                            <button type="button" @click="removeVideo"
-                                                class="mt-1 text-sm text-red-600 hover:text-red-800">Hapus Video</button>
+                                        <input type="file" name="{{ $field->name }}" id="{{ $field->name }}"
+                                            class="hidden">
+
+                                        <!-- Video Preview -->
+                                        <div class="mt-3" x-show="videoUrl" style="display: none;">
+                                            <div
+                                                class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl">
+                                                <video :src="videoUrl" controls preload="metadata"
+                                                    class="w-full h-auto" style="max-height: 500px;">
+                                                    Browser Anda tidak mendukung video player.
+                                                </video>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-2">
+                                                <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                <button type="button" @click="removeVideo"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-100 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                        </path>
+                                                    </svg>
+                                                    Hapus Video
+                                                </button>
+                                            </div>
                                         </div>
                                         <p class="text-sm text-gray-500">Maksimal 1 video.</p>
                                     </div>
@@ -158,20 +179,28 @@
             Alpine.data('videoUploadHandler', (fieldName) => ({
                 videoUrl: null,
                 videoFile: null,
+                videoFileName: '',
                 handleFileSelect(event) {
                     const file = event.target.files[0];
                     if (file && file.type.startsWith('video/')) {
                         this.videoFile = file;
                         this.videoUrl = URL.createObjectURL(file);
+                        this.videoFileName = file.name;
                     } else {
                         this.videoFile = null;
                         this.videoUrl = null;
+                        this.videoFileName = '';
                     }
                     this.updateActualInput();
                 },
                 removeVideo() {
+                    // Revoke the object URL to free memory
+                    if (this.videoUrl) {
+                        URL.revokeObjectURL(this.videoUrl);
+                    }
                     this.videoFile = null;
                     this.videoUrl = null;
+                    this.videoFileName = '';
                     document.getElementById(fieldName + '_display').value = '';
                     this.updateActualInput();
                 },

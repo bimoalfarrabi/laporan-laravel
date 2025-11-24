@@ -20,9 +20,13 @@
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                         @if ($previousReport)
                             <a href="{{ route('reports.show', $previousReport->id) }}"
-                               class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                               data-report-id="{{ $previousReport->id }}">
-                                <svg class="w-4 h-4 mr-1 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                data-report-id="{{ $previousReport->id }}">
+                                <svg class="w-4 h-4 mr-1 md:mr-1" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7"></path>
+                                </svg>
                                 <span class="hidden md:inline">Laporan Sebelumnya</span>
                             </a>
                         @else
@@ -31,17 +35,25 @@
 
                         @if ($nextReport)
                             <a href="{{ route('reports.show', $nextReport->id) }}"
-                               class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                               data-report-id="{{ $nextReport->id }}">
+                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                data-report-id="{{ $nextReport->id }}">
                                 <span class="hidden md:inline">Laporan Berikutnya</span>
-                                <svg class="w-4 h-4 ml-1 md:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                <svg class="w-4 h-4 ml-1 md:ml-1" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7"></path>
+                                </svg>
                             </a>
                         @else
                             <span class="hidden md:inline-block"></span> {{-- Placeholder to maintain space on larger screens --}}
                         @endif
                     </div>
-                    
-                    @include('reports.partials.report_details', ['report' => $report, 'previousReport' => $previousReport, 'nextReport' => $nextReport])
+
+                    @include('reports.partials.report_details', [
+                        'report' => $report,
+                        'previousReport' => $previousReport,
+                        'nextReport' => $nextReport,
+                    ])
 
                     {{-- Action Buttons --}}
                     <div class="mt-8 pt-6 border-t">
@@ -117,6 +129,7 @@
         </div>
     </div>
     <x-image-modal />
+    <x-video-modal />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

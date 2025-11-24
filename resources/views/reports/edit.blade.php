@@ -110,20 +110,36 @@
                                             ada).</p>
                                     </div>
                                 @elseif ($field->type === 'video')
-                                    <div x-data="videoEditHandler('{{ $field->name }}', '{{ $report->data[$field->name] ?? '' }}')" class="space-y-2">
+                                    <div x-data="videoEditHandler('{{ $field->name }}', '{{ $report->data[$field->name] ?? '' }}')" class="space-y-3">
                                         {{-- Existing Video --}}
-                                        <div x-show="existingVideoUrl && !videoFile" class="relative group">
-                                            <video :src="'/storage/' + existingVideoUrl" controls class="w-full rounded-md border border-gray-300"></video>
-                                            <button type="button" @click="markForDeletion"
-                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
+                                        <div x-show="existingVideoUrl && !videoFile && !isMarkedForDeletion"
+                                            class="mt-2">
+                                            <div
+                                                class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl group">
+                                                <video :src="'/storage/' + existingVideoUrl" controls preload="metadata"
+                                                    class="w-full h-auto" style="max-height: 500px;">
+                                                    Browser Anda tidak mendukung video player.
+                                                </video>
+                                                <button type="button" @click="markForDeletion"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 focus:outline-none shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mt-2"
+                                                x-text="existingVideoUrl.split('/').pop()"></p>
                                         </div>
-                                        <input type="hidden" name="delete_{{ $field->name }}" :value="existingVideoUrl" x-if="isMarkedForDeletion">
+
+                                        {{-- Hidden input for deletion --}}
+                                        <template x-if="isMarkedForDeletion">
+                                            <input type="hidden" name="delete_{{ $field->name }}"
+                                                :value="existingVideoUrl">
+                                        </template>
 
                                         {{-- New Video Input --}}
                                         <div x-show="!existingVideoUrl || isMarkedForDeletion">
@@ -133,10 +149,28 @@
                                         </div>
 
                                         {{-- New Video Preview --}}
-                                        <div class="mt-2" x-show="videoFile">
-                                            <video :src="videoPreviewUrl" controls class="w-full rounded-md border border-gray-300"></video>
-                                            <button type="button" @click="removeVideo"
-                                                class="mt-1 text-sm text-red-600 hover:text-red-800">Hapus Video</button>
+                                        <div class="mt-3" x-show="videoFile" style="display: none;">
+                                            <div
+                                                class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl">
+                                                <video :src="videoPreviewUrl" controls preload="metadata"
+                                                    class="w-full h-auto" style="max-height: 500px;">
+                                                    Browser Anda tidak mendukung video player.
+                                                </video>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-2">
+                                                <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                <button type="button" @click="removeVideo"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-100 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                        </path>
+                                                    </svg>
+                                                    Hapus Video
+                                                </button>
+                                            </div>
                                         </div>
                                         <p class="text-sm text-gray-500">Maksimal 1 video.</p>
                                     </div>
@@ -233,6 +267,7 @@
                 existingVideoUrl: initialVideo,
                 videoFile: null,
                 videoPreviewUrl: null,
+                videoFileName: '',
                 isMarkedForDeletion: false,
 
                 markForDeletion() {
@@ -244,12 +279,18 @@
                     if (file && file.type.startsWith('video/')) {
                         this.videoFile = file;
                         this.videoPreviewUrl = URL.createObjectURL(file);
+                        this.videoFileName = file.name;
                     }
                 },
 
                 removeVideo() {
+                    // Revoke the object URL to free memory
+                    if (this.videoPreviewUrl) {
+                        URL.revokeObjectURL(this.videoPreviewUrl);
+                    }
                     this.videoFile = null;
                     this.videoPreviewUrl = null;
+                    this.videoFileName = '';
                     document.getElementById(fieldName).value = '';
                 }
             }));

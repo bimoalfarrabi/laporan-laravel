@@ -197,6 +197,58 @@
                                     Tidak ada file yang diunggah.
                                 </p>
                             @endif
+                        @elseif ($field->type === 'video')
+                            @php
+                                $videoPath = $report->data[$field->name] ?? null;
+                            @endphp
+
+                            @if ($videoPath && Storage::disk('public')->exists($videoPath))
+                                <div class="mt-2">
+                                    {{-- Video Thumbnail with Play Button Overlay --}}
+                                    <div class="max-w-3xl">
+                                        <a href="#"
+                                            @click.prevent="$dispatch('open-video-modal', { 
+                                                videoUrl: '{{ asset('storage/' . $videoPath) }}',
+                                                videoFileName: '{{ basename($videoPath) }}'
+                                            })"
+                                            class="group relative block aspect-video w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200">
+
+                                            {{-- Video Preview (first frame) --}}
+                                            <video preload="metadata" class="h-full w-full object-cover" muted>
+                                                <source src="{{ asset('storage/' . $videoPath) }}#t=0.1"
+                                                    type="video/{{ pathinfo($videoPath, PATHINFO_EXTENSION) }}">
+                                            </video>
+
+                                            {{-- Play Button Overlay --}}
+                                            <div
+                                                class="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors duration-200 group-hover:bg-black/40">
+                                                <div
+                                                    class="bg-white/95 rounded-full p-4 shadow-2xl transition-transform duration-200 group-hover:scale-110">
+                                                    <svg class="w-12 h-12 text-gray-800" fill="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path d="M8 5v14l11-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                            {{-- Hover Text --}}
+                                            <div
+                                                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <span class="text-white text-sm font-medium">
+                                                    Klik untuk memutar video
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-2">
+                                        {{ basename($videoPath) }}
+                                    </p>
+                                </div>
+                            @else
+                                <p class="text-gray-500 text-base">
+                                    Video tidak tersedia.
+                                </p>
+                            @endif
                         @else
                             {{-- Fallback for any other field type --}}
                             <span class="text-lg">{{ $report->data[$field->name] ?? '-' }}</span>
