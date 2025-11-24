@@ -35,7 +35,8 @@
                             <div id="fields-container" class="space-y-4">
                                 <!-- Field templates will be added here by JavaScript -->
                             </div>
-                            <button type="button" id="add-field" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                            <button type="button" id="add-field"
+                                class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
                                 Tambah Field
                             </button>
                         </div>
@@ -61,26 +62,69 @@
     </div>
 
     @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const fieldsContainer = document.getElementById('fields-container');
-            const addFieldButton = document.getElementById('add-field');
-            let fieldCounter = 0;
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-            const fieldTypes = @json($fieldTypes);
-            const roles = @json($roles);
-            const existingFields = @json($reportType->reportTypeFields);
+        <style>
+            .drag-handle {
+                transition: all 0.2s ease;
+            }
 
-            fieldTypes.push('role_specific_text');
+            .drag-handle:hover {
+                transform: scale(1.1);
+                color: #4F46E5;
+            }
 
-            function addField(field = {}) {
-                const newFieldId = `field-${fieldCounter++}`;
-                const fieldHtml = `
+            .drag-handle:active {
+                transform: scale(0.95);
+            }
+
+            .sortable-ghost {
+                opacity: 0.4;
+                background-color: #DBEAFE;
+                border: 2px dashed #3B82F6;
+            }
+
+            .field-item {
+                transition: all 0.15s ease;
+            }
+
+            .field-item.sortable-chosen {
+                cursor: grabbing !important;
+            }
+
+            .field-item.sortable-drag {
+                opacity: 0.8;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const fieldsContainer = document.getElementById('fields-container');
+                const addFieldButton = document.getElementById('add-field');
+                let fieldCounter = 0;
+
+                const fieldTypes = @json($fieldTypes);
+                const roles = @json($roles);
+                const existingFields = @json($reportType->reportTypeFields);
+
+                fieldTypes.push('role_specific_text');
+
+                function addField(field = {}) {
+                    const newFieldId = `field-${fieldCounter++}`;
+                    const fieldHtml = `
                     <div class="field-item p-4 border rounded-md bg-gray-50 relative">
+                        <!-- Drag Handle -->
+                        <div class="drag-handle absolute left-2 top-2 cursor-move text-gray-400 hover:text-gray-600 z-10" title="Drag untuk mengubah urutan">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                            </svg>
+                        </div>
+                        
                         <button type="button" class="remove-field absolute top-1 right-1 text-red-500 hover:text-red-700 z-10">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-10">
                             <div>
                                 <x-input-label for="${newFieldId}-label" value="Label" />
                                 <x-text-input id="${newFieldId}-label" class="block mt-1 w-full" type="text" name="fields[${newFieldId}][label]" value="${field.label || ''}" required />
@@ -111,43 +155,56 @@
                         </div>
                     </div>
                 `;
-                fieldsContainer.insertAdjacentHTML('beforeend', fieldHtml);
-                updateFieldOrder();
-            }
-
-            function updateFieldOrder() {
-                Array.from(fieldsContainer.children).forEach((item, index) => {
-                    item.querySelector('.field-order').value = index;
-                });
-            }
-
-            addFieldButton.addEventListener('click', () => addField());
-
-            fieldsContainer.addEventListener('click', function (event) {
-                if (event.target.closest('.remove-field')) {
-                    event.target.closest('.field-item').remove();
+                    fieldsContainer.insertAdjacentHTML('beforeend', fieldHtml);
                     updateFieldOrder();
                 }
-            });
 
-            fieldsContainer.addEventListener('change', function(event) {
-                if (event.target.matches('select[name$="[type]"]')) {
-                    const fieldItem = event.target.closest('.field-item');
-                    const roleContainer = fieldItem.querySelector('.role-container');
-                    if (event.target.value === 'role_specific_text') {
-                        roleContainer.style.display = 'block';
-                    } else {
-                        roleContainer.style.display = 'none';
-                    }
+                function updateFieldOrder() {
+                    Array.from(fieldsContainer.children).forEach((item, index) => {
+                        item.querySelector('.field-order').value = index;
+                    });
                 }
+
+                addFieldButton.addEventListener('click', () => addField());
+
+                fieldsContainer.addEventListener('click', function(event) {
+                    if (event.target.closest('.remove-field')) {
+                        event.target.closest('.field-item').remove();
+                        updateFieldOrder();
+                    }
+                });
+
+                fieldsContainer.addEventListener('change', function(event) {
+                    if (event.target.matches('select[name$="[type]"]')) {
+                        const fieldItem = event.target.closest('.field-item');
+                        const roleContainer = fieldItem.querySelector('.role-container');
+                        if (event.target.value === 'role_specific_text') {
+                            roleContainer.style.display = 'block';
+                        } else {
+                            roleContainer.style.display = 'none';
+                        }
+                    }
+                });
+
+                // Pre-populate fields for edit mode
+                existingFields.forEach(field => addField(field));
+
+                // Initialize SortableJS after fields are loaded
+                new Sortable(fieldsContainer, {
+                    animation: 150,
+                    handle: '.drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    dragClass: 'sortable-drag',
+                    onEnd: function(evt) {
+                        updateFieldOrder();
+                        console.log('Field reordered from index', evt.oldIndex, 'to', evt.newIndex);
+                    }
+                });
+
+                // Initial field order update
+                updateFieldOrder();
             });
-
-            // Pre-populate fields for edit mode
-            existingFields.forEach(field => addField(field));
-
-            // Initial field order update
-            updateFieldOrder();
-        });
-    </script>
+        </script>
     @endpush
 </x-app-layout>
