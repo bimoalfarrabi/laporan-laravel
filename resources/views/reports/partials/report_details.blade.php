@@ -135,76 +135,69 @@
                             @if (!empty($filePaths))
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
                                     @foreach ($filePaths as $path)
-                                        @if (Storage::disk('nextcloud')->exists($path))
+                                        @php
+                                            $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
+                                                'jpg',
+                                                'jpeg',
+                                                'png',
+                                                'gif',
+                                                'svg',
+                                            ]);
+                                            $fullImageUrl = route('files.serve', ['path' => $path]);
+                                        @endphp
+
+                                        @if ($isImage)
                                             @php
-                                                $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
-                                                    'jpg',
-                                                    'jpeg',
-                                                    'png',
-                                                    'gif',
-                                                    'svg',
+                                                $thumbnailUrl = route('files.serve', [
+                                                    'path' => $path,
+                                                    'size' => '200x200',
                                                 ]);
-                                                $fullImageUrl = route('files.serve', ['path' => $path]);
                                             @endphp
+                                            <a href="#"
+                                                @click.prevent="$dispatch('open-modal', { 
+                                                        imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
+                                                        fullImageUrl: '{{ $fullImageUrl }}',
+                                                        reportId: '{{ $report->id }}',
+                                                        imagePath: '{{ $path }}'
+                                                    })"
+                                                x-data="{ imageLoaded: false }"
+                                                class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
 
-                                            @if ($isImage)
-                                                @php
-                                                    $thumbnailUrl = route('files.serve', [
-                                                        'path' => $path,
-                                                        'size' => '200x200',
-                                                    ]);
-                                                @endphp
-                                                <a href="#"
-                                                    @click.prevent="$dispatch('open-modal', { 
-                                                            imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
-                                                            fullImageUrl: '{{ $fullImageUrl }}',
-                                                            reportId: '{{ $report->id }}',
-                                                            imagePath: '{{ $path }}'
-                                                        })"
-                                                    x-data="{ imageLoaded: false }"
-                                                    class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                                <!-- Skeleton Loader -->
+                                                <div x-show="!imageLoaded"
+                                                    class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                                                    <svg class="w-12 h-12 text-gray-400" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
 
-                                                    <!-- Skeleton Loader -->
-                                                    <div x-show="!imageLoaded"
-                                                        class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-                                                        <svg class="w-12 h-12 text-gray-400" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </div>
+                                                <!-- Image -->
+                                                <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
+                                                    loading="lazy" data-path="{{ $path }}"
+                                                    @load="imageLoaded = true" x-show="imageLoaded"
+                                                    x-transition:enter="transition ease-out duration-300"
+                                                    x-transition:enter-start="opacity-0"
+                                                    x-transition:enter-end="opacity-100"
+                                                    class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
 
-                                                    <!-- Image -->
-                                                    <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
-                                                        loading="lazy" data-path="{{ $path }}"
-                                                        @load="imageLoaded = true" x-show="imageLoaded"
-                                                        x-transition:enter="transition ease-out duration-300"
-                                                        x-transition:enter-start="opacity-0"
-                                                        x-transition:enter-end="opacity-100"
-                                                        class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
-
-                                                    <!-- Hover Overlay -->
-                                                    <div x-show="imageLoaded"
-                                                        class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/10">
-                                                        <span
-                                                            class="opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-white/90 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm backdrop-blur-sm">
-                                                            Lihat
-                                                        </span>
-                                                    </div>
-                                                </a>
-                                            @else
-                                                <a href="{{ $fullImageUrl }}" target="_blank"
-                                                    class="text-blue-600 hover:underline text-base flex items-center justify-center h-40 border rounded-lg bg-gray-50">
-                                                    Lihat File
-                                                    ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
-                                                </a>
-                                            @endif
+                                                <!-- Hover Overlay -->
+                                                <div x-show="imageLoaded"
+                                                    class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/10">
+                                                    <span
+                                                        class="opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-white/90 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm backdrop-blur-sm">
+                                                        Lihat
+                                                    </span>
+                                                </div>
+                                            </a>
                                         @else
-                                            <div
-                                                class="h-40 border rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-sm p-4 text-center">
-                                                File tidak ditemukan
-                                            </div>
+                                            <a href="{{ $fullImageUrl }}" target="_blank"
+                                                class="text-blue-600 hover:underline text-base flex items-center justify-center h-40 border rounded-lg bg-gray-50">
+                                                Lihat File
+                                                ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
+                                            </a>
                                         @endif
                                     @endforeach
                                 </div>
@@ -218,7 +211,7 @@
                                 $videoPath = $report->data[$field->name] ?? null;
                             @endphp
 
-                            @if ($videoPath && Storage::disk('nextcloud')->exists($videoPath))
+                            @if ($videoPath)
                                 <div class="mt-2">
                                     {{-- Video Thumbnail with Play Button Overlay --}}
                                     <div class="max-w-3xl" x-data="{ videoLoaded: false }">

@@ -9,6 +9,10 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <script>
+                        // Define a global base URL for serving files to be used by Alpine components
+                        const fileServeUrl = '/storage/files/';
+                    </script>
                     <form id="report-form-edit" method="POST" action="{{ route('reports.update', $report->id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -57,7 +61,7 @@
                                         <div class="grid grid-cols-3 gap-4 mb-4" x-show="existingImages.length > 0">
                                             <template x-for="(path, index) in existingImages" :key="index">
                                                 <div class="relative group" x-show="!deletedImages.includes(path)">
-                                                    <img :src="'/storage/files/' + path"
+                                                    <img :src="fileServeUrl + path"
                                                         class="w-full h-24 object-cover rounded-md border border-gray-300">
                                                     <button type="button" @click="markForDeletion(path)"
                                                         class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
@@ -143,7 +147,7 @@
                                             class="mt-2">
                                             <div
                                                 class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl group">
-                                                <video :src="'/storage/files/' + existingVideoUrl" controls
+                                                <video :src="fileServeUrl + existingVideoUrl" controls
                                                     preload="metadata" class="w-full h-auto"
                                                     style="max-height: 500px;">
                                                     Browser Anda tidak mendukung video player.

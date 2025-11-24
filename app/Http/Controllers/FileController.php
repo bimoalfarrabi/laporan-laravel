@@ -21,14 +21,26 @@ class FileController extends Controller
      */
     public function serve(Request $request, $path)
     {
-        // Security: Check if the file exists on the 'nextcloud' disk.
-        if (!Storage::disk('nextcloud')->exists($path)) {
+        $finalPath = $path;
+
+        // Backward compatibility check for old paths
+        if (!Storage::disk('nextcloud')->exists($finalPath)) {
+            if (!Str::startsWith($finalPath, 'satpam/')) {
+                $prefixedPath = 'satpam/' . $finalPath;
+                if (Storage::disk('nextcloud')->exists($prefixedPath)) {
+                    $finalPath = $prefixedPath;
+                }
+            }
+        }
+        
+        // Security: Final check if the file exists on the 'nextcloud' disk.
+        if (!Storage::disk('nextcloud')->exists($finalPath)) {
             abort(404, 'File not found.');
         }
 
         // Check if a specific size is requested for an image
         $size = $request->query('size');
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $extension = pathinfo($finalPath, PATHINFO_EXTENSION);
 
         if ($size && in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif'])) {
             // Validate size format (e.g., 300x300)
@@ -39,7 +51,7 @@ class FileController extends Controller
             $dimensions = explode('x', $size);
             $width = (int) $dimensions[0];
             $height = (int) $dimensions[1];
-            $thumbnailPath = $this->getThumbnailPath($path, $width, $height);
+            $thumbnailPath = $this->getThumbnailPath($finalPath, $width, $height);
 
             // If thumbnail exists, serve it directly
             if (Storage::disk('public')->exists($thumbnailPath)) {
@@ -48,23 +60,23 @@ class FileController extends Controller
 
             // If not, generate the thumbnail
             try {
-                $this->generateThumbnail($path, $thumbnailPath, $width, $height);
+                $this->generateThumbnail($finalPath, $thumbnailPath, $width, $height);
                 return response()->file(Storage::disk('public')->path($thumbnailPath));
             } catch (\Exception $e) {
                 // If thumbnail generation fails, log the error and consider falling back
-                \Illuminate\Support\Facades\Log::error("Thumbnail generation failed for {$path}: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Thumbnail generation failed for {$finalPath}: " . $e->getMessage());
                 // Fallback to serving the original image
             }
         }
 
         // Return the original file if no size is requested or if it's not an image
         // Return the original file from Nextcloud
-        $content = Storage::disk('nextcloud')->get($path);
+        $content = Storage::disk('nextcloud')->get($finalPath);
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->buffer($content);
 
         if (!$mimeType) {
-            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $extension = pathinfo($finalPath, PATHINFO_EXTENSION);
             $mimeType = match (strtolower($extension)) {
                 'jpg', 'jpeg' => 'image/jpeg',
                 'png' => 'image/png',
