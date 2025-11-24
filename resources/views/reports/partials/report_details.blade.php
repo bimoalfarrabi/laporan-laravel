@@ -161,20 +161,21 @@
                                                         reportId: '{{ $report->id }}',
                                                         imagePath: '{{ $path }}'
                                                     })"
-                                                    class="flex flex-col group flex-shrink-0 gap-2">
+                                                    class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
 
-                                                    <!-- Outer Wrapper (final visual size) -->
+                                                    <!-- Image -->
+                                                    <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
+                                                        loading="lazy" data-path="{{ $path }}"
+                                                        class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
+
+                                                    <!-- Hover Overlay -->
                                                     <div
-                                                        class="w-full h-40 overflow-hidden rounded-lg shadow-lg group-hover:opacity-80 transition-opacity border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                                        <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
-                                                            loading="lazy" data-path="{{ $path }}"
-                                                            class="max-w-full max-h-full object-contain report-image">
+                                                        class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/10">
+                                                        <span
+                                                            class="opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-white/90 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm backdrop-blur-sm">
+                                                            Lihat
+                                                        </span>
                                                     </div>
-
-                                                    <span
-                                                        class="text-blue-600 group-hover:underline text-sm block mt-1 text-center">Lihat
-                                                        Gambar</span>
-
                                                 </a>
                                             @else
                                                 <a href="{{ $fullImageUrl }}" target="_blank"
