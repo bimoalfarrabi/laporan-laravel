@@ -584,13 +584,25 @@ class AttendanceController extends Controller
                     $imageResource = imagecreatefromgif($originalPath);
                     break;
                 default:
-                    // If file type is not supported, store it without compression
-                    return $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+            // If file type is not supported, store it without compression
+                    $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    if ($path === false) {
+                        throw ValidationException::withMessages([
+                            'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
+                        ]);
+                    }
+                    return $path;
             }
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                return $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                if ($path === false) {
+                    throw ValidationException::withMessages([
+                        'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                    ]);
+                }
+                return $path;
             }
     
             $imageResource = $this->rotateLandscapeToPortrait($imageResource);
@@ -694,12 +706,30 @@ class AttendanceController extends Controller
 
             // Ensure directory exists before upload
             $directoryPath = 'satpam/attendances/' . $year . '/' . $month;
-            if (!Storage::disk('nextcloud')->exists($directoryPath)) {
-                Storage::disk('nextcloud')->makeDirectory($directoryPath);
+            $directoryExists = false;
+            try {
+                $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
+            } catch (\Exception $e) {
+                // If check fails (e.g. network issue), assume false and try to create
+                $directoryExists = false;
+            }
+
+            if (!$directoryExists) {
+                if (!Storage::disk('nextcloud')->makeDirectory($directoryPath)) {
+                     unlink($tempPath);
+                     throw ValidationException::withMessages([
+                        'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
+                    ]);
+                }
             }
             
             // Upload to Nextcloud
-            Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
+            if (!Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'))) {
+                unlink($tempPath);
+                throw ValidationException::withMessages([
+                    'photo' => 'Gagal mengunggah foto ke penyimpanan. Silakan coba lagi.',
+                ]);
+            }
             
             // Remove temp file
             unlink($tempPath);

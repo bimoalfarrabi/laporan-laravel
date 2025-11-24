@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
 class ReportController extends Controller
@@ -548,12 +549,31 @@ class ReportController extends Controller
         $month = now()->format('m');
         $storagePath = 'satpam/reports/' . $year . '/' . $month;
     
-        // Ensure directory exists
-        if (!Storage::disk('nextcloud')->exists($storagePath)) {
-            Storage::disk('nextcloud')->makeDirectory($storagePath);
+        // Ensure directory exists with robust error handling
+        $directoryExists = false;
+        try {
+            $directoryExists = Storage::disk('nextcloud')->exists($storagePath);
+        } catch (\Exception $e) {
+            // If check fails (e.g. network issue), assume false and try to create
+            $directoryExists = false;
+        }
+
+        if (!$directoryExists) {
+            if (!Storage::disk('nextcloud')->makeDirectory($storagePath)) {
+                 throw ValidationException::withMessages([
+                    'video' => 'Gagal membuat direktori penyimpanan video. Silakan coba lagi.',
+                ]);
+            }
         }
     
-        return $file->storeAs($storagePath, $filename, 'nextcloud');
+        $path = $file->storeAs($storagePath, $filename, 'nextcloud');
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'video' => 'Gagal mengunggah video. Silakan coba lagi.',
+            ]);
+        }
+
+        return $path;
     }
 
     /**
@@ -594,14 +614,28 @@ class ReportController extends Controller
                     break;
                 default:
                     // If file type is not supported, store it without compression
-                    return $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    if ($path === false) {
+                        throw ValidationException::withMessages([
+                            'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
+                        ]);
+                    }
+                    return $path;
             }
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                return $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                if ($path === false) {
+                    throw ValidationException::withMessages([
+                        'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                    ]);
+                }
+                return $path;
             }
     
+            $imageResource = $this->rotateLandscapeToPortrait($imageResource);
+
             $originalWidth = imagesx($imageResource);
             $originalHeight = imagesy($imageResource);
     
@@ -620,37 +654,6 @@ class ReportController extends Controller
             } else { // Portrait or Square
                 $newHeight = $maxHeight;
                 $newWidth = $maxHeight * $ratio;
-            }
-        }
-
-        // Handle EXIF Rotation
-        if (function_exists('exif_read_data')) {
-            try {
-                $exif = @exif_read_data($originalPath);
-                if ($exif && isset($exif['Orientation'])) {
-                    $orientation = $exif['Orientation'];
-                    switch ($orientation) {
-                        case 3:
-                            $imageResource = imagerotate($imageResource, 180, 0);
-                            break;
-                        case 6:
-                            $imageResource = imagerotate($imageResource, -90, 0);
-                            // Swap dimensions for 90 degree rotation
-                            $tempWidth = $newWidth;
-                            $newWidth = $newHeight;
-                            $newHeight = $tempWidth;
-                            break;
-                        case 8:
-                            $imageResource = imagerotate($imageResource, 90, 0);
-                            // Swap dimensions for 90 degree rotation
-                            $tempWidth = $newWidth;
-                            $newWidth = $newHeight;
-                            $newHeight = $tempWidth;
-                            break;
-                    }
-                }
-            } catch (\Exception $e) {
-                // Ignore EXIF errors
             }
         }
     
@@ -701,12 +704,29 @@ class ReportController extends Controller
 
             // Ensure directory exists before upload
             $directoryPath = 'satpam/reports/' . $year . '/' . $month;
-            if (!Storage::disk('nextcloud')->exists($directoryPath)) {
-                Storage::disk('nextcloud')->makeDirectory($directoryPath);
+            $directoryExists = false;
+            try {
+                $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
+            } catch (\Exception $e) {
+                $directoryExists = false;
+            }
+
+            if (!$directoryExists) {
+                if (!Storage::disk('nextcloud')->makeDirectory($directoryPath)) {
+                    unlink($tempPath);
+                    throw ValidationException::withMessages([
+                        'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
+                    ]);
+                }
             }
             
             // Upload to Nextcloud
-            Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
+            if (!Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'))) {
+                unlink($tempPath);
+                throw ValidationException::withMessages([
+                    'photo' => 'Gagal mengunggah foto ke penyimpanan. Silakan coba lagi.',
+                ]);
+            }
             
             // Remove temp file
             unlink($tempPath);
@@ -717,6 +737,25 @@ class ReportController extends Controller
     
             return $storagePath;
         }
+
+    /**
+     * Rotates a GD image resource if it's in landscape orientation to make it portrait.
+     *
+     * @param resource $imageResource The GD image resource.
+     * @return resource The rotated image resource.
+     */
+    private function rotateLandscapeToPortrait($imageResource)
+    {
+        $width = imagesx($imageResource);
+        $height = imagesy($imageResource);
+
+        if ($width > $height) {
+            // Image is landscape, rotate 90 degrees clockwise to make it portrait
+            $imageResource = imagerotate($imageResource, 270, 0); // 270 degrees is 90 degrees clockwise
+        }
+
+        return $imageResource;
+    }
 
     /**
      * Rotate an image permanently.
