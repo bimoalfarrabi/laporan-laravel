@@ -775,23 +775,65 @@ class ReportController extends Controller
             \Log::info('[Report Image] Attempting to upload file to Nextcloud', [
                 'storage_path' => $storagePath,
                 'temp_path' => $tempPath,
-                'file_size' => filesize($tempPath)
+                'file_size' => filesize($tempPath),
+                'disk' => 'nextcloud'
             ]);
             
+            // Try to get more detailed error info by wrapping in try-catch at multiple levels
             try {
-                $uploadResult = Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
-                \Log::info('[Report Image] Upload result', ['success' => $uploadResult]);
-                
-                if (!$uploadResult) {
-                    unlink($tempPath);
-                    throw ValidationException::withMessages([
-                        'photo' => 'Gagal mengunggah foto ke penyimpanan. Silakan coba lagi.',
+                // Open file handle
+                $fileHandle = fopen($tempPath, 'r');
+                if (!$fileHandle) {
+                    \Log::error('[Report Image] Failed to open temp file for reading', [
+                        'temp_path' => $tempPath
                     ]);
+                    throw new \Exception('Gagal membuka file temporary untuk upload');
+                }
+                
+                \Log::info('[Report Image] File handle opened successfully');
+                
+                // Attempt upload
+                try {
+                    $uploadResult = Storage::disk('nextcloud')->put($storagePath, $fileHandle);
+                    \Log::info('[Report Image] Upload result', [
+                        'success' => $uploadResult,
+                        'result_type' => gettype($uploadResult)
+                    ]);
+                    
+                    // Close file handle
+                    fclose($fileHandle);
+                    
+                    if (!$uploadResult) {
+                        \Log::error('[Report Image] Upload returned false - checking possible causes', [
+                            'nextcloud_url' => config('filesystems.disks.nextcloud.url'),
+                            'nextcloud_root' => config('filesystems.disks.nextcloud.root'),
+                            'full_path_attempted' => config('filesystems.disks.nextcloud.root') . '/' . $storagePath
+                        ]);
+                        
+                        unlink($tempPath);
+                        throw ValidationException::withMessages([
+                            'photo' => 'Gagal mengunggah foto ke penyimpanan. Kemungkinan: permission denied, disk penuh, atau timeout koneksi.',
+                        ]);
+                    }
+                } catch (\League\Flysystem\UnableToWriteFile $e) {
+                    fclose($fileHandle);
+                    \Log::error('[Report Image] Flysystem UnableToWriteFile exception', [
+                        'error' => $e->getMessage(),
+                        'reason' => $e->reason() ?? 'unknown',
+                        'location' => $e->location() ?? 'unknown'
+                    ]);
+                    throw new \Exception('Nextcloud: ' . $e->getMessage());
+                } catch (\Exception $e) {
+                    if (is_resource($fileHandle)) {
+                        fclose($fileHandle);
+                    }
+                    throw $e;
                 }
             } catch (\Exception $e) {
                 \Log::error('[Report Image] Failed to upload file', [
                     'storage_path' => $storagePath,
                     'error' => $e->getMessage(),
+                    'error_class' => get_class($e),
                     'trace' => $e->getTraceAsString()
                 ]);
                 if (file_exists($tempPath)) {
