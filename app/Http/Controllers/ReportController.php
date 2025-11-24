@@ -596,17 +596,48 @@ class ReportController extends Controller
             $newWidth = $originalWidth;
             $newHeight = $originalHeight;
     
-            // Resize if image is larger than max dimensions
-            if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
-                $ratio = $originalWidth / $originalHeight;
-                if ($ratio > 1) { // Landscape
-                    $newWidth = $maxWidth;
-                    $newHeight = $maxWidth / $ratio;
-                } else { // Portrait or Square
-                    $newHeight = $maxHeight;
-                    $newWidth = $maxHeight * $ratio;
-                }
+        // Resize if image is larger than max dimensions
+        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+            $ratio = $originalWidth / $originalHeight;
+            if ($ratio > 1) { // Landscape
+                $newWidth = $maxWidth;
+                $newHeight = $maxWidth / $ratio;
+            } else { // Portrait or Square
+                $newHeight = $maxHeight;
+                $newWidth = $maxHeight * $ratio;
             }
+        }
+
+        // Handle EXIF Rotation
+        if (function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($originalPath);
+                if ($exif && isset($exif['Orientation'])) {
+                    $orientation = $exif['Orientation'];
+                    switch ($orientation) {
+                        case 3:
+                            $imageResource = imagerotate($imageResource, 180, 0);
+                            break;
+                        case 6:
+                            $imageResource = imagerotate($imageResource, -90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                        case 8:
+                            $imageResource = imagerotate($imageResource, 90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore EXIF errors
+            }
+        }
     
             // Create a new true color image with the new dimensions
             $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
