@@ -762,7 +762,9 @@ class ReportController extends Controller
                         'error' => $e->getMessage(),
                         'trace' => $e->getTraceAsString()
                     ]);
-                    unlink($tempPath);
+                    if (file_exists($tempPath)) {
+                        unlink($tempPath);
+                    }
                     throw ValidationException::withMessages([
                         'photo' => 'Gagal membuat direktori penyimpanan: ' . $e->getMessage(),
                     ]);
@@ -792,7 +794,9 @@ class ReportController extends Controller
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                unlink($tempPath);
+                if (file_exists($tempPath)) {
+                    unlink($tempPath);
+                }
                 throw ValidationException::withMessages([
                     'photo' => 'Gagal mengunggah foto: ' . $e->getMessage(),
                 ]);
