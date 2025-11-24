@@ -134,17 +134,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 Swal.fire({
                     title: titleText,
-                    html: htmlContent, // Add HTML content for date and time
-                    imageUrl: imageUrl,
+                    html: htmlContent,
                     imageAlt: `Foto Absensi ${photoType}`,
                     showCloseButton: true,
                     showConfirmButton: false,
-                    imageWidth: 'auto',
-                    imageHeight: 'auto',
                     customClass: {
                         image: 'rounded-lg',
-                        title: 'text-lg md:text-xl', // Responsive title size
-                        htmlContainer: 'text-sm md:text-base' // Responsive text size
+                        title: 'text-lg md:text-xl',
+                        htmlContainer: 'text-sm md:text-base'
+                    },
+                    didOpen: () => {
+                        Swal.showLoading();
+                        const imageElement = Swal.getImage();
+                        if (imageElement) {
+                            imageElement.style.display = 'none'; // Hide until loaded
+                            const preloader = new Image();
+                            preloader.onload = () => {
+                                imageElement.src = imageUrl;
+                                imageElement.style.display = 'block';
+                                Swal.hideLoading();
+                            };
+                            preloader.onerror = () => {
+                                Swal.showValidationMessage('Gagal memuat gambar.');
+                                Swal.hideLoading();
+                            };
+                            preloader.src = imageUrl;
+                        }
                     }
                 });
             });
