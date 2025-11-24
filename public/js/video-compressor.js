@@ -12,13 +12,13 @@ window.VideoCompressor = {
         const {
             maxWidth = 1280,
             maxHeight = 720,
-            videoBitrate = 2500000, // 2.5 Mbps
+            videoBitrate = 1500000, // 1.5 Mbps (lowered from 2.5 for better compression)
             quality = 0.8,
             onProgress = null
         } = options;
 
-        // Skip compression for small files (< 5MB)
-        if (file.size < 5 * 1024 * 1024) {
+        // Skip compression for small files (< 10MB)
+        if (file.size < 10 * 1024 * 1024) {
             return {
                 blob: file,
                 metadata: {
@@ -26,7 +26,7 @@ window.VideoCompressor = {
                     compressedSize: file.size,
                     compressionRatio: 0,
                     skipped: true,
-                    reason: 'File already small'
+                    reason: 'File sudah cukup kecil (< 10MB)'
                 }
             };
         }

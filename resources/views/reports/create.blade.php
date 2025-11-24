@@ -239,7 +239,7 @@
                             const result = await window.VideoCompressor.compress(file, {
                                 maxWidth: 1280,
                                 maxHeight: 720,
-                                videoBitrate: 2500000,
+                                videoBitrate: 1500000, // 1.5 Mbps for better compression
                                 onProgress: (message, percent) => {
                                     this.compressionProgress = message;
                                     this.compressionPercent = percent;
