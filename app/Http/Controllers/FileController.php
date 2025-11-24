@@ -60,7 +60,20 @@ class FileController extends Controller
         // Return the original file if no size is requested or if it's not an image
         // Return the original file from Nextcloud
         $content = Storage::disk('nextcloud')->get($path);
-        $mimeType = Storage::disk('nextcloud')->mimeType($path);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($content);
+
+        if (!$mimeType) {
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $mimeType = match (strtolower($extension)) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'mp4' => 'video/mp4',
+                'pdf' => 'application/pdf',
+                default => 'application/octet-stream',
+            };
+        }
         
         return response($content)->header('Content-Type', $mimeType);
     }
