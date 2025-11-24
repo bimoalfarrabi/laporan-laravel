@@ -135,7 +135,7 @@
                             @if (!empty($filePaths))
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
                                     @foreach ($filePaths as $path)
-                                        @if (Storage::disk('public')->exists($path))
+                                        @if (Storage::disk('nextcloud')->exists($path))
                                             @php
                                                 $isImage = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [
                                                     'jpg',
@@ -202,20 +202,20 @@
                                 $videoPath = $report->data[$field->name] ?? null;
                             @endphp
 
-                            @if ($videoPath && Storage::disk('public')->exists($videoPath))
+                            @if ($videoPath && Storage::disk('nextcloud')->exists($videoPath))
                                 <div class="mt-2">
                                     {{-- Video Thumbnail with Play Button Overlay --}}
                                     <div class="max-w-3xl">
                                         <a href="#"
                                             @click.prevent="$dispatch('open-video-modal', { 
-                                                videoUrl: '{{ asset('storage/' . $videoPath) }}',
+                                                videoUrl: '{{ route('files.serve', ['path' => $videoPath]) }}',
                                                 videoFileName: '{{ basename($videoPath) }}'
                                             })"
                                             class="group relative block aspect-video w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200">
 
                                             {{-- Video Preview (first frame) --}}
                                             <video preload="metadata" class="h-full w-full object-cover" muted>
-                                                <source src="{{ asset('storage/' . $videoPath) }}#t=0.1"
+                                                <source src="{{ route('files.serve', ['path' => $videoPath]) }}#t=0.1"
                                                     type="video/{{ pathinfo($videoPath, PATHINFO_EXTENSION) }}">
                                             </video>
 

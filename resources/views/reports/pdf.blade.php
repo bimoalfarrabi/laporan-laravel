@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Laporan {{ $report->reportType->name }}</title>
     <style>
-        body { font-family: sans-serif; }
-        .container { max-width: 800px; margin: auto; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .content { margin-top: 20px; }
-        .report-data { border-collapse: collapse; width: 100%; }
-        .report-data th, .report-data td { border: 1px solid #ddd; padding: 8px; }
-        .report-data th { background-color: #f2f2f2; text-align: left; }
-        .metadata { width: 100%; margin-bottom: 20px; }
-        .metadata td { padding: 5px; }
-        .img-fluid { max-width: 100%; height: auto; }
+        body {
+            font-family: sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            margin-top: 20px;
+        }
+
+        .report-data {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .report-data th,
+        .report-data td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .report-data th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .metadata {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .metadata td {
+            padding: 5px;
+        }
+
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -65,15 +104,20 @@
                                 @elseif ($field->type === 'time')
                                     {{ $report->data[$field->name] ?? '-' }}
                                 @elseif ($field->type === 'checkbox')
-                                    {{ ($report->data[$field->name] ?? false) ? 'Ya' : 'Tidak' }}
+                                    {{ $report->data[$field->name] ?? false ? 'Ya' : 'Tidak' }}
                                 @elseif ($field->type === 'file')
                                     @if (isset($report->data[$field->name]) && $report->data[$field->name])
                                         @php
-                                            $imagePath = storage_path('app/public/' . $report->data[$field->name]);
-                                            $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
+                                            $path = $report->data[$field->name];
+                                            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
                                         @endphp
-                                        @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg']) && file_exists($imagePath))
-                                            <img src="data:image/jpeg;base64,{{ base64_encode(file_get_contents($imagePath)) }}" alt="{{ $field->label }}" class="img-fluid">
+                                        @if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg']) && Storage::disk('nextcloud')->exists($path))
+                                            @php
+                                                $mimeType = Storage::disk('nextcloud')->mimeType($path);
+                                                $content = base64_encode(Storage::disk('nextcloud')->get($path));
+                                            @endphp
+                                            <img src="data:{{ $mimeType }};base64,{{ $content }}"
+                                                alt="{{ $field->label }}" class="img-fluid">
                                         @else
                                             <p style="color: red;">foto telah dihapus</p>
                                         @endif
@@ -91,4 +135,5 @@
         </div>
     </div>
 </body>
+
 </html>

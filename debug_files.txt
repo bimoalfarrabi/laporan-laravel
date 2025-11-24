@@ -1,0 +1,10 @@
+Array
+(
+    [0] => remote.php/dav/files/itrsbl/Nextcloud Manual.pdf
+    [1] => remote.php/dav/files/itrsbl/Nextcloud intro.mp4
+    [2] => remote.php/dav/files/itrsbl/Nextcloud.png
+    [3] => remote.php/dav/files/itrsbl/Readme.md
+    [4] => remote.php/dav/files/itrsbl/Reasons to use Nextcloud.pdf
+    [5] => remote.php/dav/files/itrsbl/Templates credits.md
+    [6] => remote.php/dav/files/itrsbl/video_2025-11-24_11-43-04.mp4
+)

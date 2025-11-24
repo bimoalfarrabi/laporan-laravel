@@ -4,6 +4,11 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Filesystem\FilesystemAdapter;
+use League\Flysystem\Filesystem;
+use League\Flysystem\WebDAV\WebDAVAdapter;
+use Sabre\DAV\Client;
 use Parsedown;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +26,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Storage::extend('webdav', function ($app, $config) {
+            $client = new Client($config);
+            $adapter = new WebDAVAdapter($client);
+            $driver = new Filesystem($adapter, $config);
+
+            return new FilesystemAdapter($driver, $adapter, $config);
+        });
+
         Blade::directive('markdown', function ($expression) {
             return "<?php echo (new Parsedown())->text(preg_replace('/(?<!\S)\*([^\s*](?:[^\*]*[^\s*])?)\*(?!\S)/', '**$1**', $expression)); ?>";
         });

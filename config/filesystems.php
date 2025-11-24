@@ -70,6 +70,13 @@ return [
             'report' => false,
         ],
 
+        'nextcloud' => [
+            'driver' => 'webdav',
+            'baseUri' => env('NEXTCLOUD_URL'),
+            'userName' => env('NEXTCLOUD_USER'),
+            'password' => env('NEXTCLOUD_PASSWORD'),
+        ],
+
     ],
 
     /*

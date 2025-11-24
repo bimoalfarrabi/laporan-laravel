@@ -367,7 +367,7 @@ class ReportController extends Controller
                 $updatedFiles = [];
                 foreach ($existingFiles as $path) {
                     if (in_array($path, $filesToDelete)) {
-                        Storage::disk('public')->delete($path);
+                        Storage::disk('nextcloud')->delete($path);
                     } else {
                         $updatedFiles[] = $path;
                     }
@@ -390,16 +390,16 @@ class ReportController extends Controller
                 $videoToDelete = $request->input('delete_' . $fieldName);
                 
                 // Handle deletion of existing video
-                if ($videoToDelete && $existingVideo && Storage::disk('public')->exists($existingVideo)) {
-                    Storage::disk('public')->delete($existingVideo);
+                if ($videoToDelete && $existingVideo && Storage::disk('nextcloud')->exists($existingVideo)) {
+                    Storage::disk('nextcloud')->delete($existingVideo);
                     $reportData[$fieldName] = null; // Clear the field
                 }
                 
                 // Handle new video upload
                 if ($request->hasFile($fieldName)) {
                     // Delete old video if exists and not already deleted above
-                    if ($existingVideo && !$videoToDelete && Storage::disk('public')->exists($existingVideo)) {
-                        Storage::disk('public')->delete($existingVideo);
+                    if ($existingVideo && !$videoToDelete && Storage::disk('nextcloud')->exists($existingVideo)) {
+                        Storage::disk('nextcloud')->delete($existingVideo);
                     }
                     $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
                 }
@@ -548,7 +548,7 @@ class ReportController extends Controller
         $month = now()->format('m');
         $storagePath = 'reports/' . $year . '/' . $month;
     
-        return $file->storeAs($storagePath, $filename, 'public');
+        return $file->storeAs($storagePath, $filename, 'nextcloud');
     }
 
     /**
@@ -589,12 +589,12 @@ class ReportController extends Controller
                     break;
                 default:
                     // If file type is not supported, store it without compression
-                    return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+                    return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+                return $file->storeAs('reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
             }
     
             $originalWidth = imagesx($imageResource);
@@ -673,13 +673,6 @@ class ReportController extends Controller
             $year = now()->format('Y');
             $month = now()->format('m');
             $storagePath = 'reports/' . $year . '/' . $month . '/' . $filename;
-            $publicPath = storage_path('app/public/' . $storagePath);
-    
-            // Ensure directory exists
-            if (!file_exists(dirname($publicPath))) {
-                mkdir(dirname($publicPath), 0755, true);
-            }
-    
             $quality = 90; // Start with high quality
             $maxFileSize = 1024 * 1024; // 1MB in bytes
             $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
@@ -700,9 +693,12 @@ class ReportController extends Controller
                     break; // Exit loop if size is acceptable or quality is too low
                 }
             } while ($quality >= 10);
-    
-            // Move the compressed image from temporary path to public storage
-            rename($tempPath, $publicPath);
+
+            // Upload to Nextcloud
+            Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
+            
+            // Remove temp file
+            unlink($tempPath);
     
             // Free up memory
             imagedestroy($imageResource);
@@ -744,58 +740,41 @@ class ReportController extends Controller
             return response()->json(['message' => 'Image not found in report.'], 404);
         }
 
-        $fullPath = storage_path('app/public/' . $imagePath);
-
-        if (!file_exists($fullPath)) {
+        if (!Storage::disk('nextcloud')->exists($imagePath)) {
             return response()->json(['message' => 'File not found.'], 404);
         }
 
-        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        // Get file content
+        $fileContent = Storage::disk('nextcloud')->get($imagePath);
+        
+        // Create temp file
+        $tempPath = tempnam(sys_get_temp_dir(), 'rotate_image_');
+        file_put_contents($tempPath, $fileContent);
+
+        $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         $imageResource = null;
 
         switch ($extension) {
             case 'jpg':
             case 'jpeg':
-                $imageResource = imagecreatefromjpeg($fullPath);
+                $imageResource = imagecreatefromjpeg($tempPath);
                 break;
             case 'png':
-                $imageResource = imagecreatefrompng($fullPath);
+                $imageResource = imagecreatefrompng($tempPath);
                 imagealphablending($imageResource, true);
                 imagesavealpha($imageResource, true);
                 break;
             default:
+                unlink($tempPath);
                 return response()->json(['message' => 'Unsupported image type.'], 400);
         }
 
         if (!$imageResource) {
+            unlink($tempPath);
             return response()->json(['message' => 'Failed to load image.'], 500);
         }
 
-        // Rotate
-        // imagerotate rotates counter-clockwise.
-        // If angle is 90 (CW), we need -90 (CCW) or 270.
-        // If angle is -90 (CCW), we need 90 (CCW).
-        // Wait, the frontend sends what?
-        // Let's assume frontend sends standard degrees: 90 means 90 degrees CW.
-        // imagerotate: "The angle of rotation, in degrees. The rotation direction is counter-clockwise."
-        // So 90 CW = 270 CCW.
-        // -90 CW = 90 CCW.
-        
-        // Let's stick to standard math: positive is usually CCW in math, but in UI "Rotate Right" is CW.
-        // If user clicks "Rotate Right" (+90), we want the image to turn right.
-        // imagerotate(image, angle, bg_color)
-        // angle: Rotation angle, in degrees. The rotation angle is interpreted as the number of degrees to rotate the image anticlockwise.
-        
-        // So if I want to rotate 90 degrees Clockwise (Right), I must pass 270 (or -90) to imagerotate.
-        // If I want to rotate 90 degrees Counter-Clockwise (Left), I must pass 90 to imagerotate.
-        
-        // The frontend logic I saw earlier:
-        // rotation += 90 (Right button)
-        // rotation -= 90 (Left button)
-        
-        // So if frontend sends 90 (Right), we should rotate -90 (or 270) in imagerotate.
-        // If frontend sends -90 (Left), we should rotate 90 in imagerotate.
-        
+        // Calculate rotation angle
         $rotationAngle = 0;
         if ($angle == 90) {
             $rotationAngle = 270;
@@ -807,32 +786,21 @@ class ReportController extends Controller
 
         $rotatedImage = imagerotate($imageResource, $rotationAngle, 0);
         
+        // Save back to temp path
         if ($extension === 'png') {
             imagealphablending($rotatedImage, false);
             imagesavealpha($rotatedImage, true);
-            imagepng($rotatedImage, $fullPath);
+            imagepng($rotatedImage, $tempPath);
         } else {
-            imagejpeg($rotatedImage, $fullPath, 90);
+            imagejpeg($rotatedImage, $tempPath, 90);
         }
+
+        // Upload back to Nextcloud
+        Storage::disk('nextcloud')->put($imagePath, fopen($tempPath, 'r'));
 
         imagedestroy($imageResource);
         imagedestroy($rotatedImage);
-
-        // Clear cached thumbnails
-        $directory = pathinfo($imagePath, PATHINFO_DIRNAME);
-        $filename = pathinfo($imagePath, PATHINFO_FILENAME);
-        $thumbnailDir = $directory . '/thumbnails';
-        
-        if (Storage::disk('public')->exists($thumbnailDir)) {
-            $files = Storage::disk('public')->files($thumbnailDir);
-            foreach ($files as $file) {
-                // Check if file matches pattern: filename_WIDTHxHEIGHT.ext
-                // Simple check: starts with filename_
-                if (str_starts_with(basename($file), $filename . '_')) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-        }
+        unlink($tempPath);
 
         return response()->json(['message' => 'Image rotated successfully.']);
     }

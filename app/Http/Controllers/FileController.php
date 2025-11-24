@@ -21,8 +21,8 @@ class FileController extends Controller
      */
     public function serve(Request $request, $path)
     {
-        // Security: Check if the file exists on the 'public' disk.
-        if (!Storage::disk('public')->exists($path)) {
+        // Security: Check if the file exists on the 'nextcloud' disk.
+        if (!Storage::disk('nextcloud')->exists($path)) {
             abort(404, 'File not found.');
         }
 
@@ -58,7 +58,11 @@ class FileController extends Controller
         }
 
         // Return the original file if no size is requested or if it's not an image
-        return response()->file(Storage::disk('public')->path($path));
+        // Return the original file from Nextcloud
+        $content = Storage::disk('nextcloud')->get($path);
+        $mimeType = Storage::disk('nextcloud')->mimeType($path);
+        
+        return response($content)->header('Content-Type', $mimeType);
     }
 
     /**
@@ -89,8 +93,8 @@ class FileController extends Controller
      */
     private function generateThumbnail($originalPath, $thumbnailPath, $width, $height)
     {
-        $fullOriginalPath = Storage::disk('public')->path($originalPath);
-        $imageContent = file_get_contents($fullOriginalPath);
+        // Get image content from Nextcloud
+        $imageContent = Storage::disk('nextcloud')->get($originalPath);
         $imageResource = @imagecreatefromstring($imageContent);
 
         if ($imageResource === false) {

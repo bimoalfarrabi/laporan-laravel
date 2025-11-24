@@ -57,7 +57,7 @@
                                         <div class="grid grid-cols-3 gap-4 mb-4" x-show="existingImages.length > 0">
                                             <template x-for="(path, index) in existingImages" :key="index">
                                                 <div class="relative group" x-show="!deletedImages.includes(path)">
-                                                    <img :src="'/storage/' + path"
+                                                    <img :src="'/storage/files/' + path"
                                                         class="w-full h-24 object-cover rounded-md border border-gray-300">
                                                     <button type="button" @click="markForDeletion(path)"
                                                         class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
@@ -143,7 +143,7 @@
                                             class="mt-2">
                                             <div
                                                 class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl group">
-                                                <video :src="'/storage/' + existingVideoUrl" controls
+                                                <video :src="'/storage/files/' + existingVideoUrl" controls
                                                     preload="metadata" class="w-full h-auto"
                                                     style="max-height: 500px;">
                                                     Browser Anda tidak mendukung video player.

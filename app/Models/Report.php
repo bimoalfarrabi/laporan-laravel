@@ -76,8 +76,8 @@ class Report extends Model
                 // Check if the field is a file type and if a file path exists in the data
                 if ($field['type'] === 'file' && !empty($report->data[$field['name']])) {
                     $filePath = $report->data[$field['name']];
-                    // Use Storage facade to delete the file from the public disk
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($filePath);
+                    // Use Storage facade to delete the file from the nextcloud disk
+                    \Illuminate\Support\Facades\Storage::disk('nextcloud')->delete($filePath);
                 }
             }
         });
