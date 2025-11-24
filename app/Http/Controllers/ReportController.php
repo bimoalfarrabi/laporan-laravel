@@ -548,6 +548,11 @@ class ReportController extends Controller
         $month = now()->format('m');
         $storagePath = 'reports/' . $year . '/' . $month;
     
+        // Ensure directory exists
+        if (!Storage::disk('nextcloud')->exists($storagePath)) {
+            Storage::disk('nextcloud')->makeDirectory($storagePath);
+        }
+    
         return $file->storeAs($storagePath, $filename, 'nextcloud');
     }
 
@@ -694,6 +699,12 @@ class ReportController extends Controller
                 }
             } while ($quality >= 10);
 
+            // Ensure directory exists before upload
+            $directoryPath = 'reports/' . $year . '/' . $month;
+            if (!Storage::disk('nextcloud')->exists($directoryPath)) {
+                Storage::disk('nextcloud')->makeDirectory($directoryPath);
+            }
+            
             // Upload to Nextcloud
             Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
             
