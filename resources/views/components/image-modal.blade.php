@@ -115,7 +115,7 @@
         }
     }
 }" x-show="show"
-    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; fullImageUrl = $event.detail.fullImageUrl; reportId = $event.detail.reportId; imagePath = $event.detail.imagePath; setRotationFromExif($event.detail.imageUrl)"
+    x-on:open-modal.window="show = true; imageUrl = $event.detail.imageUrl; fullImageUrl = $event.detail.fullImageUrl; reportId = $event.detail.reportId; imagePath = $event.detail.imagePath; setRotationFromExif($event.detail.imageUrl); isLoading = true"
     x-on:keydown.escape.window="show = false" style="display: none;"
     class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
     <!-- Background Overlay -->
