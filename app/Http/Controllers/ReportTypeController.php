@@ -36,7 +36,7 @@ class ReportTypeController extends Controller
     public function create()
     {
         $this->authorize('create', ReportType::class); // Otorisasi untuk membuat jenis laporan
-        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
+        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'video', 'checkbox'];
 
         $defaultFields = [
             ['label' => 'Deskripsi', 'name' => 'deskripsi', 'type' => 'textarea', 'required' => true, 'order' => 1],
@@ -63,7 +63,7 @@ class ReportTypeController extends Controller
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
-            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox,role_specific_text',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,video,checkbox,role_specific_text',
             'fields.*.required' => 'boolean',
             'fields.*.order' => 'required|integer',
             'fields.*.role_id' => 'nullable|exists:roles,id',
@@ -104,7 +104,7 @@ class ReportTypeController extends Controller
     public function edit(ReportType $reportType)
     {
         $this->authorize('update', $reportType); // Otorisasi untuk mengedit jenis laporan
-        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'checkbox'];
+        $fieldTypes = ['text', 'textarea', 'date', 'time', 'number', 'file', 'video', 'checkbox'];
         $roles = Role::all();
         return view('report-types.edit', compact('reportType', 'fieldTypes', 'roles'));
     }
@@ -123,7 +123,7 @@ class ReportTypeController extends Controller
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
-            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,checkbox,role_specific_text',
+            'fields.*.type' => 'required|string|in:text,textarea,date,time,number,file,video,checkbox,role_specific_text',
             'fields.*.required' => 'boolean',
             'fields.*.order' => 'required|integer',
             'fields.*.role_id' => 'nullable|exists:roles,id',
