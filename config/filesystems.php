@@ -75,6 +75,9 @@ return [
             'baseUri' => env('NEXTCLOUD_URL'),
             'userName' => env('NEXTCLOUD_USER'),
             'password' => env('NEXTCLOUD_PASSWORD'),
+            'curl' => [
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            ],
         ],
 
     ],

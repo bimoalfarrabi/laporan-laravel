@@ -107,30 +107,3 @@ Route::middleware('auth')->group(function () {
 require __DIR__ . '/auth.php';
 
 
-Route::get('/debug-nextcloud-connection', function() {
-    $nextcloudUrl = 'https://cdn.rsudblambangan.id/remote.php/dav/files/itrsbl/';
-
-    echo "Mencoba koneksi ke: " . $nextcloudUrl . "<br><br>";
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $nextcloudUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_VERBOSE, 1); // Memberikan output detail
-    curl_setopt($ch, CURLOPT_HEADER, 1); // Memasukkan header dalam output
-    curl_setopt($ch, CURLOPT_NOBODY, 1); // Kita hanya butuh header, bukan body
-
-    $response = curl_exec($ch);
-
-    if (curl_errno($ch)) {
-        $error_msg = curl_error($ch);
-        echo "<h1>Koneksi GAGAL</h1>";
-        echo "cURL Error Number: " . curl_errno($ch) . "<br>";
-        echo "cURL Error Message: " . $error_msg;
-    } else {
-        echo "<h1>Koneksi BERHASIL</h1>";
-        echo "<pre>" . htmlspecialchars($response) . "</pre>";
-    }
-
-    curl_close($ch);
-});
-
