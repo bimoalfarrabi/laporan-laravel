@@ -108,27 +108,3 @@ require __DIR__ . '/auth.php';
 
 
 
-Route::get('/debug-php-settings', function() {
-    $memoryLimit = ini_get('memory_limit');
-    $maxExecutionTime = ini_get('max_execution_time');
-    $postMaxSize = ini_get('post_max_size');
-    $uploadMaxFilesize = ini_get('upload_max_filesize');
-
-    echo "<h1>PHP Configuration Limits</h1>";
-    echo "<ul>";
-    echo "<li><strong>memory_limit:</strong> " . $memoryLimit . "</li>";
-    echo "<li><strong>max_execution_time:</strong> " . $maxExecutionTime . " seconds</li>";
-    echo "<li><strong>post_max_size:</strong> " . $postMaxSize . "</li>";
-    echo "<li><strong>upload_max_filesize:</strong> " . $uploadMaxFilesize . "</li>";
-    echo "</ul>";
-
-    if (function_exists('gd_info')) {
-        echo "<h2>GD Library Information</h2>";
-        echo "<pre>";
-        print_r(gd_info());
-        echo "</pre>";
-    } else {
-        echo "<h2>GD Library is NOT installed.</h2>";
-    }
-});
-
