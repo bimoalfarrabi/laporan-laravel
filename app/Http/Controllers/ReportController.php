@@ -616,61 +616,251 @@ class ReportController extends Controller
      *
      * @return string The path to the stored image.
      */
-            private function compressAndStoreImage($file): string
-            {
-                // --- DIAGNOSTIC BYPASS: Upload original file without compression ---
-                $accountName = Str::slug(Auth::user()->name);
-                $timestamp = now()->format('YmdHis');
-                $originalExtension = strtolower($file->getClientOriginalExtension());
-                $filename = $accountName . '-' . $timestamp . '.' . $originalExtension;
-            
-                $year = now()->format('Y');
-                $month = now()->format('m');
-                $storagePathDir = 'satpam/reports/' . $year . '/' . $month;
-            
-                // Ensure directory exists with robust error handling (copied from storeVideo)
-                $directoryExists = false;
-                try {
-                    \Log::info('[Report Image Bypass] Checking Nextcloud directory existence', ['path' => $storagePathDir]);
-                    $directoryExists = Storage::disk('nextcloud')->exists($storagePathDir);
-                } catch (\Exception $e) {
-                    \Log::error('[Report Image Bypass] Failed to check directory existence', ['path' => $storagePathDir, 'error' => $e->getMessage()]);
-                    $directoryExists = false;
-                }
-        
-                if (!$directoryExists) {
-                    \Log::info('[Report Image Bypass] Attempting to create directory', ['path' => $storagePathDir]);
-                    try {
-                        if (!Storage::disk('nextcloud')->makeDirectory($storagePathDir)) {
-                             throw new \Exception('Gagal membuat direktori penyimpanan gambar.');
+                private function compressAndStoreImage($file): string
+                {
+                    $originalPath = $file->getRealPath();
+                    $originalExtension = strtolower($file->getClientOriginalExtension());
+                
+                    // Generate unique filename with .jpg extension (default)
+                    $accountName = Str::slug(Auth::user()->name);
+                    $timestamp = now()->format('YmdHis');
+                    $filename = $accountName . '-' . $timestamp . '.jpg';
+                
+                    // Create image resource from uploaded file
+                    $imageResource = null;
+                    switch ($originalExtension) {
+                        case 'jpg':
+                        case 'jpeg':
+                            $imageResource = imagecreatefromjpeg($originalPath);
+                            break;
+                        case 'png':
+                            $imageResource = imagecreatefrompng($originalPath);
+                            // Preserve transparency for PNG
+                            imagealphablending($imageResource, true);
+                            imagesavealpha($imageResource, true);
+                            $filename = $accountName . '-' . $timestamp . '.png'; // Use PNG extension for PNG originals
+                            break;
+                        case 'gif':
+                            $imageResource = imagecreatefromgif($originalPath);
+                            break;
+                        default:
+                            // If file type is not supported, store it without compression
+                            $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                            if ($path === false) {
+                                throw ValidationException::withMessages([
+                                    'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
+                                ]);
+                            }
+                            return $path;
+                    }
+                
+                    if (!$imageResource) {
+                        // Fallback if image resource creation failed
+                        $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                        if ($path === false) {
+                            throw ValidationException::withMessages([
+                                'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                            ]);
                         }
-                    } catch (\Exception $e) {
-                        \Log::error('[Report Image Bypass] Failed to create directory', ['path' => $storagePathDir, 'error' => $e->getMessage()]);
-                        throw ValidationException::withMessages(['photo' => 'Gagal membuat direktori penyimpanan gambar: ' . $e->getMessage()]);
+                        return $path;
+                    }
+                
+                    $imageResource = $this->rotateLandscapeToPortrait($imageResource);
+            
+                    $originalWidth = imagesx($imageResource);
+                    $originalHeight = imagesy($imageResource);
+                
+                    $maxWidth = 1280; // Max width for images (reverted)
+                    $maxHeight = 1280; // Max height for images (reverted)
+                
+                    $newWidth = $originalWidth;
+                    $newHeight = $originalHeight;
+                
+                // Resize if image is larger than max dimensions
+                if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+                    $ratio = $originalWidth / $originalHeight;
+                    if ($ratio > 1) { // Landscape
+                        $newWidth = $maxWidth;
+                        $newHeight = $maxWidth / $ratio;
+                    } else { // Portrait or Square
+                        $newHeight = $maxHeight;
+                        $newWidth = $maxHeight * $ratio;
                     }
                 }
-        
-                \Log::info('[Report Image Bypass] Attempting to upload original image file', [
-                    'storage_path' => $storagePathDir,
-                    'filename' => $filename,
-                    'file_size' => $file->getSize()
-                ]);
                 
-                $path = $file->storeAs($storagePathDir, $filename, 'nextcloud');
-                if ($path === false) {
-                    $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
-                    $nextcloudUser = config('filesystems.disks.nextcloud.userName');
-                    $errorMessage = "Gagal mengunggah foto ke Nextcloud (Bypass). Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'.";
-                    
-                    throw ValidationException::withMessages([
-                        'photo' => $errorMessage,
+                    // Create a new true color image with the new dimensions
+                    $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+                
+                    // Preserve transparency for PNG
+                    if ($originalExtension === 'png') {
+                        imagealphablending($newImageResource, false);
+                        imagesavealpha($newImageResource, true);
+                        $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+                        imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+                    }
+                
+                    // Resample (resize) the image
+                    imagecopyresampled(
+                        $newImageResource,
+                        $imageResource,
+                        0, 0, 0, 0,
+                        (int) $newWidth, (int) $newHeight,
+                        $originalWidth, $originalHeight
+                    );
+                
+                    // Define storage path
+                    $year = now()->format('Y');
+                    $month = now()->format('m');
+                    $storagePath = 'satpam/reports/' . $year . '/' . $month . '/' . $filename;
+                    $quality = 90; // Start with high quality
+                    $maxFileSize = 1024 * 1024; // 1MB in bytes
+                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+                
+                    do {
+                        // Save the image with current quality to a temporary file
+                        if ($originalExtension === 'png') { // Save as PNG if original was PNG
+                            imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
+                        } else { // Otherwise, save as JPEG
+                            imagejpeg($newImageResource, $tempPath, $quality);
+                        }
+                
+                        $fileSize = filesize($tempPath);
+                
+                        if ($fileSize > $maxFileSize && $quality > 10) {
+                            $quality -= 5; // Reduce quality
+                        } else {
+                            break; // Exit loop if size is acceptable or quality is too low
+                        }
+                    } while ($quality >= 10);
+            
+                    // Ensure directory exists before upload
+                    $directoryPath = 'satpam/reports/' . $year . '/' . $month;
+                    $directoryExists = false;
+                    try {
+                        \Log::info('[Report Image] Checking Nextcloud directory existence', ['path' => $directoryPath]);
+                        $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
+                        \Log::info('[Report Image] Directory exists check result', ['exists' => $directoryExists]);
+                    } catch (\Exception $e) {
+                        \Log::error('[Report Image] Failed to check directory existence', [
+                            'path' => $directoryPath,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        $directoryExists = false;
+                    }
+            
+                    if (!$directoryExists) {
+                        \Log::info('[Report Image] Attempting to create directory', ['path' => $directoryPath]);
+                        try {
+                            $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($directoryPath);
+                            \Log::info('[Report Image] Make directory result', ['success' => $makeDirectoryResult]);
+                            if (!$makeDirectoryResult) {
+                                unlink($tempPath);
+                                throw ValidationException::withMessages([
+                                    'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
+                                ]);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error('[Report Image] Failed to create directory', [
+                                'path' => $directoryPath,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                            if (file_exists($tempPath)) {
+                                unlink($tempPath);
+                            }
+                            throw ValidationException::withMessages([
+                                'photo' => 'Gagal membuat direktori penyimpanan: ' . $e->getMessage(),
+                            ]);
+                        }
+                    }
+            
+                    // Upload to Nextcloud
+                    \Log::info('[Report Image] Attempting to upload file to Nextcloud', [
+                        'storage_path' => $storagePath,
+                        'temp_path' => $tempPath,
+                        'file_size' => filesize($tempPath),
+                        'disk' => 'nextcloud'
                     ]);
-                }
-        
-                return $path;
-                // --- END BYPASS ---
-            }
-    /**
+                    
+                    // Try to get more detailed error info by wrapping in try-catch at multiple levels
+                    try {
+                        // Open file handle
+                        $fileHandle = fopen($tempPath, 'r');
+                        if (!$fileHandle) {
+                            \Log::error('[Report Image] Failed to open temp file for reading', [
+                                'temp_path' => $tempPath
+                            ]);
+                            throw new \Exception('Gagal membuka file temporary untuk upload');
+                        }
+                        
+                        \Log::info('[Report Image] File handle opened successfully');
+                        
+                        // Attempt upload
+                        try {
+                            $uploadResult = Storage::disk('nextcloud')->put($storagePath, $fileHandle);
+                            \Log::info('[Report Image] Upload result', [
+                                'success' => $uploadResult,
+                                'result_type' => gettype($uploadResult)
+                            ]);
+                            
+                            // Close file handle
+                            fclose($fileHandle);
+                            
+                            if (!$uploadResult) {
+                                \Log::error('[Report Image] Upload returned false - checking possible causes', [
+                                    'nextcloud_url' => config('filesystems.disks.nextcloud.url'),
+                                    'nextcloud_root' => config('filesystems.disks.nextcloud.root'),
+                                    'full_path_attempted' => config('filesystems.disks.nextcloud.root') . '/' . $storagePath
+                                ]);
+                                
+                                $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
+                                $nextcloudUser = config('filesystems.disks.nextcloud.userName');
+                                $errorMessage = "Gagal mengunggah foto ke Nextcloud. Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'. Kemungkinan penyebab: permission denied, disk penuh, atau koneksi timeout.";
+            
+                                unlink($tempPath);
+                                throw ValidationException::withMessages([
+                                    'photo' => $errorMessage,
+                                ]);
+                            }
+                        } catch (\League\Flysystem\UnableToWriteFile $e) {
+                            fclose($fileHandle);
+                            \Log::error('[Report Image] Flysystem UnableToWriteFile exception', [
+                                'error' => $e->getMessage(),
+                                'reason' => $e->reason() ?? 'unknown',
+                                'location' => $e->location() ?? 'unknown'
+                            ]);
+                            throw new \Exception('Nextcloud: ' . $e->getMessage());
+                        } catch (\Exception $e) {
+                            if (is_resource($fileHandle)) {
+                                fclose($fileHandle);
+                            }
+                            throw $e;
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('[Report Image] Failed to upload file', [
+                            'storage_path' => $storagePath,
+                            'error' => $e->getMessage(),
+                            'error_class' => get_class($e),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        if (file_exists($tempPath)) {
+                            unlink($tempPath);
+                        }
+                        throw ValidationException::withMessages([
+                            'photo' => 'Gagal mengunggah foto: ' . $e->getMessage(),
+                        ]);
+                    }
+            
+                    // Clean up temp file
+                    unlink($tempPath);
+                
+                    // Free up memory
+                    imagedestroy($imageResource);
+                    imagedestroy($newImageResource);
+                
+                    return $storagePath;
+                }    /**
      * Rotates a GD image resource if it's in landscape orientation to make it portrait.
      *
      * @param resource $imageResource The GD image resource.
