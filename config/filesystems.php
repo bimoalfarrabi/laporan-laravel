@@ -78,6 +78,9 @@ return [
             'curl' => [
                 CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             ],
+            'guzzle' => [
+                'expect' => false,
+            ],
         ],
 
     ],
