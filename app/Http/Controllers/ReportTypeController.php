@@ -82,12 +82,6 @@ class ReportTypeController extends Controller
             if ($fieldData['type'] !== 'role_specific_text') {
                 $fieldData['role_id'] = null;
             }
-            
-            // Handle unchecked 'required' checkbox
-            if (!isset($fieldData['required'])) {
-                $fieldData['required'] = false;
-            }
-            
             $reportType->reportTypeFields()->create($fieldData);
         }
 
@@ -148,11 +142,6 @@ class ReportTypeController extends Controller
         foreach ($request->fields as $fieldData) {
             if ($fieldData['type'] !== 'role_specific_text') {
                 $fieldData['role_id'] = null;
-            }
-
-            // Handle unchecked 'required' checkbox
-            if (!isset($fieldData['required'])) {
-                $fieldData['required'] = false;
             }
 
             if (isset($fieldData['id'])) {

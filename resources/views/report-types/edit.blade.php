@@ -147,6 +147,7 @@
                                 </select>
                             </div>
                             <div class="flex items-center mt-6">
+                                <input type="hidden" name="fields[${newFieldId}][required]" value="0">
                                 <input type="checkbox" id="${newFieldId}-required" name="fields[${newFieldId}][required]" value="1" ${field.required ? 'checked' : ''} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                 <x-input-label for="${newFieldId}-required" value="Wajib Diisi" class="ms-2" />
                             </div>
