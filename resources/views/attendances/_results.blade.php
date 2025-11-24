@@ -193,7 +193,7 @@
                                         <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '50x50']) }}"
                                             alt="Foto Masuk" loading="lazy"
                                             class="h-full w-full object-cover transition-opacity duration-300"
-                                            @load="imageLoaded = true" x-show="imageLoaded" x-transition:enter="opacity-0" x-transition:enter-end="opacity-100">
+                                            @load="imageLoaded = true" :class="{ 'opacity-0': !imageLoaded }">
                                     </a>
                                 </div>
                             @else
@@ -328,7 +328,7 @@
                                         <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '50x50']) }}"
                                             alt="Foto Pulang" loading="lazy"
                                             class="h-full w-full object-cover transition-opacity duration-300"
-                                            @load="imageLoaded = true" x-show="imageLoaded" x-transition:enter="opacity-0" x-transition:enter-end="opacity-100">
+                                            @load="imageLoaded = true" :class="{ 'opacity-0': !imageLoaded }">
                                     </a>
                                 </div>
                             @else
@@ -488,7 +488,7 @@
                                                     <img src="{{ route('files.serve', ['path' => $attendance->photo_in_path, 'size' => '50x50']) }}"
                                                         alt="Foto Masuk" loading="lazy"
                                                         class="h-full w-full object-cover transition-opacity duration-300"
-                                                        @load="imageLoaded = true" x-show="imageLoaded" x-transition:enter="opacity-0" x-transition:enter-end="opacity-100">
+                                                        @load="imageLoaded = true" :class="{ 'opacity-0': !imageLoaded }">
                                                 </a>
                                             </div>
                                         @endif
@@ -637,7 +637,7 @@
                                                     <img src="{{ route('files.serve', ['path' => $attendance->photo_out_path, 'size' => '50x50']) }}"
                                                         alt="Foto Pulang" loading="lazy"
                                                         class="h-full w-full object-cover transition-opacity duration-300"
-                                                        @load="imageLoaded = true" x-show="imageLoaded" x-transition:enter="opacity-0" x-transition:enter-end="opacity-100">
+                                                        @load="imageLoaded = true" :class="{ 'opacity-0': !imageLoaded }">
                                                 </a>
                                             </div>
                                         @endif
