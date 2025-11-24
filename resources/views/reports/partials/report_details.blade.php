@@ -156,20 +156,36 @@
                                                 @endphp
                                                 <a href="#"
                                                     @click.prevent="$dispatch('open-modal', { 
-                                                        imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
-                                                        fullImageUrl: '{{ $fullImageUrl }}',
-                                                        reportId: '{{ $report->id }}',
-                                                        imagePath: '{{ $path }}'
-                                                    })"
+                                                            imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
+                                                            fullImageUrl: '{{ $fullImageUrl }}',
+                                                            reportId: '{{ $report->id }}',
+                                                            imagePath: '{{ $path }}'
+                                                        })"
+                                                    x-data="{ imageLoaded: false }"
                                                     class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+
+                                                    <!-- Skeleton Loader -->
+                                                    <div x-show="!imageLoaded"
+                                                        class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                                                        <svg class="w-12 h-12 text-gray-400" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
 
                                                     <!-- Image -->
                                                     <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
                                                         loading="lazy" data-path="{{ $path }}"
+                                                        @load="imageLoaded = true" x-show="imageLoaded"
+                                                        x-transition:enter="transition ease-out duration-300"
+                                                        x-transition:enter-start="opacity-0"
+                                                        x-transition:enter-end="opacity-100"
                                                         class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
 
                                                     <!-- Hover Overlay -->
-                                                    <div
+                                                    <div x-show="imageLoaded"
                                                         class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/10">
                                                         <span
                                                             class="opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-white/90 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm backdrop-blur-sm">
@@ -205,7 +221,7 @@
                             @if ($videoPath && Storage::disk('nextcloud')->exists($videoPath))
                                 <div class="mt-2">
                                     {{-- Video Thumbnail with Play Button Overlay --}}
-                                    <div class="max-w-3xl">
+                                    <div class="max-w-3xl" x-data="{ videoLoaded: false }">
                                         <a href="#"
                                             @click.prevent="$dispatch('open-video-modal', { 
                                                 videoUrl: '{{ route('files.serve', ['path' => $videoPath]) }}',
@@ -213,14 +229,29 @@
                                             })"
                                             class="group relative block aspect-video w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200">
 
+                                            <!-- Skeleton Loader -->
+                                            <div x-show="!videoLoaded"
+                                                class="absolute inset-0 bg-gray-700 animate-pulse flex flex-col items-center justify-center">
+                                                <svg class="w-16 h-16 text-gray-500 mb-2" fill="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path d="M8 5v14l11-7z" />
+                                                </svg>
+                                                <span class="text-gray-400 text-sm">Loading video...</span>
+                                            </div>
+
                                             {{-- Video Preview (first frame) --}}
-                                            <video preload="metadata" class="h-full w-full object-cover" muted>
+                                            <video preload="metadata" @loadedmetadata="videoLoaded = true"
+                                                x-show="videoLoaded"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0"
+                                                x-transition:enter-end="opacity-100" class="h-full w-full object-cover"
+                                                muted>
                                                 <source src="{{ route('files.serve', ['path' => $videoPath]) }}#t=0.1"
                                                     type="video/{{ pathinfo($videoPath, PATHINFO_EXTENSION) }}">
                                             </video>
 
                                             {{-- Play Button Overlay --}}
-                                            <div
+                                            <div x-show="videoLoaded"
                                                 class="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors duration-200 group-hover:bg-black/40">
                                                 <div
                                                     class="bg-white/95 rounded-full p-4 shadow-2xl transition-transform duration-200 group-hover:scale-110">
@@ -232,7 +263,7 @@
                                             </div>
 
                                             {{-- Hover Text --}}
-                                            <div
+                                            <div x-show="videoLoaded"
                                                 class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                                 <span class="text-white text-sm font-medium">
                                                     Klik untuk memutar video
