@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE attendances MODIFY status ENUM('Tepat Waktu', 'Terlambat', 'Libur') DEFAULT 'Tepat Waktu'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE attendances MODIFY status ENUM('Tepat Waktu', 'Terlambat', 'Libur') DEFAULT 'Tepat Waktu'");
+        }
     }
 
     /**
@@ -20,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE attendances MODIFY status ENUM('Tepat Waktu', 'Terlambat') DEFAULT 'Tepat Waktu'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE attendances MODIFY status ENUM('Tepat Waktu', 'Terlambat') DEFAULT 'Tepat Waktu'");
+        }
     }
 };
