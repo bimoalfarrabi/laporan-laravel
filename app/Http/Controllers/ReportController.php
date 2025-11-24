@@ -183,7 +183,7 @@ class ReportController extends Controller
                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
             } elseif ($field->type === 'video') {
                 $rules[] = 'file';
-                $rules[] = 'mimes:mp4,mov,avi,mkv';
+                $rules[] = 'mimes:mp4,mov,avi,mkv,webm';
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
@@ -325,7 +325,7 @@ class ReportController extends Controller
                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
             } elseif ($field->type === 'video') {
                 $rules[] = 'file';
-                $rules[] = 'mimes:mp4,mov,avi,mkv';
+                $rules[] = 'mimes:mp4,mov,avi,mkv,webm';
             }
 
             $validationRules[$fieldName] = implode('|', $rules);

@@ -83,7 +83,34 @@
                                         <input type="file" name="{{ $field->name }}" id="{{ $field->name }}"
                                             class="hidden">
 
-                                        <!-- Video Preview -->
+                                        {{-- Compression Loading Overlay --}}
+                                        <div x-show="isCompressing" style="display: none;"
+                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                                                <div class="flex items-start space-x-4">
+                                                    <svg class="animate-spin h-8 w-8 text-indigo-600 flex-shrink-0"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                        </path>
+                                                    </svg>
+                                                    <div class="flex-1">
+                                                        <p class="font-medium text-gray-900">Mengompresi video...</p>
+                                                        <p class="text-sm text-gray-600 mt-1"
+                                                            x-text="compressionProgress"></p>
+                                                        <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                                            <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                                                                :style="'width: ' + compressionPercent + '%'"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Video Preview --}}
                                         <div class="mt-3" x-show="videoUrl" style="display: none;">
                                             <div
                                                 class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl">
@@ -93,7 +120,11 @@
                                                 </video>
                                             </div>
                                             <div class="flex items-center justify-between mt-2">
-                                                <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                <div>
+                                                    <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                    <p class="text-xs text-gray-500 mt-1" x-show="compressionMetadata"
+                                                        x-html="getCompressionInfo()"></p>
+                                                </div>
                                                 <button type="button" @click="removeVideo"
                                                     class="inline-flex items-center px-3 py-1.5 bg-red-100 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
@@ -107,7 +138,8 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-gray-500">Maksimal 1 video.</p>
+                                        <p class="text-sm text-gray-500">Maksimal 1 video. Video akan dikompres
+                                            otomatis.</p>
                                     </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
@@ -180,19 +212,75 @@
                 videoUrl: null,
                 videoFile: null,
                 videoFileName: '',
-                handleFileSelect(event) {
+                isCompressing: false,
+                compressionProgress: '',
+                compressionPercent: 0,
+                compressionMetadata: null,
+
+                async handleFileSelect(event) {
                     const file = event.target.files[0];
                     if (file && file.type.startsWith('video/')) {
-                        this.videoFile = file;
-                        this.videoUrl = URL.createObjectURL(file);
-                        this.videoFileName = file.name;
+                        // Check if compression is supported
+                        if (!window.VideoCompressor || !window.VideoCompressor.isSupported()) {
+                            // Fallback: use original file without compression
+                            this.videoFile = file;
+                            this.videoUrl = URL.createObjectURL(file);
+                            this.videoFileName = file.name;
+                            this.updateActualInput();
+                            return;
+                        }
+
+                        try {
+                            this.isCompressing = true;
+                            this.compressionProgress = 'Memulai kompresi...';
+                            this.compressionPercent = 0;
+
+                            // Compress video
+                            const result = await window.VideoCompressor.compress(file, {
+                                maxWidth: 1280,
+                                maxHeight: 720,
+                                videoBitrate: 2500000,
+                                onProgress: (message, percent) => {
+                                    this.compressionProgress = message;
+                                    this.compressionPercent = percent;
+                                }
+                            });
+
+                            this.isCompressing = false;
+
+                            // Create new file from compressed blob
+                            const compressedFile = new File(
+                                [result.blob],
+                                file.name.replace(/\.[^/.]+$/,
+                                    '.webm'), // Change extension to .webm
+                                {
+                                    type: result.blob.type
+                                }
+                            );
+
+                            this.videoFile = compressedFile;
+                            this.videoUrl = URL.createObjectURL(compressedFile);
+                            this.videoFileName = file.name;
+                            this.compressionMetadata = result.metadata;
+
+                        } catch (error) {
+                            console.error('Compression error:', error);
+                            this.isCompressing = false;
+
+                            // Fallback to original
+                            this.videoFile = file;
+                            this.videoUrl = URL.createObjectURL(file);
+                            this.videoFileName = file.name;
+                        }
                     } else {
                         this.videoFile = null;
                         this.videoUrl = null;
                         this.videoFileName = '';
+                        this.compressionMetadata = null;
                     }
                     this.updateActualInput();
                 },
+
                 removeVideo() {
                     // Revoke the object URL to free memory
                     if (this.videoUrl) {
@@ -201,15 +289,51 @@
                     this.videoFile = null;
                     this.videoUrl = null;
                     this.videoFileName = '';
+                    this.compressionMetadata = null;
                     document.getElementById(fieldName + '_display').value = '';
                     this.updateActualInput();
                 },
+
                 updateActualInput() {
-                    const dataTransfer = new DataTransfer();
+                    const actualInput = document.getElementById(fieldName);
+                    const displayInput = document.getElementById(fieldName + '_display');
+
                     if (this.videoFile) {
+                        // Create DataTransfer to assign file to hidden input
+                        const dataTransfer = new DataTransfer();
                         dataTransfer.items.add(this.videoFile);
+                        actualInput.files = dataTransfer.files;
+
+                        // Clear display input to prevent original file submission
+                        if (displayInput) {
+                            displayInput.value = '';
+                        }
+                    } else {
+                        // Clear both inputs
+                        actualInput.value = '';
+                        if (displayInput) {
+                            displayInput.value = '';
+                        }
                     }
-                    document.getElementById(fieldName).files = dataTransfer.files;
+                },
+
+                getCompressionInfo() {
+                    if (!this.compressionMetadata) return '';
+
+                    const meta = this.compressionMetadata;
+
+                    if (meta.skipped) {
+                        return `<span class="text-blue-600">ℹ️ ${meta.reason}</span>`;
+                    }
+
+                    const originalSize = window.VideoCompressor.formatFileSize(meta.originalSize);
+                    const compressedSize = window.VideoCompressor.formatFileSize(meta.compressedSize);
+                    const ratio = meta.compressionRatio;
+
+                    return `
+                        ${originalSize} → ${compressedSize} 
+                        <span class="text-green-600 font-medium">(${ratio}% lebih kecil)</span>
+                    `;
                 }
             }));
         });

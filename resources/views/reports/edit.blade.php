@@ -111,13 +111,41 @@
                                     </div>
                                 @elseif ($field->type === 'video')
                                     <div x-data="videoEditHandler('{{ $field->name }}', '{{ $report->data[$field->name] ?? '' }}')" class="space-y-3">
+                                        {{-- Compression Loading Overlay --}}
+                                        <div x-show="isCompressing" style="display: none;"
+                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                                                <div class="flex items-start space-x-4">
+                                                    <svg class="animate-spin h-8 w-8 text-indigo-600 flex-shrink-0"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                        </path>
+                                                    </svg>
+                                                    <div class="flex-1">
+                                                        <p class="font-medium text-gray-900">Mengompresi video...</p>
+                                                        <p class="text-sm text-gray-600 mt-1"
+                                                            x-text="compressionProgress"></p>
+                                                        <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                                            <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                                                                :style="'width: ' + compressionPercent + '%'"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {{-- Existing Video --}}
                                         <div x-show="existingVideoUrl && !videoFile && !isMarkedForDeletion"
                                             class="mt-2">
                                             <div
                                                 class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl group">
-                                                <video :src="'/storage/' + existingVideoUrl" controls preload="metadata"
-                                                    class="w-full h-auto" style="max-height: 500px;">
+                                                <video :src="'/storage/' + existingVideoUrl" controls
+                                                    preload="metadata" class="w-full h-auto"
+                                                    style="max-height: 500px;">
                                                     Browser Anda tidak mendukung video player.
                                                 </video>
                                                 <button type="button" @click="markForDeletion"
@@ -158,7 +186,11 @@
                                                 </video>
                                             </div>
                                             <div class="flex items-center justify-between mt-2">
-                                                <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                <div>
+                                                    <p class="text-sm text-gray-600" x-text="videoFileName"></p>
+                                                    <p class="text-xs text-gray-500 mt-1" x-show="compressionMetadata"
+                                                        x-html="getCompressionInfo()"></p>
+                                                </div>
                                                 <button type="button" @click="removeVideo"
                                                     class="inline-flex items-center px-3 py-1.5 bg-red-100 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
@@ -172,7 +204,8 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-gray-500">Maksimal 1 video.</p>
+                                        <p class="text-sm text-gray-500">Maksimal 1 video. Video akan dikompres
+                                            otomatis.</p>
                                     </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
@@ -269,17 +302,73 @@
                 videoPreviewUrl: null,
                 videoFileName: '',
                 isMarkedForDeletion: false,
+                isCompressing: false,
+                compressionProgress: '',
+                compressionPercent: 0,
+                compressionMetadata: null,
 
                 markForDeletion() {
                     this.isMarkedForDeletion = true;
                 },
 
-                handleFileSelect(event) {
+                async handleFileSelect(event) {
                     const file = event.target.files[0];
                     if (file && file.type.startsWith('video/')) {
-                        this.videoFile = file;
-                        this.videoPreviewUrl = URL.createObjectURL(file);
-                        this.videoFileName = file.name;
+                        // Check if compression is supported
+                        if (!window.VideoCompressor || !window.VideoCompressor.isSupported()) {
+                            // Fallback: use original file
+                            this.videoFile = file;
+                            this.videoPreviewUrl = URL.createObjectURL(file);
+                            this.videoFileName = file.name;
+                            return;
+                        }
+
+                        try {
+                            this.isCompressing = true;
+                            this.compressionProgress = 'Memulai kompresi...';
+                            this.compressionPercent = 0;
+
+                            // Compress video
+                            const result = await window.VideoCompressor.compress(file, {
+                                maxWidth: 1280,
+                                maxHeight: 720,
+                                videoBitrate: 2500000,
+                                onProgress: (message, percent) => {
+                                    this.compressionProgress = message;
+                                    this.compressionPercent = percent;
+                                }
+                            });
+
+                            this.isCompressing = false;
+
+                            // Create new file from compressed blob
+                            const compressedFile = new File(
+                                [result.blob],
+                                file.name.replace(/\.[^/.]+$/, '.webm'), {
+                                    type: result.blob.type
+                                }
+                            );
+
+                            // Assign compressed file
+                            this.videoFile = compressedFile;
+                            this.videoPreviewUrl = URL.createObjectURL(compressedFile);
+                            this.videoFileName = file.name;
+                            this.compressionMetadata = result.metadata;
+
+                            // Update form input with compressed file
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(compressedFile);
+                            document.getElementById(fieldName).files = dataTransfer.files;
+
+                        } catch (error) {
+                            console.error('Compression error:', error);
+                            this.isCompressing = false;
+
+                            // Fallback to original
+                            this.videoFile = file;
+                            this.videoPreviewUrl = URL.createObjectURL(file);
+                            this.videoFileName = file.name;
+                        }
                     }
                 },
 
@@ -291,7 +380,27 @@
                     this.videoFile = null;
                     this.videoPreviewUrl = null;
                     this.videoFileName = '';
+                    this.compressionMetadata = null;
                     document.getElementById(fieldName).value = '';
+                },
+
+                getCompressionInfo() {
+                    if (!this.compressionMetadata) return '';
+
+                    const meta = this.compressionMetadata;
+
+                    if (meta.skipped) {
+                        return `<span class="text-blue-600">ℹ️ ${meta.reason}</span>`;
+                    }
+
+                    const originalSize = window.VideoCompressor.formatFileSize(meta.originalSize);
+                    const compressedSize = window.VideoCompressor.formatFileSize(meta.compressedSize);
+                    const ratio = meta.compressionRatio;
+
+                    return `
+                        ${originalSize} → ${compressedSize} 
+                        <span class="text-green-600 font-medium">(${ratio}% lebih kecil)</span>
+                    `;
                 }
             }));
         });
