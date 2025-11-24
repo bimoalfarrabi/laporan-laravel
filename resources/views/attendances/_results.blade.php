@@ -171,8 +171,7 @@
                             @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
                                 -
                             @elseif (isset($attendance->photo_in_path) &&
-                                    $attendance->photo_in_path &&
-                                    Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
+                                    $attendance->photo_in_path)
                                 <a class="open-photo-modal cursor-pointer"
                                     data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_in_path]) }}"
                                     data-photo-type="Masuk"
@@ -291,8 +290,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if (isset($attendance->photo_out_path) &&
-                                    $attendance->photo_out_path &&
-                                    Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
+                                    $attendance->photo_out_path)
                                 <a class="open-photo-modal cursor-pointer"
                                     data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_out_path]) }}"
                                     data-photo-type="Pulang"
@@ -436,8 +434,7 @@
                                 @if ($attendance->status != 'Izin' && $attendance->status != 'libur')
                                     <div class="flex items-center mt-1">
                                         @if (isset($attendance->photo_in_path) &&
-                                                $attendance->photo_in_path &&
-                                                Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_in_path))
+                                                $attendance->photo_in_path)
                                             <a class="open-photo-modal cursor-pointer mr-2"
                                                 data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_in_path]) }}"
                                                 data-photo-type="Masuk"
@@ -571,8 +568,7 @@
                                 @if ($attendance->time_out)
                                     <div class="flex items-center mt-1">
                                         @if (isset($attendance->photo_out_path) &&
-                                                $attendance->photo_out_path &&
-                                                Illuminate\Support\Facades\Storage::disk('public')->exists($attendance->photo_out_path))
+                                                $attendance->photo_out_path)
                                             <a class="open-photo-modal cursor-pointer mr-2"
                                                 data-full-image-url="{{ route('files.serve', ['path' => $attendance->photo_out_path]) }}"
                                                 data-photo-type="Pulang"

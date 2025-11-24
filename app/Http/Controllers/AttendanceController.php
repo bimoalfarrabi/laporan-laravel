@@ -359,80 +359,7 @@ class AttendanceController extends Controller
             }
         }
 
-        $file = $request->file("photo");
-        $photoPath = null;
-
-        // --- Native GD Compression Logic ---
-        $originalPath = $file->getRealPath();
-        $originalExtension = strtolower($file->getClientOriginalExtension());
-
-        // Generate unique filename with .jpg extension
-        $accountName = Str::slug(Auth::user()->name);
-        $timestamp = now()->format("YmdHis");
-        $filename = $accountName . "-" . $timestamp . ".jpg";
-
-        // Create image resource from uploaded file
-        $imageResource = null;
-        switch ($originalExtension) {
-            case "jpg":
-            case "jpeg":
-                $imageResource = imagecreatefromjpeg($originalPath);
-                break;
-            case "png":
-                $imageResource = imagecreatefrompng($originalPath);
-                break;
-            case "gif":
-                $imageResource = imagecreatefromgif($originalPath);
-                break;
-        }
-
-        if ($imageResource) {
-            // Rotate image if it's landscape to make it portrait
-            $imageResource = $this->rotateLandscapeToPortrait($imageResource);
-
-            $year = now()->format("Y");
-            $month = now()->format("m");
-            $storagePath =
-                "attendances/" . $year . "/" . $month . "/" . $filename;
-            $publicPath = storage_path("app/public/" . $storagePath);
-
-            // Ensure directory exists
-            if (!file_exists(dirname($publicPath))) {
-                mkdir(dirname($publicPath), 0755, true);
-            }
-
-            $quality = 90; // Start with high quality
-            $maxFileSize = 1024 * 1024; // 1MB in bytes
-            $tempPath = tempnam(sys_get_temp_dir(), "compressed_image_"); // Temporary file for compression
-
-            do {
-                // Save the image with current quality to a temporary file
-                imagejpeg($imageResource, $tempPath, $quality);
-                $fileSize = filesize($tempPath);
-
-                if ($fileSize > $maxFileSize && $quality > 10) {
-                    $quality -= 5; // Reduce quality
-                } else {
-                    break; // Exit loop if size is acceptable or quality is too low
-                }
-            } while ($quality >= 10);
-
-            // Move the compressed image from temporary path to public storage
-            rename($tempPath, $publicPath);
-
-            // Free up memory
-            imagedestroy($imageResource);
-
-            $photoPath = $storagePath;
-        } else {
-            // Fallback for unsupported image types (e.g., webp, heic)
-            $year = now()->format("Y");
-            $month = now()->format("m");
-            $photoPath = $file->store(
-                "attendances/" . $year . "/" . $month,
-                "public",
-            );
-        }
+        $photoPath = $this->compressAndStoreImage($request->file('photo'));
         // --- End of Native GD Logic ---
 
         if ($action === "in") {
@@ -628,6 +555,161 @@ class AttendanceController extends Controller
 
         return $imageResource;
     }
+
+    private function compressAndStoreImage($file): string
+        {
+            $originalPath = $file->getRealPath();
+            $originalExtension = strtolower($file->getClientOriginalExtension());
+    
+            // Generate unique filename with .jpg extension (default)
+            $accountName = Str::slug(Auth::user()->name);
+            $timestamp = now()->format('YmdHis');
+            $filename = $accountName . '-' . $timestamp . '.jpg';
+    
+            // Create image resource from uploaded file
+            $imageResource = null;
+            switch ($originalExtension) {
+                case 'jpg':
+                case 'jpeg':
+                    $imageResource = imagecreatefromjpeg($originalPath);
+                    break;
+                case 'png':
+                    $imageResource = imagecreatefrompng($originalPath);
+                    // Preserve transparency for PNG
+                    imagealphablending($imageResource, true);
+                    imagesavealpha($imageResource, true);
+                    $filename = $accountName . '-' . $timestamp . '.png'; // Use PNG extension for PNG originals
+                    break;
+                case 'gif':
+                    $imageResource = imagecreatefromgif($originalPath);
+                    break;
+                default:
+                    // If file type is not supported, store it without compression
+                    return $file->storeAs('attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+            }
+    
+            if (!$imageResource) {
+                // Fallback if image resource creation failed
+                return $file->storeAs('attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+            }
+    
+            $imageResource = $this->rotateLandscapeToPortrait($imageResource);
+
+            $originalWidth = imagesx($imageResource);
+            $originalHeight = imagesy($imageResource);
+    
+            $maxWidth = 1280; // Max width for images (reverted)
+            $maxHeight = 1280; // Max height for images (reverted)
+    
+            $newWidth = $originalWidth;
+            $newHeight = $originalHeight;
+    
+        // Resize if image is larger than max dimensions
+        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+            $ratio = $originalWidth / $originalHeight;
+            if ($ratio > 1) { // Landscape
+                $newWidth = $maxWidth;
+                $newHeight = $maxWidth / $ratio;
+            } else { // Portrait or Square
+                $newHeight = $maxHeight;
+                $newWidth = $maxHeight * $ratio;
+            }
+        }
+
+        // Handle EXIF Rotation
+        if (function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($originalPath);
+                if ($exif && isset($exif['Orientation'])) {
+                    $orientation = $exif['Orientation'];
+                    switch ($orientation) {
+                        case 3:
+                            $imageResource = imagerotate($imageResource, 180, 0);
+                            break;
+                        case 6:
+                            $imageResource = imagerotate($imageResource, -90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                        case 8:
+                            $imageResource = imagerotate($imageResource, 90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore EXIF errors
+            }
+        }
+    
+            // Create a new true color image with the new dimensions
+            $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+    
+            // Preserve transparency for PNG
+            if ($originalExtension === 'png') {
+                imagealphablending($newImageResource, false);
+                imagesavealpha($newImageResource, true);
+                $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+                imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+            }
+    
+            // Resample (resize) the image
+            imagecopyresampled(
+                $newImageResource,
+                $imageResource,
+                0, 0, 0, 0,
+                (int) $newWidth, (int) $newHeight,
+                $originalWidth, $originalHeight
+            );
+    
+            // Define storage path
+            $year = now()->format('Y');
+            $month = now()->format('m');
+            $storagePath = 'attendances/' . $year . '/' . $month . '/' . $filename;
+            $quality = 90; // Start with high quality
+            $maxFileSize = 1024 * 1024; // 1MB in bytes
+            $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+    
+            do {
+                // Save the image with current quality to a temporary file
+                if ($originalExtension === 'png') { // Save as PNG if original was PNG
+                    imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
+                } else { // Otherwise, save as JPEG
+                    imagejpeg($newImageResource, $tempPath, $quality);
+                }
+    
+                $fileSize = filesize($tempPath);
+    
+                if ($fileSize > $maxFileSize && $quality > 10) {
+                    $quality -= 5; // Reduce quality
+                } else {
+                    break; // Exit loop if size is acceptable or quality is too low
+                }
+            } while ($quality >= 10);
+
+            // Ensure directory exists before upload
+            $directoryPath = 'attendances/' . $year . '/' . $month;
+            if (!Storage::disk('nextcloud')->exists($directoryPath)) {
+                Storage::disk('nextcloud')->makeDirectory($directoryPath);
+            }
+            
+            // Upload to Nextcloud
+            Storage::disk('nextcloud')->put($storagePath, fopen($tempPath, 'r'));
+            
+            // Remove temp file
+            unlink($tempPath);
+    
+            // Free up memory
+            imagedestroy($imageResource);
+            imagedestroy($newImageResource);
+    
+            return $storagePath;
+        }
 
     /**
      * Display the specified resource.
