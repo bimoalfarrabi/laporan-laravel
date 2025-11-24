@@ -34,8 +34,11 @@
                 </svg>
             </div>
 
-            <video :src="videoUrl" controls autoplay preload="metadata" class="w-full h-auto"
-                style="max-height: 85vh;" @load="isLoading = false"></video>
+            <video :src="videoUrl" controls autoplay preload="metadata"
+                class="w-full h-auto transition-opacity duration-300"
+                style="max-height: 85vh;"
+                @canplaythrough="isLoading = false"
+                :class="{ 'opacity-0': isLoading }"></video>
         </div>
 
         <!-- Video Filename -->
