@@ -154,13 +154,12 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create', Report::class);  // Otorisasi untuk menyimpan laporan
+        $this->authorize('create', Report::class);
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($request->report_type_id);
 
-        // bangun aturan validasi dinamis berdasarkan reportTypeFields
         $validationRules = [];
-        $reportData = [];  // untuk menyimpan data laporan
+        $reportData = [];
 
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
@@ -171,7 +170,7 @@ class ReportController extends Controller
             } else {
                 $rules[] = 'nullable';
             }
-            // tambahkan validasi tipe data jika diperlukan
+
             if ($field->type === 'date') {
                 $rules[] = 'date';
             } elseif ($field->type === 'time') {
@@ -179,19 +178,15 @@ class ReportController extends Controller
             } elseif ($field->type === 'number') {
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
-                // Remove 'file' rule because input might be array
-                // $rules[] = 'file'; 
-                // $rules[] = 'mimes:jpg,jpeg,png';
                 $rules[] = 'array';
-                $rules[] = 'max:3'; // Max 3 files
+                $rules[] = 'max:3';
+                $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
+            } elseif ($field->type === 'video') {
+                $rules[] = 'file';
+                $rules[] = 'mimes:mp4,mov,avi,mkv';
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
-            
-            // Add validation for individual files in the array
-            if ($field->type === 'file') {
-                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
-            }
         }
 
         $validator = Validator::make($request->all(), $validationRules);
@@ -203,7 +198,7 @@ class ReportController extends Controller
         foreach ($reportType->reportTypeFields as $field) {
             if ($field->type === 'role_specific_text' && $field->role_id) {
                 if (!Auth::user()->hasRole(Role::find($field->role_id)->name)) {
-                    continue;  // skip this field if user does not have the role
+                    continue;
                 }
             }
 
@@ -213,15 +208,16 @@ class ReportController extends Controller
                 $filePaths = [];
                 if (is_array($files)) {
                     foreach ($files as $file) {
-                         $filePaths[] = $this->compressAndStoreImage($file);
+                        $filePaths[] = $this->compressAndStoreImage($file);
                     }
                 } else {
-                    // Fallback for single file (should not happen with array validation but good for safety)
                     $filePaths[] = $this->compressAndStoreImage($files);
                 }
                 $reportData[$fieldName] = $filePaths;
+            } elseif ($field->type === 'video' && $request->hasFile($fieldName)) {
+                $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
             } elseif ($field['type'] === 'checkbox') {
-                $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
+                $reportData[$fieldName] = $request->has($fieldName);
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
             }
@@ -230,14 +226,9 @@ class ReportController extends Controller
         $report = new Report();
         $report->report_type_id = $reportType->id;
         $report->user_id = Auth::id();
-        $report->data = $reportData;  // simpan data
-        $report->status = 'belum disetujui';  // default status
+        $report->data = $reportData;
+        $report->status = 'belum disetujui';
         $report->last_edited_by_user_id = Auth::id();
-
-        // Automatically record danru's shift for LHJ reports
-        // if ($reportType->name === 'Laporan Harian Jaga (LHJ) / Shift Report' && Auth::user()->hasRole('danru')) {
-        //     $report->shift = Auth::user()->shift;
-        // }
         $report->save();
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');
@@ -290,42 +281,37 @@ class ReportController extends Controller
      */
     public function update(Request $request, Report $report)
     {
-        $this->authorize('update', $report);  // Otorisasi untuk memperbarui laporan
+        $this->authorize('update', $report);
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($report->report_type_id);
 
         $validationRules = [];
-        $reportData = $report->data;  // untuk menyimpan data laporan
+        $reportData = $report->data;
 
-        // bangun aturan validasi dinamis berdasarkan reportTypeFields
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
             $rules = [];
 
             if ($field->required) {
-                // jika required dan type file, hanya required jika tidak ada file lama (atau file lama kosong)
-                if ($field->type === 'file') {
+                if ($field->type === 'file' || $field->type === 'video') {
                     $existingFiles = $reportData[$fieldName] ?? [];
-                    // Handle legacy string format
                     if (is_string($existingFiles)) {
-                         $existingFiles = [$existingFiles];
+                        $existingFiles = [$existingFiles];
                     }
-                    
-                    // Check if we have existing files that are NOT marked for deletion
                     $filesToDelete = $request->input('delete_' . $fieldName, []);
                     $remainingFilesCount = count($existingFiles) - count($filesToDelete);
-                    
-                    if ($remainingFilesCount <= 0) {
-                         $rules[] = 'required'; // Must upload new if all old ones are deleted
+                    if ($remainingFilesCount <= 0 && !$request->hasFile($fieldName)) {
+                        $rules[] = 'required';
                     } else {
-                         $rules[] = 'nullable';
+                        $rules[] = 'nullable';
                     }
-                } elseif ($field->type !== 'file') {
-                    $rules[] = 'required';
                 } else {
-                    $rules[] = 'nullable';
+                    $rules[] = 'required';
                 }
+            } else {
+                $rules[] = 'nullable';
             }
+
 
             if ($field->type === 'date') {
                 $rules[] = 'date';
@@ -335,55 +321,49 @@ class ReportController extends Controller
                 $rules[] = 'numeric';
             } elseif ($field->type === 'file') {
                 $rules[] = 'array';
-                // Max 3 logic is complex here because it depends on remaining files + new files.
-                // We'll handle strict count validation manually or via custom rule if needed, 
-                // but 'max:3' on the upload array itself is a safe start.
-                $rules[] = 'max:3'; 
+                $rules[] = 'max:3';
+                $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
+            } elseif ($field->type === 'video') {
+                $rules[] = 'file';
+                $rules[] = 'mimes:mp4,mov,avi,mkv';
             }
 
             $validationRules[$fieldName] = implode('|', $rules);
-             if ($field->type === 'file') {
-                 $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
-            }
         }
 
         $validator = Validator::make($request->all(), $validationRules);
-        
-        // Additional manual validation for total file count
+
         $validator->after(function ($validator) use ($request, $reportData, $reportType) {
-             foreach ($reportType->reportTypeFields as $field) {
+            foreach ($reportType->reportTypeFields as $field) {
                 if ($field->type === 'file') {
                     $fieldName = $field->name;
                     $existingFiles = $reportData[$fieldName] ?? [];
                     if (is_string($existingFiles)) $existingFiles = [$existingFiles];
-                    
+
                     $filesToDelete = $request->input('delete_' . $fieldName, []);
                     $newFiles = $request->file($fieldName, []);
-                    
+
                     $totalFiles = count($existingFiles) - count($filesToDelete) + count($newFiles);
-                    
+
                     if ($totalFiles > 3) {
                         $validator->errors()->add($fieldName, 'Maksimal total 3 gambar diperbolehkan.');
                     }
                 }
-             }
+            }
         });
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // proses upload file dan upload data
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
             if ($field->type === 'file') {
-                
-                // 1. Handle deletions
                 $existingFiles = $reportData[$fieldName] ?? [];
                 if (is_string($existingFiles)) $existingFiles = [$existingFiles];
-                
+
                 $filesToDelete = $request->input('delete_' . $fieldName, []);
-                
+
                 $updatedFiles = [];
                 foreach ($existingFiles as $path) {
                     if (in_array($path, $filesToDelete)) {
@@ -392,23 +372,29 @@ class ReportController extends Controller
                         $updatedFiles[] = $path;
                     }
                 }
-                
-                // 2. Handle new uploads
+
                 if ($request->hasFile($fieldName)) {
                     $files = $request->file($fieldName);
                     if (is_array($files)) {
                         foreach ($files as $file) {
-                             $updatedFiles[] = $this->compressAndStoreImage($file);
+                            $updatedFiles[] = $this->compressAndStoreImage($file);
                         }
                     } else {
-                         $updatedFiles[] = $this->compressAndStoreImage($files);
+                        $updatedFiles[] = $this->compressAndStoreImage($files);
                     }
                 }
-                
-                $reportData[$fieldName] = $updatedFiles;
 
+                $reportData[$fieldName] = $updatedFiles;
+            } elseif ($field->type === 'video') {
+                $existingVideo = $reportData[$fieldName] ?? null;
+                if ($request->hasFile($fieldName)) {
+                    if ($existingVideo) {
+                        Storage::disk('public')->delete($existingVideo);
+                    }
+                    $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
+                }
             } elseif ($field->type === 'checkbox') {
-                $reportData[$fieldName] = $request->has($fieldName);  // simpan true/false
+                $reportData[$fieldName] = $request->has($fieldName);
             } else {
                 $reportData[$fieldName] = $request->input($fieldName);
             }
@@ -539,6 +525,20 @@ class ReportController extends Controller
         $filename = 'Laporan_Anggota_Bulan_' . $month . '_' . $year . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    private function storeVideo($file): string
+    {
+        $accountName = Str::slug(Auth::user()->name);
+        $timestamp = now()->format('YmdHis');
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+        $filename = $accountName . '-' . $timestamp . '.' . $originalExtension;
+    
+        $year = now()->format('Y');
+        $month = now()->format('m');
+        $storagePath = 'reports/' . $year . '/' . $month;
+    
+        return $file->storeAs($storagePath, $filename, 'public');
     }
 
     /**

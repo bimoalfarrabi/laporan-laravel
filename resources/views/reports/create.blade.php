@@ -75,6 +75,19 @@
                                         </div>
                                         <p class="text-sm text-gray-500">Maksimal 3 gambar.</p>
                                     </div>
+                                @elseif ($field->type === 'video')
+                                    <div x-data="videoUploadHandler('{{ $field->name }}')" class="space-y-2">
+                                        <input id="{{ $field->name }}_display" type="file" accept="video/*"
+                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                            @change="handleFileSelect" />
+                                        <input type="file" name="{{ $field->name }}" id="{{ $field->name }}" class="hidden">
+                                        <div class="mt-2" x-show="videoUrl">
+                                            <video :src="videoUrl" controls class="w-full rounded-md border border-gray-300"></video>
+                                            <button type="button" @click="removeVideo"
+                                                class="mt-1 text-sm text-red-600 hover:text-red-800">Hapus Video</button>
+                                        </div>
+                                        <p class="text-sm text-gray-500">Maksimal 1 video.</p>
+                                    </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
                             </div>
@@ -139,6 +152,35 @@
                     const dataTransfer = new DataTransfer();
                     this.files.forEach(file => dataTransfer.items.add(file));
                     document.getElementById(fieldName + '_actual').files = dataTransfer.files;
+                }
+            }));
+
+            Alpine.data('videoUploadHandler', (fieldName) => ({
+                videoUrl: null,
+                videoFile: null,
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file && file.type.startsWith('video/')) {
+                        this.videoFile = file;
+                        this.videoUrl = URL.createObjectURL(file);
+                    } else {
+                        this.videoFile = null;
+                        this.videoUrl = null;
+                    }
+                    this.updateActualInput();
+                },
+                removeVideo() {
+                    this.videoFile = null;
+                    this.videoUrl = null;
+                    document.getElementById(fieldName + '_display').value = '';
+                    this.updateActualInput();
+                },
+                updateActualInput() {
+                    const dataTransfer = new DataTransfer();
+                    if (this.videoFile) {
+                        dataTransfer.items.add(this.videoFile);
+                    }
+                    document.getElementById(fieldName).files = dataTransfer.files;
                 }
             }));
         });

@@ -109,6 +109,37 @@
                                         <p class="text-sm text-gray-500">Maksimal 3 gambar total (termasuk yang sudah
                                             ada).</p>
                                     </div>
+                                @elseif ($field->type === 'video')
+                                    <div x-data="videoEditHandler('{{ $field->name }}', '{{ $report->data[$field->name] ?? '' }}')" class="space-y-2">
+                                        {{-- Existing Video --}}
+                                        <div x-show="existingVideoUrl && !videoFile" class="relative group">
+                                            <video :src="'/storage/' + existingVideoUrl" controls class="w-full rounded-md border border-gray-300"></video>
+                                            <button type="button" @click="markForDeletion"
+                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="delete_{{ $field->name }}" :value="existingVideoUrl" x-if="isMarkedForDeletion">
+
+                                        {{-- New Video Input --}}
+                                        <div x-show="!existingVideoUrl || isMarkedForDeletion">
+                                            <input id="{{ $field->name }}" type="file" accept="video/*"
+                                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                @change="handleFileSelect" name="{{ $field->name }}">
+                                        </div>
+
+                                        {{-- New Video Preview --}}
+                                        <div class="mt-2" x-show="videoFile">
+                                            <video :src="videoPreviewUrl" controls class="w-full rounded-md border border-gray-300"></video>
+                                            <button type="button" @click="removeVideo"
+                                                class="mt-1 text-sm text-red-600 hover:text-red-800">Hapus Video</button>
+                                        </div>
+                                        <p class="text-sm text-gray-500">Maksimal 1 video.</p>
+                                    </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
                             </div>
@@ -195,6 +226,31 @@
                     const dataTransfer = new DataTransfer();
                     this.newFiles.forEach(file => dataTransfer.items.add(file));
                     document.getElementById(fieldName + '_actual').files = dataTransfer.files;
+                }
+            }));
+
+            Alpine.data('videoEditHandler', (fieldName, initialVideo) => ({
+                existingVideoUrl: initialVideo,
+                videoFile: null,
+                videoPreviewUrl: null,
+                isMarkedForDeletion: false,
+
+                markForDeletion() {
+                    this.isMarkedForDeletion = true;
+                },
+
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file && file.type.startsWith('video/')) {
+                        this.videoFile = file;
+                        this.videoPreviewUrl = URL.createObjectURL(file);
+                    }
+                },
+
+                removeVideo() {
+                    this.videoFile = null;
+                    this.videoPreviewUrl = null;
+                    document.getElementById(fieldName).value = '';
                 }
             }));
         });
