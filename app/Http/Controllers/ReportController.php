@@ -595,8 +595,12 @@ class ReportController extends Controller
         
         $path = $file->storeAs($storagePath, $filename, 'nextcloud');
         if ($path === false) {
+            $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
+            $nextcloudUser = config('filesystems.disks.nextcloud.userName');
+            $errorMessage = "Gagal mengunggah video ke Nextcloud. Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'. Kemungkinan penyebab: permission denied, disk penuh, atau koneksi timeout.";
+            
             throw ValidationException::withMessages([
-                'video' => 'Gagal mengunggah video. Silakan coba lagi.',
+                'video' => $errorMessage,
             ]);
         }
 
@@ -810,9 +814,13 @@ class ReportController extends Controller
                             'full_path_attempted' => config('filesystems.disks.nextcloud.root') . '/' . $storagePath
                         ]);
                         
+                        $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
+                        $nextcloudUser = config('filesystems.disks.nextcloud.userName');
+                        $errorMessage = "Gagal mengunggah foto ke Nextcloud. Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'. Kemungkinan penyebab: permission denied, disk penuh, atau koneksi timeout.";
+
                         unlink($tempPath);
                         throw ValidationException::withMessages([
-                            'photo' => 'Gagal mengunggah foto ke penyimpanan. Kemungkinan: permission denied, disk penuh, atau timeout koneksi.',
+                            'photo' => $errorMessage,
                         ]);
                     }
                 } catch (\League\Flysystem\UnableToWriteFile $e) {
