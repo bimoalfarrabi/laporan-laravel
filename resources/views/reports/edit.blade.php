@@ -21,7 +21,13 @@
 
                         @foreach ($report->reportType->reportTypeFields as $field)
                             <div class="mt-4">
-                                <x-input-label for="{{ $field->name }}" :value="__($field->label)" />
+                                <x-input-label for="{{ $field->name }}">
+                                    {{ __($field->label) }}
+                                    @if ($field->required)
+                                        <span
+                                            class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>
+                                    @endif
+                                </x-input-label>
 
                                 @if (
                                     $field->type === 'text' ||
