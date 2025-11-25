@@ -22,6 +22,24 @@ trix-editor blockquote,
     font-style: italic;
 }
 
+/* Improve text rendering for WhatsApp copy-paste compatibility */
+trix-editor,
+.trix-content {
+    word-break: break-word !important; /* Prevent overflow from long words/URLs */
+    overflow-wrap: break-word !important;
+}
+
+.trix-content div,
+.trix-content p {
+    margin-bottom: 0.5em; /* Add spacing between paragraphs/lines */
+    min-height: 1em; /* Ensure empty lines are visible */
+}
+
+.trix-content a {
+    color: #2563eb; /* Tailwind blue-600 */
+    text-decoration: underline;
+}
+
 /* Mobile optimizations for Trix */
 trix-toolbar .trix-button-row {
     display: flex;

@@ -42,3 +42,4 @@ document.addEventListener('DOMContentLoaded', function () {
 Alpine.start();
 
 import './dashboard-pagination';
+import './trix-whatsapp';
