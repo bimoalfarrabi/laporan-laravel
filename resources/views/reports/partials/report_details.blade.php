@@ -187,7 +187,7 @@
                                                 <img src="{{ $thumbnailUrl }}" alt="{{ $field->label }}"
                                                     loading="lazy" data-path="{{ $path }}"
                                                     @load="imageLoaded = true"
-                                                    class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105 transition-opacity"
+                                                    class="h-full w-full object-cover p-2 transition-transform duration-300 group-hover:scale-105 transition-opacity"
                                                     :class="{ 'opacity-0': !imageLoaded }">
 
                                                 <!-- Hover Overlay -->
