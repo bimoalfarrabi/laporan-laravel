@@ -190,7 +190,26 @@ class ReportController extends Controller
             $validationRules[$fieldName] = implode('|', $rules);
         }
 
-        $validator = Validator::make($request->all(), $validationRules);
+        // Custom Error Messages
+        $messages = [
+            'required' => ':attribute wajib diisi.',
+            'date' => ':attribute harus berupa tanggal yang valid.',
+            'date_format' => ':attribute harus berformat waktu yang benar (HH:MM).',
+            'numeric' => ':attribute harus berupa angka.',
+            'array' => ':attribute harus berupa data yang valid.',
+            'max.array' => 'Maksimal :max file yang diperbolehkan untuk :attribute.',
+            'mimes' => ':attribute harus berupa file bertipe: :values.',
+            'file' => ':attribute harus berupa file yang valid.',
+            'max.file' => 'Ukuran :attribute tidak boleh lebih dari :max kilobytes.',
+        ];
+
+        // Custom Attributes (Labels)
+        $customAttributes = [];
+        foreach ($reportType->reportTypeFields as $field) {
+            $customAttributes[$field->name] = $field->label;
+        }
+
+        $validator = Validator::make($request->all(), $validationRules, $messages, $customAttributes);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -332,7 +351,26 @@ class ReportController extends Controller
             $validationRules[$fieldName] = implode('|', $rules);
         }
 
-        $validator = Validator::make($request->all(), $validationRules);
+        // Custom Error Messages
+        $messages = [
+            'required' => ':attribute wajib diisi.',
+            'date' => ':attribute harus berupa tanggal yang valid.',
+            'date_format' => ':attribute harus berformat waktu yang benar (HH:MM).',
+            'numeric' => ':attribute harus berupa angka.',
+            'array' => ':attribute harus berupa data yang valid.',
+            'max.array' => 'Maksimal :max file yang diperbolehkan untuk :attribute.',
+            'mimes' => ':attribute harus berupa file bertipe: :values.',
+            'file' => ':attribute harus berupa file yang valid.',
+            'max.file' => 'Ukuran :attribute tidak boleh lebih dari :max kilobytes.',
+        ];
+
+        // Custom Attributes (Labels)
+        $customAttributes = [];
+        foreach ($reportType->reportTypeFields as $field) {
+            $customAttributes[$field->name] = $field->label;
+        }
+
+        $validator = Validator::make($request->all(), $validationRules, $messages, $customAttributes);
 
         $validator->after(function ($validator) use ($request, $reportData, $reportType) {
             foreach ($reportType->reportTypeFields as $field) {
