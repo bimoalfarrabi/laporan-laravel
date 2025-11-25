@@ -21,7 +21,7 @@
                         </div>
 
                         <!-- Deskripsi -->
-                        <div class="mt-4">
+                        <div class="mt-4 mb-4">
                             <x-input-label for="description" :value="__('Deskripsi')" />
                             <textarea id="description" name="description"
                                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description') }}</textarea>
