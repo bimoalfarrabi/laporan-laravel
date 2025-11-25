@@ -57,9 +57,24 @@
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                 @elseif ($field->type === 'file')
                                     <div x-data="fileUploadHandler('{{ $field->name }}')" class="space-y-2">
+                                        <!-- Hidden file input -->
                                         <input id="{{ $field->name }}" type="file" multiple accept="image/*"
-                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                            @change="handleFileSelect" />
+                                            class="hidden" @change="handleFileSelect" />
+
+                                        <!-- Custom file upload button -->
+                                        <label for="{{ $field->name }}"
+                                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                            <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span
+                                                class="group-hover:text-indigo-600 transition-colors duration-150">Pilih
+                                                Foto</span>
+                                        </label>
 
                                         {{-- Hidden input to store actual files for form submission (managed by DataTransfer in JS) --}}
                                         <input type="file" name="{{ $field->name }}[]"
@@ -85,9 +100,22 @@
                                     </div>
                                 @elseif ($field->type === 'video')
                                     <div x-data="videoUploadHandler('{{ $field->name }}')" class="space-y-3">
-                                        <input id="{{ $field->name }}" type="file" accept="video/*"
-                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        <!-- Hidden file input -->
+                                        <input id="{{ $field->name }}" type="file" accept="video/*" class="hidden"
                                             @change="handleFileSelect" />
+
+                                        <!-- Custom file upload button -->
+                                        <label for="{{ $field->name }}"
+                                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                            <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            <span
+                                                class="group-hover:text-indigo-600 transition-colors duration-150">Pilih
+                                                Video</span>
+                                        </label>
                                         <input type="file" name="{{ $field->name }}"
                                             id="{{ $field->name }}_actual" class="hidden">
 
@@ -99,8 +127,8 @@
                                                     <svg class="animate-spin h-8 w-8 text-indigo-600 flex-shrink-0"
                                                         xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <circle class="opacity-25" cx="12" cy="12"
+                                                            r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor"
                                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                                         </path>
