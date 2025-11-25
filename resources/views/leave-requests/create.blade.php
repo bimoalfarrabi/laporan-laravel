@@ -14,7 +14,11 @@
 
                         <!-- Leave Type -->
                         <div>
-                            <x-input-label for="leave_type" :value="__('Jenis Izin')" />
+                            <x-input-label for="leave_type">
+                                {{ __('Jenis Izin') }}
+                                <span
+                                    class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>
+                            </x-input-label>
                             <select id="leave_type" name="leave_type"
                                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                 required>
@@ -50,7 +54,11 @@
 
                         <!-- Start Date -->
                         <div class="mt-4">
-                            <x-input-label for="start_date" id="start_date_label" :value="__('Tanggal Mulai Izin')" />
+                            <x-input-label for="start_date" id="start_date_label">
+                                {{ __('Tanggal Mulai Izin') }}
+                                <span
+                                    class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>
+                            </x-input-label>
                             <x-text-input id="start_date" class="block mt-1 w-full" type="date" name="start_date"
                                 :value="old('start_date')" required />
                             <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
@@ -58,7 +66,11 @@
 
                         <!-- End Date -->
                         <div class="mt-4" id="end_date_wrapper">
-                            <x-input-label for="end_date" :value="__('Tanggal Selesai Izin')" />
+                            <x-input-label for="end_date">
+                                {{ __('Tanggal Selesai Izin') }}
+                                <span
+                                    class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>
+                            </x-input-label>
                             <x-text-input id="end_date" class="block mt-1 w-full" type="date" name="end_date"
                                 :value="old('end_date')" required />
                             <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
@@ -124,7 +136,8 @@
                     if (leaveTypeSelect.value === 'Izin terlambat') {
                         timeFields.style.display = 'block';
                         endDateWrapper.style.display = 'none';
-                        startDateLabel.textContent = 'Tanggal';
+                        startDateLabel.innerHTML =
+                            'Tanggal <span class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>';
 
                         endDateInput.removeAttribute('required');
                         startTimeInput.setAttribute('required', '');
@@ -132,12 +145,14 @@
                         keteranganTextarea.setAttribute('required', '');
 
                         if (keteranganLabel) {
-                            keteranganLabel.innerHTML = 'Keterangan <span class="text-red-500">*</span>';
+                            keteranganLabel.innerHTML =
+                                'Keterangan <span class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>';
                         }
                     } else {
                         timeFields.style.display = 'none';
                         endDateWrapper.style.display = 'block';
-                        startDateLabel.textContent = 'Tanggal Mulai Izin';
+                        startDateLabel.innerHTML =
+                            'Tanggal Mulai Izin <span class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>';
 
                         endDateInput.setAttribute('required', '');
                         startTimeInput.removeAttribute('required');
