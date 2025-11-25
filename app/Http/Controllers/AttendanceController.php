@@ -73,7 +73,7 @@ class AttendanceController extends Controller
         // Sort and paginate
         $sortBy = $request->query("sort_by", "user.name");
         $sortDirection = $request->query("sort_direction", "asc");
-        
+
         $sorted = $this->sortRecords($combined, $sortBy, $sortDirection);
         $paginatedItems = $this->paginateRecords($sorted, 15, $request);
 
@@ -165,7 +165,7 @@ class AttendanceController extends Controller
     private function mergeRecords($attendances, $usersOnLeave)
     {
         $usersWithAttendance = $attendances->pluck("user_id");
-        
+
         $filteredUsersOnLeave = $usersOnLeave->whereNotIn(
             "user.id",
             $usersWithAttendance,
@@ -189,7 +189,7 @@ class AttendanceController extends Controller
             ($currentPage - 1) * $perPage,
             $perPage,
         );
-        
+
         return new LengthAwarePaginator(
             $currentPageItems,
             $sorted->count(),
@@ -245,8 +245,8 @@ class AttendanceController extends Controller
             if ($lastAction->time_out && $lastAction->time_in) {
                 $lastActionTime =
                     $lastAction->time_out > $lastAction->time_in
-                        ? $lastAction->time_out
-                        : $lastAction->time_in;
+                    ? $lastAction->time_out
+                    : $lastAction->time_in;
             }
             $errorMessage =
                 "Anda sudah melakukan absensi pada pukul " .
@@ -392,8 +392,8 @@ class AttendanceController extends Controller
 
             $expectedStartTime =
                 $now->hour >= 0 && $now->hour < 14
-                    ? $pagiShiftStart
-                    : $malamShiftStart;
+                ? $pagiShiftStart
+                : $malamShiftStart;
 
             // Define the valid clock-in window: 1 hour before and 1 hour after the shift starts.
             $windowStart = $expectedStartTime->copy()->subHour();
@@ -468,7 +468,7 @@ class AttendanceController extends Controller
 
                 $distance = abs(
                     $actualShiftMidpoint->getTimestamp() -
-                        $idealMidpoint->getTimestamp(),
+                    $idealMidpoint->getTimestamp(),
                 );
 
                 if ($distance < $minimumDistance) {
@@ -528,94 +528,77 @@ class AttendanceController extends Controller
         $a =
             sin($dLat / 2) * sin($dLat / 2) +
             cos(deg2rad($lat1)) *
-                cos(deg2rad($lat2)) *
-                sin($dLon / 2) *
-                sin($dLon / 2);
+            cos(deg2rad($lat2)) *
+            sin($dLon / 2) *
+            sin($dLon / 2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
     }
 
-    /**
-     * Rotates a GD image resource if it's in landscape orientation to make it portrait.
-     *
-     * @param resource $imageResource The GD image resource.
-     * @return resource The rotated image resource.
-     */
-    private function rotateLandscapeToPortrait($imageResource)
-    {
-        $width = imagesx($imageResource);
-        $height = imagesy($imageResource);
 
-        if ($width > $height) {
-            // Image is landscape, rotate 90 degrees clockwise to make it portrait
-            $imageResource = imagerotate($imageResource, 270, 0); // 270 degrees is 90 degrees clockwise
-        }
-
-        return $imageResource;
-    }
 
     private function compressAndStoreImage($file): string
-        {
-            $originalPath = $file->getRealPath();
-            $originalExtension = strtolower($file->getClientOriginalExtension());
-    
-            // Generate unique filename with .jpg extension (default)
-            $accountName = Str::slug(Auth::user()->name);
-            $timestamp = now()->format('YmdHis');
-            $filename = $accountName . '-' . $timestamp . '.jpg';
-    
-            // Create image resource from uploaded file
-            $imageResource = null;
-            switch ($originalExtension) {
-                case 'jpg':
-                case 'jpeg':
-                    $imageResource = imagecreatefromjpeg($originalPath);
-                    break;
-                case 'png':
-                    $imageResource = imagecreatefrompng($originalPath);
-                    // Preserve transparency for PNG
-                    imagealphablending($imageResource, true);
-                    imagesavealpha($imageResource, true);
-                    $filename = $accountName . '-' . $timestamp . '.png'; // Use PNG extension for PNG originals
-                    break;
-                case 'gif':
-                    $imageResource = imagecreatefromgif($originalPath);
-                    break;
-                default:
-            // If file type is not supported, store it without compression
-                    $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
-                    if ($path === false) {
-                        throw ValidationException::withMessages([
-                            'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
-                        ]);
-                    }
-                    return $path;
-            }
-    
-            if (!$imageResource) {
-                // Fallback if image resource creation failed
+    {
+        $originalPath = $file->getRealPath();
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        // Generate unique filename with .jpg extension (default)
+        $accountName = Str::slug(Auth::user()->name);
+        $timestamp = now()->format('YmdHis');
+        $filename = $accountName . '-' . $timestamp . '.jpg';
+
+        // Create image resource from uploaded file
+        $imageResource = null;
+        switch ($originalExtension) {
+            case 'jpg':
+            case 'jpeg':
+                $imageResource = imagecreatefromjpeg($originalPath);
+                break;
+            case 'png':
+                $imageResource = imagecreatefrompng($originalPath);
+                // Preserve transparency for PNG
+                imagealphablending($imageResource, true);
+                imagesavealpha($imageResource, true);
+                $filename = $accountName . '-' . $timestamp . '.png'; // Use PNG extension for PNG originals
+                break;
+            case 'gif':
+                $imageResource = imagecreatefromgif($originalPath);
+                break;
+            default:
+                // If file type is not supported, store it without compression
                 $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
                 if ($path === false) {
                     throw ValidationException::withMessages([
-                        'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                        'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
                     ]);
                 }
                 return $path;
-            }
-    
-            $imageResource = $this->rotateLandscapeToPortrait($imageResource);
+        }
 
-            $originalWidth = imagesx($imageResource);
-            $originalHeight = imagesy($imageResource);
-    
-            $maxWidth = 1280; // Max width for images (reverted)
-            $maxHeight = 1280; // Max height for images (reverted)
-    
-            $newWidth = $originalWidth;
-            $newHeight = $originalHeight;
-    
+        if (!$imageResource) {
+            // Fallback if image resource creation failed
+            $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+            if ($path === false) {
+                throw ValidationException::withMessages([
+                    'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                ]);
+            }
+            return $path;
+        }
+
+
+
+        $originalWidth = imagesx($imageResource);
+        $originalHeight = imagesy($imageResource);
+
+        $maxWidth = 1280; // Max width for images (reverted)
+        $maxHeight = 1280; // Max height for images (reverted)
+
+        $newWidth = $originalWidth;
+        $newHeight = $originalHeight;
+
         // Resize if image is larger than max dimensions
         if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
             $ratio = $originalWidth / $originalHeight;
@@ -658,79 +641,84 @@ class AttendanceController extends Controller
                 // Ignore EXIF errors
             }
         }
-    
-            // Create a new true color image with the new dimensions
-            $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
-    
-            // Preserve transparency for PNG
-            if ($originalExtension === 'png') {
-                imagealphablending($newImageResource, false);
-                imagesavealpha($newImageResource, true);
-                $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
-                imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
-            }
-    
-            // Resample (resize) the image
-            imagecopyresampled(
-                $newImageResource,
-                $imageResource,
-                0, 0, 0, 0,
-                (int) $newWidth, (int) $newHeight,
-                $originalWidth, $originalHeight
-            );
-    
-            // Define storage path
-            $year = now()->format('Y');
-            $month = now()->format('m');
-            $storagePath = 'satpam/attendances/' . $year . '/' . $month . '/' . $filename;
-            $quality = 90; // Start with high quality
-            $maxFileSize = 1024 * 1024; // 1MB in bytes
-            $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
-    
-            do {
-                // Save the image with current quality to a temporary file
-                if ($originalExtension === 'png') { // Save as PNG if original was PNG
-                    imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
-                } else { // Otherwise, save as JPEG
-                    imagejpeg($newImageResource, $tempPath, $quality);
-                }
-    
-                $fileSize = filesize($tempPath);
-    
-                if ($fileSize > $maxFileSize && $quality > 10) {
-                    $quality -= 5; // Reduce quality
-                } else {
-                    break; // Exit loop if size is acceptable or quality is too low
-                }
-            } while ($quality >= 10);
 
-            // Ensure directory exists before upload
-            $directoryPath = 'satpam/attendances/' . $year . '/' . $month;
-            if (!Storage::disk('public')->exists($directoryPath)) {
-                Storage::disk('public')->makeDirectory($directoryPath);
-            }
-            
-            // Upload to Public Disk
-            $fileHandle = fopen($tempPath, 'r');
-            $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
-            fclose($fileHandle);
-            
-            if (!$uploadResult) {
-                unlink($tempPath);
-                throw ValidationException::withMessages([
-                    'photo' => 'Gagal mengunggah foto ke penyimpanan.',
-                ]);
-            }
+        // Create a new true color image with the new dimensions
+        $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
 
-            // Clean up temp file
-            unlink($tempPath);
-        
-            // Free up memory
-            imagedestroy($imageResource);
-            imagedestroy($newImageResource);
-        
-            return $storagePath;
+        // Preserve transparency for PNG
+        if ($originalExtension === 'png') {
+            imagealphablending($newImageResource, false);
+            imagesavealpha($newImageResource, true);
+            $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+            imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
         }
+
+        // Resample (resize) the image
+        imagecopyresampled(
+            $newImageResource,
+            $imageResource,
+            0,
+            0,
+            0,
+            0,
+            (int) $newWidth,
+            (int) $newHeight,
+            $originalWidth,
+            $originalHeight
+        );
+
+        // Define storage path
+        $year = now()->format('Y');
+        $month = now()->format('m');
+        $storagePath = 'satpam/attendances/' . $year . '/' . $month . '/' . $filename;
+        $quality = 90; // Start with high quality
+        $maxFileSize = 1024 * 1024; // 1MB in bytes
+        $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+        do {
+            // Save the image with current quality to a temporary file
+            if ($originalExtension === 'png') { // Save as PNG if original was PNG
+                imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
+            } else { // Otherwise, save as JPEG
+                imagejpeg($newImageResource, $tempPath, $quality);
+            }
+
+            $fileSize = filesize($tempPath);
+
+            if ($fileSize > $maxFileSize && $quality > 10) {
+                $quality -= 5; // Reduce quality
+            } else {
+                break; // Exit loop if size is acceptable or quality is too low
+            }
+        } while ($quality >= 10);
+
+        // Ensure directory exists before upload
+        $directoryPath = 'satpam/attendances/' . $year . '/' . $month;
+        if (!Storage::disk('public')->exists($directoryPath)) {
+            Storage::disk('public')->makeDirectory($directoryPath);
+        }
+
+        // Upload to Public Disk
+        $fileHandle = fopen($tempPath, 'r');
+        $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
+        fclose($fileHandle);
+
+        if (!$uploadResult) {
+            unlink($tempPath);
+            throw ValidationException::withMessages([
+                'photo' => 'Gagal mengunggah foto ke penyimpanan.',
+            ]);
+        }
+
+        // Clean up temp file
+        unlink($tempPath);
+
+        // Free up memory
+        imagedestroy($imageResource);
+        imagedestroy($newImageResource);
+
+        return $storagePath;
+    }
 
     /**
      * Display the specified resource.
@@ -813,7 +801,7 @@ class AttendanceController extends Controller
             })
             ->where(function ($query) use ($startDate) {
                 $query->whereNull('deleted_at')
-                      ->orWhere('deleted_at', '>=', $startDate);
+                    ->orWhere('deleted_at', '>=', $startDate);
             })
             ->orderBy("name")
             ->get();
@@ -880,8 +868,8 @@ class AttendanceController extends Controller
 
             $expectedStartTime =
                 $timeIn->hour >= 0 && $timeIn->hour < 14
-                    ? $pagiShiftStart
-                    : $malamShiftStart;
+                ? $pagiShiftStart
+                : $malamShiftStart;
             $isLate = $timeIn->isAfter($expectedStartTime);
 
             return [

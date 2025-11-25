@@ -339,7 +339,8 @@ class ReportController extends Controller
                 if ($field->type === 'file') {
                     $fieldName = $field->name;
                     $existingFiles = $reportData[$fieldName] ?? [];
-                    if (is_string($existingFiles)) $existingFiles = [$existingFiles];
+                    if (is_string($existingFiles))
+                        $existingFiles = [$existingFiles];
 
                     $filesToDelete = $request->input('delete_' . $fieldName, []);
                     $newFiles = $request->file($fieldName, []);
@@ -361,7 +362,8 @@ class ReportController extends Controller
             $fieldName = $field->name;
             if ($field->type === 'file') {
                 $existingFiles = $reportData[$fieldName] ?? [];
-                if (is_string($existingFiles)) $existingFiles = [$existingFiles];
+                if (is_string($existingFiles))
+                    $existingFiles = [$existingFiles];
 
                 $filesToDelete = $request->input('delete_' . $fieldName, []);
 
@@ -393,7 +395,7 @@ class ReportController extends Controller
             } elseif ($field->type === 'video') {
                 $existingVideo = $reportData[$fieldName] ?? null;
                 $videoToDelete = $request->input('delete_' . $fieldName);
-                
+
                 // Handle deletion of existing video
                 if ($videoToDelete && $existingVideo) {
                     if (Storage::disk('public')->exists($existingVideo)) {
@@ -403,7 +405,7 @@ class ReportController extends Controller
                     }
                     $reportData[$fieldName] = null; // Clear the field
                 }
-                
+
                 // Handle new video upload
                 if ($request->hasFile($fieldName)) {
                     // Delete old video if exists and not already deleted above
@@ -555,21 +557,21 @@ class ReportController extends Controller
         $accountName = Str::slug(Auth::user()->name);
         $timestamp = now()->format('YmdHis');
         $originalExtension = strtolower($file->getClientOriginalExtension());
-        $filename = $accountName . '-' . $timestamp . '.' . $originalExtension;
-    
+        $filename = $accountName . '-' . $timestamp . '-' . uniqid() . '.' . $originalExtension;
+
         $year = now()->format('Y');
         $month = now()->format('m');
         $storagePath = 'satpam/reports/' . $year . '/' . $month;
-    
+
         // Ensure directory exists
         if (!Storage::disk('public')->exists($storagePath)) {
             Storage::disk('public')->makeDirectory($storagePath);
         }
 
         $path = $file->storeAs($storagePath, $filename, 'public');
-        
+
         if ($path === false) {
-             throw ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'video' => 'Gagal mengunggah video. Silakan coba lagi.',
             ]);
         }
@@ -586,165 +588,182 @@ class ReportController extends Controller
      *
      * @return string The path to the stored image.
      */
-                private function compressAndStoreImage($file): string
-                {
-                    $originalPath = $file->getRealPath();
-                    $originalExtension = strtolower($file->getClientOriginalExtension());
-                
-                    // Generate unique filename with .jpg extension (default)
-                    $accountName = Str::slug(Auth::user()->name);
-                    $timestamp = now()->format('YmdHis');
-                    $filename = $accountName . '-' . $timestamp . '.jpg';
-                
-                    // Create image resource from uploaded file
-                    $imageResource = null;
-                    switch ($originalExtension) {
-                        case 'jpg':
-                        case 'jpeg':
-                            $imageResource = imagecreatefromjpeg($originalPath);
-                            break;
-                        case 'png':
-                            $imageResource = imagecreatefrompng($originalPath);
-                            // Preserve transparency for PNG
-                            imagealphablending($imageResource, true);
-                            imagesavealpha($imageResource, true);
-                            $filename = $accountName . '-' . $timestamp . '.png'; // Use PNG extension for PNG originals
-                            break;
-                        case 'gif':
-                            $imageResource = imagecreatefromgif($originalPath);
-                            break;
-                        default:
-                            // If file type is not supported, store it without compression
-                            $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
-                            if ($path === false) {
-                                throw ValidationException::withMessages([
-                                    'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
-                                ]);
-                            }
-                            return $path;
-                    }
-                
-                    if (!$imageResource) {
-                        // Fallback if image resource creation failed
-                        $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
-                        if ($path === false) {
-                            throw ValidationException::withMessages([
-                                'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
-                            ]);
-                        }
-                        return $path;
-                    }
-                
-                    $imageResource = $this->rotateLandscapeToPortrait($imageResource);
-            
-                    $originalWidth = imagesx($imageResource);
-                    $originalHeight = imagesy($imageResource);
-                
-                    $maxWidth = 1280; // Max width for images (reverted)
-                    $maxHeight = 1280; // Max height for images (reverted)
-                
-                    $newWidth = $originalWidth;
-                    $newHeight = $originalHeight;
-                
-                // Resize if image is larger than max dimensions
-                if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
-                    $ratio = $originalWidth / $originalHeight;
-                    if ($ratio > 1) { // Landscape
-                        $newWidth = $maxWidth;
-                        $newHeight = $maxWidth / $ratio;
-                    } else { // Portrait or Square
-                        $newHeight = $maxHeight;
-                        $newWidth = $maxHeight * $ratio;
-                    }
-                }
-                
-                    // Create a new true color image with the new dimensions
-                    $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
-                
-                    // Preserve transparency for PNG
-                    if ($originalExtension === 'png') {
-                        imagealphablending($newImageResource, false);
-                        imagesavealpha($newImageResource, true);
-                        $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
-                        imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
-                    }
-                
-                    // Resample (resize) the image
-                    imagecopyresampled(
-                        $newImageResource,
-                        $imageResource,
-                        0, 0, 0, 0,
-                        (int) $newWidth, (int) $newHeight,
-                        $originalWidth, $originalHeight
-                    );
-                
-                    // Define storage path
-                    $year = now()->format('Y');
-                    $month = now()->format('m');
-                    $storagePath = 'satpam/reports/' . $year . '/' . $month . '/' . $filename;
-                    $quality = 90; // Start with high quality
-                    $maxFileSize = 1024 * 1024; // 1MB in bytes
-                    $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
-                
-                    do {
-                        // Save the image with current quality to a temporary file
-                        if ($originalExtension === 'png') { // Save as PNG if original was PNG
-                            imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
-                        } else { // Otherwise, save as JPEG
-                            imagejpeg($newImageResource, $tempPath, $quality);
-                        }
-                
-                        $fileSize = filesize($tempPath);
-                
-                        if ($fileSize > $maxFileSize && $quality > 10) {
-                            $quality -= 5; // Reduce quality
-                        } else {
-                            break; // Exit loop if size is acceptable or quality is too low
-                        }
-                    } while ($quality >= 10);
-            
-                    // Ensure directory exists before upload
-                    $directoryPath = 'satpam/reports/' . $year . '/' . $month;
-                    if (!Storage::disk('public')->exists($directoryPath)) {
-                        Storage::disk('public')->makeDirectory($directoryPath);
-                    }
-            
-                    // Upload to Public Disk
-                    $fileHandle = fopen($tempPath, 'r');
-                    $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
-                    fclose($fileHandle);
-
-                    // Clean up temp file
-                    unlink($tempPath);
-                
-                    // Free up memory
-                    imagedestroy($imageResource);
-                    imagedestroy($newImageResource);
-
-                    if (!$uploadResult) {
-                         throw ValidationException::withMessages([
-                            'photo' => 'Gagal mengunggah foto. Silakan coba lagi.',
-                        ]);
-                    }
-                
-                    return $storagePath;
-                }    /**
-     * Rotates a GD image resource if it's in landscape orientation to make it portrait.
-     *
-     * @param resource $imageResource The GD image resource.
-     * @return resource The rotated image resource.
-     */
-    private function rotateLandscapeToPortrait($imageResource)
+    private function compressAndStoreImage($file): string
     {
-        $width = imagesx($imageResource);
-        $height = imagesy($imageResource);
+        $originalPath = $file->getRealPath();
+        $originalExtension = strtolower($file->getClientOriginalExtension());
 
-        if ($width > $height) {
-            // Image is landscape, rotate 90 degrees clockwise to make it portrait
-            $imageResource = imagerotate($imageResource, 270, 0); // 270 degrees is 90 degrees clockwise
+        // Generate unique filename with .jpg extension (default)
+        $accountName = Str::slug(Auth::user()->name);
+        $timestamp = now()->format('YmdHis');
+        $filename = $accountName . '-' . $timestamp . '-' . uniqid() . '.jpg';
+
+        // Create image resource from uploaded file
+        $imageResource = null;
+        switch ($originalExtension) {
+            case 'jpg':
+            case 'jpeg':
+                $imageResource = imagecreatefromjpeg($originalPath);
+                break;
+            case 'png':
+                $imageResource = imagecreatefrompng($originalPath);
+                // Preserve transparency for PNG
+                imagealphablending($imageResource, true);
+                imagesavealpha($imageResource, true);
+                $filename = $accountName . '-' . $timestamp . '-' . uniqid() . '.png'; // Use PNG extension for PNG originals
+                break;
+            case 'gif':
+                $imageResource = imagecreatefromgif($originalPath);
+                break;
+            default:
+                // If file type is not supported, store it without compression
+                $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+                if ($path === false) {
+                    throw ValidationException::withMessages([
+                        'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
+                    ]);
+                }
+                return $path;
         }
 
-        return $imageResource;
+        if (!$imageResource) {
+            // Fallback if image resource creation failed
+            $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
+            if ($path === false) {
+                throw ValidationException::withMessages([
+                    'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
+                ]);
+            }
+            return $path;
+        }
+
+        $originalWidth = imagesx($imageResource);
+        $originalHeight = imagesy($imageResource);
+
+        $maxWidth = 1280; // Max width for images (reverted)
+        $maxHeight = 1280; // Max height for images (reverted)
+
+        $newWidth = $originalWidth;
+        $newHeight = $originalHeight;
+
+        // Resize if image is larger than max dimensions
+        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+            $ratio = $originalWidth / $originalHeight;
+            if ($ratio > 1) { // Landscape
+                $newWidth = $maxWidth;
+                $newHeight = $maxWidth / $ratio;
+            } else { // Portrait or Square
+                $newHeight = $maxHeight;
+                $newWidth = $maxHeight * $ratio;
+            }
+        }
+
+        // Handle EXIF Rotation
+        if (function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($originalPath);
+                if ($exif && isset($exif['Orientation'])) {
+                    $orientation = $exif['Orientation'];
+                    switch ($orientation) {
+                        case 3:
+                            $imageResource = imagerotate($imageResource, 180, 0);
+                            break;
+                        case 6:
+                            $imageResource = imagerotate($imageResource, -90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                        case 8:
+                            $imageResource = imagerotate($imageResource, 90, 0);
+                            // Swap dimensions for 90 degree rotation
+                            $tempWidth = $newWidth;
+                            $newWidth = $newHeight;
+                            $newHeight = $tempWidth;
+                            break;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore EXIF errors
+            }
+        }
+
+        // Create a new true color image with the new dimensions
+        $newImageResource = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+
+        // Preserve transparency for PNG
+        if ($originalExtension === 'png') {
+            imagealphablending($newImageResource, false);
+            imagesavealpha($newImageResource, true);
+            $transparent = imagecolorallocatealpha($newImageResource, 255, 255, 255, 127);
+            imagefilledrectangle($newImageResource, 0, 0, (int) $newWidth, (int) $newHeight, $transparent);
+        }
+
+        // Resample (resize) the image
+        imagecopyresampled(
+            $newImageResource,
+            $imageResource,
+            0,
+            0,
+            0,
+            0,
+            (int) $newWidth,
+            (int) $newHeight,
+            $originalWidth,
+            $originalHeight
+        );
+
+        // Define storage path
+        $year = now()->format('Y');
+        $month = now()->format('m');
+        $storagePath = 'satpam/reports/' . $year . '/' . $month . '/' . $filename;
+        $quality = 90; // Start with high quality
+        $maxFileSize = 1024 * 1024; // 1MB in bytes
+        $tempPath = tempnam(sys_get_temp_dir(), 'compressed_image_'); // Temporary file for compression
+
+        do {
+            // Save the image with current quality to a temporary file
+            if ($originalExtension === 'png') { // Save as PNG if original was PNG
+                imagepng($newImageResource, $tempPath, floor($quality / 10)); // PNG quality 0-9
+            } else { // Otherwise, save as JPEG
+                imagejpeg($newImageResource, $tempPath, $quality);
+            }
+
+            $fileSize = filesize($tempPath);
+
+            if ($fileSize > $maxFileSize && $quality > 10) {
+                $quality -= 5; // Reduce quality
+            } else {
+                break; // Exit loop if size is acceptable or quality is too low
+            }
+        } while ($quality >= 10);
+
+        // Ensure directory exists before upload
+        $directoryPath = 'satpam/reports/' . $year . '/' . $month;
+        if (!Storage::disk('public')->exists($directoryPath)) {
+            Storage::disk('public')->makeDirectory($directoryPath);
+        }
+
+        // Upload to Public Disk
+        $fileHandle = fopen($tempPath, 'r');
+        $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
+        fclose($fileHandle);
+
+        // Clean up temp file
+        unlink($tempPath);
+
+        // Free up memory
+        imagedestroy($imageResource);
+        imagedestroy($newImageResource);
+
+        if (!$uploadResult) {
+            throw ValidationException::withMessages([
+                'photo' => 'Gagal mengunggah foto. Silakan coba lagi.',
+            ]);
+        }
+
+        return $storagePath;
     }
 
     /**
@@ -787,7 +806,7 @@ class ReportController extends Controller
         } else {
             return response()->json(['message' => 'File not found.'], 404);
         }
-        
+
         // Create temp file
         $tempPath = tempnam(sys_get_temp_dir(), 'rotate_image_');
         file_put_contents($tempPath, $fileContent);
@@ -826,7 +845,7 @@ class ReportController extends Controller
         }
 
         $rotatedImage = imagerotate($imageResource, $rotationAngle, 0);
-        
+
         // Save back to temp path
         if ($extension === 'png') {
             imagealphablending($rotatedImage, false);
