@@ -4,7 +4,18 @@
     videoFileName: '',
     isLoading: true
 }" x-show="show"
-    x-on:open-video-modal.window="show = true; videoUrl = $event.detail.videoUrl; videoFileName = $event.detail.videoFileName; isLoading = true"
+    x-on:open-video-modal.window="
+        show = true; 
+        videoUrl = $event.detail.videoUrl; 
+        videoFileName = $event.detail.videoFileName; 
+        isLoading = true;
+        $nextTick(() => {
+            const video = $el.querySelector('video');
+            if (video && video.readyState >= 3) {
+                isLoading = false;
+            }
+        });
+    "
     x-on:keydown.escape.window="show = false" style="display: none;"
     class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
     <!-- Background Overlay -->
@@ -35,10 +46,8 @@
             </div>
 
             <video :src="videoUrl" controls autoplay preload="metadata"
-                class="w-full h-auto transition-opacity duration-300"
-                style="max-height: 85vh;"
-                @canplaythrough="isLoading = false"
-                :class="{ 'opacity-0': isLoading }"></video>
+                class="w-full h-auto transition-opacity duration-300" style="max-height: 85vh;"
+                @canplaythrough="isLoading = false" :class="{ 'opacity-0': isLoading }"></video>
         </div>
 
         <!-- Video Filename -->

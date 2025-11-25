@@ -160,7 +160,15 @@
                                                         reportId: '{{ $report->id }}',
                                                         imagePath: '{{ $path }}'
                                                     })"
-                                                x-data="{ imageLoaded: false }"
+                                                x-data="{
+                                                    imageLoaded: false,
+                                                    init() {
+                                                        const img = this.$el.querySelector('img');
+                                                        if (img && img.complete && img.naturalWidth > 0) {
+                                                            this.imageLoaded = true;
+                                                        }
+                                                    }
+                                                }"
                                                 class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
 
                                                 <!-- Skeleton Loader -->
@@ -212,7 +220,15 @@
                             @if ($videoPath)
                                 <div class="mt-2">
                                     {{-- Video Thumbnail with Play Button Overlay --}}
-                                    <div class="max-w-3xl" x-data="{ videoLoaded: false }">
+                                    <div class="max-w-3xl" x-data="{
+                                        videoLoaded: false,
+                                        init() {
+                                            const video = this.$el.querySelector('video');
+                                            if (video && video.readyState >= 1) {
+                                                this.videoLoaded = true;
+                                            }
+                                        }
+                                    }">
                                         <a href="#"
                                             @click.prevent="$dispatch('open-video-modal', { 
                                                 videoUrl: '{{ route('files.serve', ['path' => $videoPath]) }}',
