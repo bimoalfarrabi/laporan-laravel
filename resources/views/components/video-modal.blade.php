@@ -47,7 +47,7 @@
 
             <video :src="videoUrl" controls autoplay preload="metadata"
                 class="w-full h-auto transition-opacity duration-300" style="max-height: 85vh;"
-                @canplaythrough="isLoading = false" :class="{ 'opacity-0': isLoading }"></video>
+                @loadeddata="isLoading = false" :class="{ 'opacity-0': isLoading }"></video>
         </div>
 
         <!-- Video Filename -->

@@ -248,13 +248,10 @@
                                             </div>
 
                                             {{-- Video Preview (first frame) --}}
-                                            <video preload="metadata" @loadedmetadata="videoLoaded = true"
-                                                x-show="videoLoaded"
-                                                x-transition:enter="transition ease-out duration-300"
-                                                x-transition:enter-start="opacity-0"
-                                                x-transition:enter-end="opacity-100" class="h-full w-full object-cover"
-                                                muted>
-                                                <source src="{{ route('files.serve', ['path' => $videoPath]) }}#t=0.1"
+                                            <video preload="metadata" @loadeddata="videoLoaded = true"
+                                                class="h-full w-full object-cover transition-opacity duration-300"
+                                                :class="{ 'opacity-0': !videoLoaded }" muted>
+                                                <source src="{{ route('files.serve', ['path' => $videoPath]) }}"
                                                     type="video/{{ pathinfo($videoPath, PATHINFO_EXTENSION) }}">
                                             </video>
 
