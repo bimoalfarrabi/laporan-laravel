@@ -60,7 +60,7 @@ class FileController extends Controller
             $width = (int) $dimensions[0];
             $height = (int) $dimensions[1];
             $thumbnailPath = $this->getThumbnailPath($finalPath, $width, $height);
-            
+
             // If thumbnail exists, serve it directly
             if (Storage::disk('public')->exists($thumbnailPath)) {
                 return response()->file(Storage::disk('public')->path($thumbnailPath));
@@ -77,25 +77,29 @@ class FileController extends Controller
             }
         }
 
-        // Return the original file if no size is requested or if it's not an image
-        // Return the original file from the determined disk
-        $content = Storage::disk($disk)->get($finalPath);
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->buffer($content);
+        // Return the file using Storage::response to support HTTP Range requests (streaming)
+        // Determine MIME type
+        $mimeType = null;
+        try {
+            $mimeType = Storage::disk($disk)->mimeType($finalPath);
+        } catch (\Exception $e) {
+            // Ignore error, fallback to extension
+        }
 
-        if (!$mimeType) {
+        if (!$mimeType || $mimeType === 'application/octet-stream') {
             $extension = pathinfo($finalPath, PATHINFO_EXTENSION);
             $mimeType = match (strtolower($extension)) {
                 'jpg', 'jpeg' => 'image/jpeg',
                 'png' => 'image/png',
                 'gif' => 'image/gif',
                 'mp4' => 'video/mp4',
+                'webm' => 'video/webm',
                 'pdf' => 'application/pdf',
                 default => 'application/octet-stream',
             };
         }
-        
-        return response($content)->header('Content-Type', $mimeType);
+
+        return Storage::disk($disk)->response($finalPath, null, ['Content-Type' => $mimeType]);
     }
 
     /**
