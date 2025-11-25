@@ -203,7 +203,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const reportForm = document.getElementById('report-form-edit');
                 const submitButton = document.querySelector(
-                '#report-form-edit button[type="submit"]'); // Select the primary button
+                    '#report-form-edit button[type="submit"]'); // Select the primary button
                 const buttonText = submitButton.querySelector('span');
                 const loadingSpinner = submitButton.querySelector('svg');
 
@@ -223,6 +223,7 @@
             Alpine.data('fileEditHandler', (fieldName, existingImages) => ({
                 existingImages: existingImages || [],
                 deletedImages: [],
+                newFiles: [],
                 newImages: [],
 
                 init() {
@@ -351,7 +352,8 @@
                             // Update form input with compressed file
                             const dataTransfer = new DataTransfer();
                             dataTransfer.items.add(compressedFile);
-                            document.getElementById(fieldName).files = dataTransfer.files;
+                            document.getElementById(fieldName + '_actual').files = dataTransfer
+                                .files;
 
                         } catch (error) {
                             console.error('Compression error:', error);
@@ -361,6 +363,12 @@
                             this.videoFile = file;
                             this.videoPreviewUrl = URL.createObjectURL(file);
                             this.videoFileName = file.name;
+
+                            // Update form input with original file
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            document.getElementById(fieldName + '_actual').files = dataTransfer
+                                .files;
                         }
                     }
                 },
@@ -374,7 +382,7 @@
                     this.videoPreviewUrl = null;
                     this.videoFileName = '';
                     this.compressionMetadata = null;
-                    document.getElementById(fieldName).value = '';
+                    document.getElementById(fieldName + '_actual').value = '';
                 },
 
                 getCompressionInfo() {
