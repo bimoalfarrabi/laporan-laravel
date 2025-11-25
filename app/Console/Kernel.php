@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('announcements:delete-expired')->daily();
         $schedule->command('app:absence-aura')->daily();
         $schedule->command('app:prune-backup-users')->daily();
+        $schedule->command('media:delete-expired')->daily();
     }
 
     /**
@@ -22,7 +23,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

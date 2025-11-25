@@ -18,6 +18,8 @@ class ReportType extends Model
         'slug',
         'description',
         'is_active',
+        'retention_days_images',
+        'retention_days_videos',
         'created_by_user_id',
         'updated_by_user_id',
     ];

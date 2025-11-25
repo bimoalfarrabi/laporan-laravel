@@ -28,6 +28,38 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
+                        <div class="mb-4">
+                            <x-input-label for="is_active" :value="__('Status')" />
+                            <select id="is_active" name="is_active"
+                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="1" {{ old('is_active') == '1' ? 'selected' : '' }}>Aktif</option>
+                                <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Tidak Aktif
+                                </option>
+                            </select>
+                            <x-input-error :messages="$errors->get('is_active')" class="mt-2" />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <x-input-label for="retention_days_images" :value="__('Masa Penyimpanan Gambar (Hari)')" />
+                                <x-text-input id="retention_days_images" class="block mt-1 w-full" type="number"
+                                    name="retention_days_images" :value="old('retention_days_images')" min="1"
+                                    placeholder="Kosongkan untuk simpan selamanya" />
+                                <p class="text-sm text-gray-500 mt-1">Gambar yang lebih tua dari jumlah hari ini akan
+                                    dihapus.</p>
+                                <x-input-error :messages="$errors->get('retention_days_images')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="retention_days_videos" :value="__('Masa Penyimpanan Video (Hari)')" />
+                                <x-text-input id="retention_days_videos" class="block mt-1 w-full" type="number"
+                                    name="retention_days_videos" :value="old('retention_days_videos')" min="1"
+                                    placeholder="Kosongkan untuk simpan selamanya" />
+                                <p class="text-sm text-gray-500 mt-1">Video yang lebih tua dari jumlah hari ini akan
+                                    dihapus.</p>
+                                <x-input-error :messages="$errors->get('retention_days_videos')" class="mt-2" />
+                            </div>
+                        </div>
+
                         <!-- Dynamic Fields Builder -->
                         <div class="mt-6">
                             <h3 class="text-lg font-semibold mb-3">Field Laporan</h3>

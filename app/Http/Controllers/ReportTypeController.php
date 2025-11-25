@@ -60,6 +60,8 @@ class ReportTypeController extends Controller
             'name' => 'required|string|max:255|unique:report_types,name',
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'retention_days_images' => 'nullable|integer|min:1',
+            'retention_days_videos' => 'nullable|integer|min:1',
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
@@ -73,7 +75,11 @@ class ReportTypeController extends Controller
         $reportType->name = $request->name;
         $reportType->slug = Str::slug($request->name);
         $reportType->description = $request->description;
+        $reportType->slug = Str::slug($request->name);
+        $reportType->description = $request->description;
         $reportType->is_active = $request->boolean('is_active');
+        $reportType->retention_days_images = $request->retention_days_images;
+        $reportType->retention_days_videos = $request->retention_days_videos;
         $reportType->created_by_user_id = Auth::id();
         $reportType->updated_by_user_id = Auth::id();
         $reportType->save();
@@ -120,6 +126,8 @@ class ReportTypeController extends Controller
             'name' => 'required|string|max:255|unique:report_types,name,' . $reportType->id,
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'retention_days_images' => 'nullable|integer|min:1',
+            'retention_days_videos' => 'nullable|integer|min:1',
             'fields' => 'array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255|regex:/^[a-z0-9_]+$/',
@@ -132,6 +140,8 @@ class ReportTypeController extends Controller
         $reportType->name = $request->name;
         $reportType->description = $request->description;
         $reportType->is_active = $request->boolean('is_active');
+        $reportType->retention_days_images = $request->retention_days_images;
+        $reportType->retention_days_videos = $request->retention_days_videos;
         $reportType->updated_by_user_id = Auth::id();
         $reportType->save();
 

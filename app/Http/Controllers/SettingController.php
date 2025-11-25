@@ -45,4 +45,33 @@ class SettingController extends Controller
 
         return redirect()->back()->with('success', 'Pengaturan lokasi berhasil diperbarui.');
     }
+
+    /**
+     * Show the form for editing media settings.
+     */
+    public function mediaSettings()
+    {
+        $settingKeys = ['attendance_retention_days'];
+        $settings = Setting::whereIn('key', $settingKeys)
+            ->pluck('value', 'key');
+
+        return view('settings.media', compact('settings'));
+    }
+
+    /**
+     * Update the media settings in storage.
+     */
+    public function updateMediaSettings(Request $request)
+    {
+        $request->validate([
+            'attendance_retention_days' => 'nullable|integer|min:1',
+        ]);
+
+        Setting::updateOrCreate(
+            ['key' => 'attendance_retention_days'],
+            ['value' => $request->attendance_retention_days]
+        );
+
+        return redirect()->back()->with('success', 'Pengaturan media berhasil diperbarui.');
+    }
 }

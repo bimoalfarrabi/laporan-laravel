@@ -97,10 +97,12 @@ Route::middleware('auth')->group(function () {
     // Phone Numbers
     Route::get('/phone-numbers', [\App\Http\Controllers\PhoneNumberController::class, 'index'])->name('phone-numbers.index');
 
-    // Location Settings
+    // Location & Media Settings
     Route::middleware('role:superadmin')->group(function () {
         Route::get('/settings/location', [SettingController::class, 'locationSettings'])->name('settings.location');
         Route::post('/settings/location', [SettingController::class, 'updateLocationSettings'])->name('settings.location.update');
+        Route::get('/settings/media', [SettingController::class, 'mediaSettings'])->name('settings.media');
+        Route::post('/settings/media', [SettingController::class, 'updateMediaSettings'])->name('settings.media.update');
     });
 });
 
