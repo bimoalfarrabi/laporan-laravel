@@ -42,9 +42,9 @@
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
-                                    <input id="{{ $field->name }}" type="hidden" name="{{ $field->name }}"
+                                    <input id="{{ $field->name }}_input" type="hidden" name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}">
-                                    <trix-editor input="{{ $field->name }}"
+                                    <trix-editor id="{{ $field->name }}" input="{{ $field->name }}_input"
                                         class="trix-content block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm min-h-[150px]"></trix-editor>
                                 @elseif ($field->type === 'select')
                                     {{-- Assuming 'select' type will still have options --}}
@@ -99,7 +99,7 @@
                                             id="{{ $field->name }}_actual" multiple class="hidden">
 
                                         {{-- New Images Preview --}}
-                                        <div class="grid grid-cols-3 gap-4 mt-2" id="{{ $field->name }}_new_preview">
+                                        <div class="grid grid-cols-3 gap-4 mt-2" id="{{ $field->name }}_preview">
                                             <template x-for="(image, index) in newImages" :key="index">
                                                 <div class="relative group">
                                                     <img :src="image.url"
@@ -115,11 +115,16 @@
                                                 </div>
                                             </template>
                                         </div>
-                                        <p class="text-sm text-gray-500">Maksimal 3 gambar total (termasuk yang sudah
-                                            ada).</p>
+                                        <p class="text-sm text-gray-500">Maksimal 3 gambar.</p>
                                     </div>
                                 @elseif ($field->type === 'video')
-                                    <div x-data="videoEditHandler('{{ $field->name }}', '{{ $report->data[$field->name] ?? '' }}')" class="space-y-3">
+                                    <div x-data="videoEditHandler('{{ $field->name }}', {{ json_encode($report->data[$field->name] ?? null) }})" class="space-y-3">
+                                        <input id="{{ $field->name }}" type="file" accept="video/*"
+                                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                            @change="handleFileSelect" />
+                                        <input type="file" name="{{ $field->name }}"
+                                            id="{{ $field->name }}_actual" class="hidden">
+
                                         {{-- Compression Loading Overlay --}}
                                         <div x-show="isCompressing" style="display: none;"
                                             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -128,18 +133,19 @@
                                                     <svg class="animate-spin h-8 w-8 text-indigo-600 flex-shrink-0"
                                                         xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <circle class="opacity-25" cx="12" cy="12"
+                                                            r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor"
                                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                                         </path>
                                                     </svg>
-                                                    <div class="flex-1">
-                                                        <p class="font-medium text-gray-900">Mengompresi video...</p>
-                                                        <p class="text-sm text-gray-600 mt-1"
-                                                            x-text="compressionProgress"></p>
-                                                        <div class="mt-2 bg-gray-200 rounded-full h-2">
-                                                            <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                                                    <div>
+                                                        <h3 class="text-lg font-medium text-gray-900">Mengompresi Video
+                                                        </h3>
+                                                        <p class="mt-1 text-sm text-gray-500"
+                                                            x-text="compressionProgress">Memproses...</p>
+                                                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                                            <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
                                                                 :style="'width: ' + compressionPercent + '%'"></div>
                                                         </div>
                                                     </div>
@@ -147,74 +153,30 @@
                                             </div>
                                         </div>
 
-                                        {{-- Existing Video --}}
-                                        <div x-show="existingVideoUrl && !videoFile && !isMarkedForDeletion"
-                                            class="mt-2">
-                                            <div
-                                                class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl group">
-                                                <video :src="fileServeUrl + existingVideoUrl" controls
-                                                    preload="metadata" class="w-full h-auto"
-                                                    style="max-height: 500px;">
-                                                    Browser Anda tidak mendukung video player.
-                                                </video>
-                                                <button type="button" @click="markForDeletion"
-                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 focus:outline-none shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                        </path>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <p class="text-sm text-gray-500 mt-2"
-                                                x-text="existingVideoUrl.split('/').pop()"></p>
-                                        </div>
-
-                                        {{-- Hidden input for deletion --}}
-                                        <template x-if="isMarkedForDeletion">
-                                            <input type="hidden" name="delete_{{ $field->name }}"
-                                                :value="existingVideoUrl">
-                                        </template>
-
-                                        {{-- New Video Input --}}
-                                        <div x-show="!existingVideoUrl || isMarkedForDeletion">
-                                            <input id="{{ $field->name }}" type="file" accept="video/*"
-                                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                                @change="handleFileSelect" name="{{ $field->name }}">
-                                        </div>
-
-                                        {{-- New Video Preview --}}
-                                        <div class="mt-3" x-show="videoFile" style="display: none;">
-                                            <div
-                                                class="relative rounded-xl overflow-hidden bg-gray-900 shadow-lg border border-gray-300 max-w-3xl">
-                                                <video :src="videoPreviewUrl" controls preload="metadata"
-                                                    class="w-full h-auto" style="max-height: 500px;">
-                                                    Browser Anda tidak mendukung video player.
-                                                </video>
-                                            </div>
-                                            <div class="flex items-center justify-between mt-2">
-                                                <div>
-                                                    <p class="text-sm text-gray-600" x-text="videoFileName"></p>
-                                                    <p class="text-xs text-gray-500 mt-1" x-show="compressionMetadata"
-                                                        x-html="getCompressionInfo()"></p>
+                                        {{-- Video Preview --}}
+                                        <div x-show="videoPreviewUrl" class="relative group mt-2"
+                                            style="display: none;">
+                                            <div class="bg-gray-100 rounded-lg p-3 border border-gray-300">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="text-sm font-medium text-gray-700 truncate"
+                                                        x-text="videoFileName"></span>
+                                                    <button type="button" @click="removeVideo"
+                                                        class="text-red-500 hover:text-red-700 focus:outline-none">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
                                                 </div>
-                                                <button type="button" @click="removeVideo"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-red-100 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                        </path>
-                                                    </svg>
-                                                    Hapus Video
-                                                </button>
+                                                <video :src="videoPreviewUrl" controls
+                                                    class="w-full max-h-64 rounded-md"></video>
+                                                <div class="mt-2 text-xs text-gray-500" x-html="getCompressionInfo()">
+                                                </div>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-gray-500">Maksimal 1 video. Video akan dikompres
-                                            otomatis.</p>
                                     </div>
                                 @endif
                                 <x-input-error :messages="$errors->get($field->name)" class="mt-2" />
@@ -222,18 +184,12 @@
                         @endforeach
 
                         <div class="flex items-center justify-end mt-4">
-                            <x-primary-button id="submit-report-button" class="ms-4">
-                                <span id="button-text">{{ __('Update Laporan') }}</span>
-                                <span id="loading-spinner" class="hidden ml-2">
-                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                                        fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                            stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </span>
+                            <a href="{{ route('dashboard') }}"
+                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150 mr-3">
+                                Batal
+                            </a>
+                            <x-primary-button>
+                                {{ __('Simpan Perubahan') }}
                             </x-primary-button>
                         </div>
                     </form>
@@ -241,15 +197,15 @@
             </div>
         </div>
     </div>
-    </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const reportForm = document.getElementById('report-form-edit');
-                const submitButton = document.getElementById('submit-report-button');
-                const buttonText = document.getElementById('button-text');
-                const loadingSpinner = document.getElementById('loading-spinner');
+                const submitButton = document.querySelector(
+                '#report-form-edit button[type="submit"]'); // Select the primary button
+                const buttonText = submitButton.querySelector('span');
+                const loadingSpinner = submitButton.querySelector('svg');
 
                 if (reportForm && submitButton) {
                     reportForm.addEventListener('submit', function() {
@@ -264,18 +220,17 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('fileEditHandler', (fieldName, initialData) => ({
-                existingImages: [],
+            Alpine.data('fileEditHandler', (fieldName, existingImages) => ({
+                existingImages: existingImages || [],
                 deletedImages: [],
                 newImages: [],
-                newFiles: [],
 
                 init() {
                     // Handle legacy string format or array format
-                    if (typeof initialData === 'string') {
-                        this.existingImages = [initialData];
-                    } else if (Array.isArray(initialData)) {
-                        this.existingImages = initialData;
+                    if (typeof this.existingImages === 'string') {
+                        this.existingImages = [this.existingImages];
+                    } else if (!Array.isArray(this.existingImages)) {
+                        this.existingImages = [];
                     }
                 },
 
@@ -290,7 +245,7 @@
 
                     // Calculate current total: (existing - deleted) + (current new) + (incoming)
                     const currentActiveCount = this.existingImages.length - this.deletedImages.length;
-                    const totalAfterAdd = currentActiveCount + this.newFiles.length + incomingFiles
+                    const totalAfterAdd = currentActiveCount + this.newImages.length + incomingFiles
                         .length;
 
                     if (totalAfterAdd > 3) {
