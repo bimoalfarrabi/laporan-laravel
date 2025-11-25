@@ -3,6 +3,22 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Buat Laporan Baru: ') . $reportType->name }}
         </h2>
+        <style>
+            trix-toolbar .trix-button-group--text-tools,
+            /* Bold, Italic, Strike, Link */
+            trix-toolbar .trix-button--icon-heading-1,
+            /* Heading */
+            trix-toolbar .trix-button--icon-quote,
+            /* Quote */
+            trix-toolbar .trix-button--icon-code,
+            /* Code */
+            trix-toolbar .trix-button-group--file-tools
+
+            /* File Attachment */
+                {
+                display: none !important;
+            }
+        </style>
     </x-slot>
 
     <div class="py-12">
