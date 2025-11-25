@@ -585,7 +585,7 @@ class AttendanceController extends Controller
                     break;
                 default:
             // If file type is not supported, store it without compression
-                    $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                    $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
                     if ($path === false) {
                         throw ValidationException::withMessages([
                             'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
@@ -596,7 +596,7 @@ class AttendanceController extends Controller
     
             if (!$imageResource) {
                 // Fallback if image resource creation failed
-                $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                $path = $file->storeAs('satpam/attendances/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
                 if ($path === false) {
                     throw ValidationException::withMessages([
                         'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
@@ -706,127 +706,29 @@ class AttendanceController extends Controller
 
             // Ensure directory exists before upload
             $directoryPath = 'satpam/attendances/' . $year . '/' . $month;
-            $directoryExists = false;
-            try {
-                \Log::info('Checking Nextcloud directory existence', ['path' => $directoryPath]);
-                $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
-                \Log::info('Directory exists check result', ['exists' => $directoryExists]);
-            } catch (\Exception $e) {
-                // If check fails (e.g. network issue), assume false and try to create
-                \Log::error('Failed to check directory existence', [
-                    'path' => $directoryPath,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+            if (!Storage::disk('public')->exists($directoryPath)) {
+                Storage::disk('public')->makeDirectory($directoryPath);
+            }
+            
+            // Upload to Public Disk
+            $fileHandle = fopen($tempPath, 'r');
+            $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
+            fclose($fileHandle);
+            
+            if (!$uploadResult) {
+                unlink($tempPath);
+                throw ValidationException::withMessages([
+                    'photo' => 'Gagal mengunggah foto ke penyimpanan.',
                 ]);
-                $directoryExists = false;
             }
 
-            if (!$directoryExists) {
-                \Log::info('Attempting to create directory', ['path' => $directoryPath]);
-                try {
-                    $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($directoryPath);
-                    \Log::info('Make directory result', ['success' => $makeDirectoryResult]);
-                    if (!$makeDirectoryResult) {
-                         unlink($tempPath);
-                         throw ValidationException::withMessages([
-                            'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    \Log::error('Failed to create directory', [
-                        'path' => $directoryPath,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    if (file_exists($tempPath)) {
-                        unlink($tempPath);
-                    }
-                    throw ValidationException::withMessages([
-                        'photo' => 'Gagal membuat direktori penyimpanan: ' . $e->getMessage(),
-                    ]);
-                }
-            }
-            
-            // Upload to Nextcloud
-            \Log::info('Attempting to upload file to Nextcloud', [
-                'storage_path' => $storagePath,
-                'temp_path' => $tempPath,
-                'file_size' => filesize($tempPath),
-                'disk' => 'nextcloud'
-            ]);
-            
-            // Try to get more detailed error info by wrapping in try-catch at multiple levels
-            try {
-                // Open file handle
-                $fileHandle = fopen($tempPath, 'r');
-                if (!$fileHandle) {
-                    \Log::error('Failed to open temp file for reading', [
-                        'temp_path' => $tempPath
-                    ]);
-                    throw new \Exception('Gagal membuka file temporary untuk upload');
-                }
-                
-                \Log::info('File handle opened successfully');
-                
-                // Attempt upload
-                try {
-                    $uploadResult = Storage::disk('nextcloud')->put($storagePath, $fileHandle);
-                    \Log::info('Upload result', [
-                        'success' => $uploadResult,
-                        'result_type' => gettype($uploadResult)
-                    ]);
-                    
-                    // Close file handle
-                    fclose($fileHandle);
-                    
-                    if (!$uploadResult) {
-                        \Log::error('Upload returned false - checking possible causes', [
-                            'nextcloud_url' => config('filesystems.disks.nextcloud.url'),
-                            'nextcloud_root' => config('filesystems.disks.nextcloud.root'),
-                            'full_path_attempted' => config('filesystems.disks.nextcloud.root') . '/' . $storagePath
-                        ]);
-                        
-                        unlink($tempPath);
-                        throw ValidationException::withMessages([
-                            'photo' => 'Gagal mengunggah foto ke penyimpanan. Kemungkinan: permission denied, disk penuh, atau timeout koneksi.',
-                        ]);
-                    }
-                } catch (\League\Flysystem\UnableToWriteFile $e) {
-                    fclose($fileHandle);
-                    \Log::error('Flysystem UnableToWriteFile exception', [
-                        'error' => $e->getMessage(),
-                        'reason' => $e->reason() ?? 'unknown',
-                        'location' => $e->location() ?? 'unknown'
-                    ]);
-                    throw new \Exception('Nextcloud: ' . $e->getMessage());
-                } catch (\Exception $e) {
-                    if (is_resource($fileHandle)) {
-                        fclose($fileHandle);
-                    }
-                    throw $e;
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to upload file', [
-                    'storage_path' => $storagePath,
-                    'error' => $e->getMessage(),
-                    'error_class' => get_class($e),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                if (file_exists($tempPath)) {
-                    unlink($tempPath);
-                }
-                throw ValidationException::withMessages([
-                    'photo' => 'Gagal mengunggah foto: ' . $e->getMessage(),
-                ]);
-            }
-            
-            // Remove temp file
+            // Clean up temp file
             unlink($tempPath);
-    
+        
             // Free up memory
             imagedestroy($imageResource);
             imagedestroy($newImageResource);
-    
+        
             return $storagePath;
         }
 

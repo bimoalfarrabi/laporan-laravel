@@ -368,7 +368,11 @@ class ReportController extends Controller
                 $updatedFiles = [];
                 foreach ($existingFiles as $path) {
                     if (in_array($path, $filesToDelete)) {
-                        Storage::disk('nextcloud')->delete($path);
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        } elseif (Storage::disk('nextcloud')->exists($path)) {
+                            Storage::disk('nextcloud')->delete($path);
+                        }
                     } else {
                         $updatedFiles[] = $path;
                     }
@@ -391,16 +395,24 @@ class ReportController extends Controller
                 $videoToDelete = $request->input('delete_' . $fieldName);
                 
                 // Handle deletion of existing video
-                if ($videoToDelete && $existingVideo && Storage::disk('nextcloud')->exists($existingVideo)) {
-                    Storage::disk('nextcloud')->delete($existingVideo);
+                if ($videoToDelete && $existingVideo) {
+                    if (Storage::disk('public')->exists($existingVideo)) {
+                        Storage::disk('public')->delete($existingVideo);
+                    } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
+                        Storage::disk('nextcloud')->delete($existingVideo);
+                    }
                     $reportData[$fieldName] = null; // Clear the field
                 }
                 
                 // Handle new video upload
                 if ($request->hasFile($fieldName)) {
                     // Delete old video if exists and not already deleted above
-                    if ($existingVideo && !$videoToDelete && Storage::disk('nextcloud')->exists($existingVideo)) {
-                        Storage::disk('nextcloud')->delete($existingVideo);
+                    if ($existingVideo && !$videoToDelete) {
+                        if (Storage::disk('public')->exists($existingVideo)) {
+                            Storage::disk('public')->delete($existingVideo);
+                        } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
+                            Storage::disk('nextcloud')->delete($existingVideo);
+                        }
                     }
                     $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
                 }
@@ -549,58 +561,16 @@ class ReportController extends Controller
         $month = now()->format('m');
         $storagePath = 'satpam/reports/' . $year . '/' . $month;
     
-        // Ensure directory exists with robust error handling
-        $directoryExists = false;
-        try {
-            \Log::info('[Report Video] Checking Nextcloud directory existence', ['path' => $storagePath]);
-            $directoryExists = Storage::disk('nextcloud')->exists($storagePath);
-            \Log::info('[Report Video] Directory exists check result', ['exists' => $directoryExists]);
-        } catch (\Exception $e) {
-            // If check fails (e.g. network issue), assume false and try to create
-            \Log::error('[Report Video] Failed to check directory existence', [
-                'path' => $storagePath,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            $directoryExists = false;
+        // Ensure directory exists
+        if (!Storage::disk('public')->exists($storagePath)) {
+            Storage::disk('public')->makeDirectory($storagePath);
         }
 
-        if (!$directoryExists) {
-            \Log::info('[Report Video] Attempting to create directory', ['path' => $storagePath]);
-            try {
-                $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($storagePath);
-                \Log::info('[Report Video] Make directory result', ['success' => $makeDirectoryResult]);
-                if (!$makeDirectoryResult) {
-                     throw ValidationException::withMessages([
-                        'video' => 'Gagal membuat direktori penyimpanan video. Silakan coba lagi.',
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Log::error('[Report Video] Failed to create directory', [
-                    'path' => $storagePath,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                throw ValidationException::withMessages([
-                    'video' => 'Gagal membuat direktori penyimpanan video: ' . $e->getMessage(),
-                ]);
-            }
-        }
-
-        \Log::info('[Report Video] Attempting to upload video file', [
-            'storage_path' => $storagePath,
-            'filename' => $filename,
-            'file_size' => $file->getSize()
-        ]);
+        $path = $file->storeAs($storagePath, $filename, 'public');
         
-        $path = $file->storeAs($storagePath, $filename, 'nextcloud');
         if ($path === false) {
-            $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
-            $nextcloudUser = config('filesystems.disks.nextcloud.userName');
-            $errorMessage = "Gagal mengunggah video ke Nextcloud. Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'. Kemungkinan penyebab: permission denied, disk penuh, atau koneksi timeout.";
-            
-            throw ValidationException::withMessages([
-                'video' => $errorMessage,
+             throw ValidationException::withMessages([
+                'video' => 'Gagal mengunggah video. Silakan coba lagi.',
             ]);
         }
 
@@ -645,7 +615,7 @@ class ReportController extends Controller
                             break;
                         default:
                             // If file type is not supported, store it without compression
-                            $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                            $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
                             if ($path === false) {
                                 throw ValidationException::withMessages([
                                     'photo' => 'Gagal mengunggah foto (format tidak didukung). Silakan coba lagi.',
@@ -656,7 +626,7 @@ class ReportController extends Controller
                 
                     if (!$imageResource) {
                         // Fallback if image resource creation failed
-                        $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'nextcloud');
+                        $path = $file->storeAs('satpam/reports/' . Auth::id(), $accountName . '-' . $timestamp . '.' . $originalExtension, 'public');
                         if ($path === false) {
                             throw ValidationException::withMessages([
                                 'photo' => 'Gagal mengunggah foto (fallback). Silakan coba lagi.',
@@ -735,129 +705,27 @@ class ReportController extends Controller
             
                     // Ensure directory exists before upload
                     $directoryPath = 'satpam/reports/' . $year . '/' . $month;
-                    $directoryExists = false;
-                    try {
-                        \Log::info('[Report Image] Checking Nextcloud directory existence', ['path' => $directoryPath]);
-                        $directoryExists = Storage::disk('nextcloud')->exists($directoryPath);
-                        \Log::info('[Report Image] Directory exists check result', ['exists' => $directoryExists]);
-                    } catch (\Exception $e) {
-                        \Log::error('[Report Image] Failed to check directory existence', [
-                            'path' => $directoryPath,
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-                        $directoryExists = false;
+                    if (!Storage::disk('public')->exists($directoryPath)) {
+                        Storage::disk('public')->makeDirectory($directoryPath);
                     }
             
-                    if (!$directoryExists) {
-                        \Log::info('[Report Image] Attempting to create directory', ['path' => $directoryPath]);
-                        try {
-                            $makeDirectoryResult = Storage::disk('nextcloud')->makeDirectory($directoryPath);
-                            \Log::info('[Report Image] Make directory result', ['success' => $makeDirectoryResult]);
-                            if (!$makeDirectoryResult) {
-                                unlink($tempPath);
-                                throw ValidationException::withMessages([
-                                    'photo' => 'Gagal membuat direktori penyimpanan. Silakan coba lagi.',
-                                ]);
-                            }
-                        } catch (\Exception $e) {
-                            \Log::error('[Report Image] Failed to create directory', [
-                                'path' => $directoryPath,
-                                'error' => $e->getMessage(),
-                                'trace' => $e->getTraceAsString()
-                            ]);
-                            if (file_exists($tempPath)) {
-                                unlink($tempPath);
-                            }
-                            throw ValidationException::withMessages([
-                                'photo' => 'Gagal membuat direktori penyimpanan: ' . $e->getMessage(),
-                            ]);
-                        }
-                    }
-            
-                    // Upload to Nextcloud
-                    \Log::info('[Report Image] Attempting to upload file to Nextcloud', [
-                        'storage_path' => $storagePath,
-                        'temp_path' => $tempPath,
-                        'file_size' => filesize($tempPath),
-                        'disk' => 'nextcloud'
-                    ]);
-                    
-                    // Try to get more detailed error info by wrapping in try-catch at multiple levels
-                    try {
-                        // Open file handle
-                        $fileHandle = fopen($tempPath, 'r');
-                        if (!$fileHandle) {
-                            \Log::error('[Report Image] Failed to open temp file for reading', [
-                                'temp_path' => $tempPath
-                            ]);
-                            throw new \Exception('Gagal membuka file temporary untuk upload');
-                        }
-                        
-                        \Log::info('[Report Image] File handle opened successfully');
-                        
-                        // Attempt upload
-                        try {
-                            $uploadResult = Storage::disk('nextcloud')->put($storagePath, $fileHandle);
-                            \Log::info('[Report Image] Upload result', [
-                                'success' => $uploadResult,
-                                'result_type' => gettype($uploadResult)
-                            ]);
-                            
-                            // Close file handle
-                            fclose($fileHandle);
-                            
-                            if (!$uploadResult) {
-                                \Log::error('[Report Image] Upload returned false - checking possible causes', [
-                                    'nextcloud_url' => config('filesystems.disks.nextcloud.url'),
-                                    'nextcloud_root' => config('filesystems.disks.nextcloud.root'),
-                                    'full_path_attempted' => config('filesystems.disks.nextcloud.root') . '/' . $storagePath
-                                ]);
-                                
-                                $nextcloudUrl = config('filesystems.disks.nextcloud.baseUri');
-                                $nextcloudUser = config('filesystems.disks.nextcloud.userName');
-                                $errorMessage = "Gagal mengunggah foto ke Nextcloud. Pastikan konfigurasi sudah benar. URL: '{$nextcloudUrl}', User: '{$nextcloudUser}'. Kemungkinan penyebab: permission denied, disk penuh, atau koneksi timeout.";
-            
-                                unlink($tempPath);
-                                throw ValidationException::withMessages([
-                                    'photo' => $errorMessage,
-                                ]);
-                            }
-                        } catch (\League\Flysystem\UnableToWriteFile $e) {
-                            fclose($fileHandle);
-                            \Log::error('[Report Image] Flysystem UnableToWriteFile exception', [
-                                'error' => $e->getMessage(),
-                                'reason' => $e->reason() ?? 'unknown',
-                                'location' => $e->location() ?? 'unknown'
-                            ]);
-                            throw new \Exception('Nextcloud: ' . $e->getMessage());
-                        } catch (\Exception $e) {
-                            if (is_resource($fileHandle)) {
-                                fclose($fileHandle);
-                            }
-                            throw $e;
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error('[Report Image] Failed to upload file', [
-                            'storage_path' => $storagePath,
-                            'error' => $e->getMessage(),
-                            'error_class' => get_class($e),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-                        if (file_exists($tempPath)) {
-                            unlink($tempPath);
-                        }
-                        throw ValidationException::withMessages([
-                            'photo' => 'Gagal mengunggah foto: ' . $e->getMessage(),
-                        ]);
-                    }
-            
+                    // Upload to Public Disk
+                    $fileHandle = fopen($tempPath, 'r');
+                    $uploadResult = Storage::disk('public')->put($storagePath, $fileHandle);
+                    fclose($fileHandle);
+
                     // Clean up temp file
                     unlink($tempPath);
                 
                     // Free up memory
                     imagedestroy($imageResource);
                     imagedestroy($newImageResource);
+
+                    if (!$uploadResult) {
+                         throw ValidationException::withMessages([
+                            'photo' => 'Gagal mengunggah foto. Silakan coba lagi.',
+                        ]);
+                    }
                 
                     return $storagePath;
                 }    /**
@@ -912,12 +780,13 @@ class ReportController extends Controller
             return response()->json(['message' => 'Image not found in report.'], 404);
         }
 
-        if (!Storage::disk('nextcloud')->exists($imagePath)) {
+        if (Storage::disk('public')->exists($imagePath)) {
+            $fileContent = Storage::disk('public')->get($imagePath);
+        } elseif (Storage::disk('nextcloud')->exists($imagePath)) {
+            $fileContent = Storage::disk('nextcloud')->get($imagePath);
+        } else {
             return response()->json(['message' => 'File not found.'], 404);
         }
-
-        // Get file content
-        $fileContent = Storage::disk('nextcloud')->get($imagePath);
         
         // Create temp file
         $tempPath = tempnam(sys_get_temp_dir(), 'rotate_image_');
@@ -968,7 +837,12 @@ class ReportController extends Controller
         }
 
         // Upload back to Nextcloud
-        Storage::disk('nextcloud')->put($imagePath, fopen($tempPath, 'r'));
+        // Upload back to storage
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->put($imagePath, fopen($tempPath, 'r'));
+        } elseif (Storage::disk('nextcloud')->exists($imagePath)) {
+            Storage::disk('nextcloud')->put($imagePath, fopen($tempPath, 'r'));
+        }
 
         imagedestroy($imageResource);
         imagedestroy($rotatedImage);
