@@ -36,9 +36,10 @@
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
-                                    <textarea id="{{ $field->name }}" name="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        {{ $field->required ? 'required' : '' }}>{{ old($field->name, $report->data[$field->name] ?? '') }}</textarea>
+                                    <input id="{{ $field->name }}" type="hidden" name="{{ $field->name }}"
+                                        value="{{ old($field->name, $report->data[$field->name] ?? '') }}">
+                                    <trix-editor input="{{ $field->name }}"
+                                        class="trix-content block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm min-h-[150px]"></trix-editor>
                                 @elseif ($field->type === 'select')
                                     {{-- Assuming 'select' type will still have options --}}
                                     {{-- This part needs significant re-evaluation: where do options come from now? --}}

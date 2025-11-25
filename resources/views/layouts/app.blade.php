@@ -15,6 +15,10 @@
     <!-- Scripts -->
     @stack('styles')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Trix Editor -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+    <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
 </head>
 
 <body class="font-sans antialiased">
@@ -89,7 +93,7 @@
                     const form = this.closest('form');
                     const swalTitle = this.dataset.swalTitle || 'Apakah Anda yakin?';
                     const swalText = this.dataset.swalText ||
-                    'Tindakan ini tidak dapat dibatalkan.';
+                        'Tindakan ini tidak dapat dibatalkan.';
 
                     Swal.fire({
                         title: swalTitle,

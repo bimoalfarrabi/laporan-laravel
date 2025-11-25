@@ -9,7 +9,8 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form id="report-form-create" method="POST" action="{{ route('reports.store') }}" enctype="multipart/form-data">
+                    <form id="report-form-create" method="POST" action="{{ route('reports.store') }}"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="report_type_id" value="{{ $reportType->id }}">
 
@@ -29,9 +30,10 @@
                                         name="{{ $field->name }}" value="{{ old($field->name) }}"
                                         {{ $field->required ? 'required' : '' }} />
                                 @elseif ($field->type === 'textarea')
-                                    <textarea id="{{ $field->name }}" name="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                        {{ $field->required ? 'required' : '' }}>{{ old($field->name) }}</textarea>
+                                    <input id="{{ $field->name }}" type="hidden" name="{{ $field->name }}"
+                                        value="{{ old($field->name) }}">
+                                    <trix-editor input="{{ $field->name }}"
+                                        class="trix-content block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm min-h-[150px]"></trix-editor>
                                 @elseif ($field->type === 'select')
                                     {{-- Assuming 'select' type will still have options --}}
                                     {{-- This part needs significant re-evaluation: where do options come from now? --}}
@@ -150,9 +152,13 @@
                             <x-primary-button id="submit-report-button" class="ms-4">
                                 <span id="button-text">{{ __('Simpan Laporan') }}</span>
                                 <span id="loading-spinner" class="hidden ml-2">
-                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
                                     </svg>
                                 </span>
                             </x-primary-button>
@@ -164,22 +170,22 @@
     </div>
 
     @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const reportForm = document.getElementById('report-form-create');
-            const submitButton = document.getElementById('submit-report-button');
-            const buttonText = document.getElementById('button-text');
-            const loadingSpinner = document.getElementById('loading-spinner');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const reportForm = document.getElementById('report-form-create');
+                const submitButton = document.getElementById('submit-report-button');
+                const buttonText = document.getElementById('button-text');
+                const loadingSpinner = document.getElementById('loading-spinner');
 
-            if (reportForm && submitButton) {
-                reportForm.addEventListener('submit', function() {
-                    submitButton.setAttribute('disabled', 'true');
-                    buttonText.textContent = 'Menyimpan...';
-                    loadingSpinner.classList.remove('hidden');
-                });
-            }
-        });
-    </script>
+                if (reportForm && submitButton) {
+                    reportForm.addEventListener('submit', function() {
+                        submitButton.setAttribute('disabled', 'true');
+                        buttonText.textContent = 'Menyimpan...';
+                        loadingSpinner.classList.remove('hidden');
+                    });
+                }
+            });
+        </script>
     @endpush
 
     <script>

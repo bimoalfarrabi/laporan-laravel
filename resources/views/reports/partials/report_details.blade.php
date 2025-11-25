@@ -118,7 +118,8 @@
                                 <span class="ml-2 text-gray-600">{{ $timeFieldValue }} WIB</span>
                             @endif
                         @elseif ($field->type === 'textarea' || $field->type === 'text')
-                            <div class="prose max-w-none text-lg leading-relaxed">@markdown($report->data[$field->name] ?? '-')</div>
+                            <div class="trix-content prose max-w-none text-lg leading-relaxed">{!! $report->data[$field->name] ?? '-' !!}
+                            </div>
                         @elseif ($field->type === 'checkbox')
                             <span
                                 class="px-3 py-1 rounded-full font-semibold text-sm {{ $report->data[$field->name] ?? false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
