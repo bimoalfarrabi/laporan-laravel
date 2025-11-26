@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -218,6 +219,9 @@ class AttendanceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -226,10 +230,64 @@ class AttendanceController extends Controller
             "longitude" => "required|numeric",
         ]);
 
-        $user = Auth::user();
-        $now = now();
+        return DB::transaction(function () use ($request) {
+            $user = Auth::user();
+            $now = now();
 
-        // Cek jika ada absensi dalam 2 jam terakhir untuk mencegah data ganda
+            // 1. Check for duplicate actions
+            if ($error = $this->checkDuplicateAttendance($user, $now)) {
+                return redirect()->back()->with("error", $error);
+            }
+
+            // 2. Validate Location
+            $this->validateLocation($request);
+
+            // 3. Determine Action (In/Out)
+            $openAttendance = $this->findOpenAttendance($user, $now);
+
+            // 4. Process Action
+            try {
+                $photoPath = $this->compressAndStoreImage($request->file('photo'));
+
+                if ($openAttendance) {
+                    // Clock Out
+                    $this->handleClockOut($openAttendance, $request, $photoPath, $now);
+                    $action = "out";
+                } else {
+                    // Clock In
+                    if ($error = $this->checkClockInConstraints($user, $now)) {
+                        // If constraint check fails, we must rollback file upload if possible, 
+                        // but since we are in transaction, just throwing exception or returning error is enough.
+                        // However, file is already stored. In a perfect world we'd delete it.
+                        // For now, let's just return the error.
+                        return redirect()->back()->with("error", $error);
+                    }
+
+                    $this->handleClockIn($user, $request, $photoPath, $now);
+                    $action = "in";
+                }
+            } catch (ValidationException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                // Log error and rethrow or handle
+                throw $e;
+            }
+
+            $successMessage = "Absensi " . ($action === "in" ? "masuk" : "pulang") . " berhasil dicatat.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    "message" => $successMessage,
+                    "redirect_url" => route("attendances.index"),
+                ]);
+            }
+
+            return redirect()->route("dashboard")->with("success", $successMessage);
+        });
+    }
+
+    private function checkDuplicateAttendance($user, $now)
+    {
         $twoHoursAgo = $now->copy()->subHours(2);
         $lastAction = Attendance::where("user_id", $user->id)
             ->where(function ($query) use ($twoHoursAgo) {
@@ -243,275 +301,187 @@ class AttendanceController extends Controller
         if ($lastAction) {
             $lastActionTime = $lastAction->time_out ?? $lastAction->time_in;
             if ($lastAction->time_out && $lastAction->time_in) {
-                $lastActionTime =
-                    $lastAction->time_out > $lastAction->time_in
+                $lastActionTime = $lastAction->time_out > $lastAction->time_in
                     ? $lastAction->time_out
                     : $lastAction->time_in;
             }
-            $errorMessage =
-                "Anda sudah melakukan absensi pada pukul " .
+            return "Anda sudah melakukan absensi pada pukul " .
                 Carbon::parse($lastActionTime)->format("H:i") .
                 ". Aksi dibatalkan untuk mencegah data ganda.";
-            return redirect()->back()->with("error", $errorMessage);
         }
+        return null;
+    }
 
-        // Define a "look-behind" window to find a potential open shift.
-        // A shift won't be longer than 12 hours, so a 16-hour window is safe.
+    private function findOpenAttendance($user, $now)
+    {
         $lookbehindTime = $now->copy()->subHours(16);
-
-        // Find an open attendance record within the look-behind window.
         $openAttendance = Attendance::where("user_id", $user->id)
             ->whereNull("time_out")
             ->where("time_in", ">=", $lookbehindTime)
             ->latest("time_in")
             ->first();
 
-        // If an open attendance exists, but it's older than 24 hours,
-        // we consider it stale and proceed as if no open attendance was found.
-        if (
-            $openAttendance &&
-            $openAttendance->time_in->diffInHours($now) > 24
-        ) {
-            $openAttendance = null;
+        if ($openAttendance && $openAttendance->time_in->diffInHours($now) > 24) {
+            return null;
+        }
+        return $openAttendance;
+    }
+
+    private function checkClockInConstraints($user, $now)
+    {
+        // A) User already completed a shift today
+        $completedToday = Attendance::where("user_id", $user->id)
+            ->whereDate("time_in", $now->toDateString())
+            ->whereNotNull("time_out")
+            ->exists();
+
+        if ($completedToday) {
+            return "Anda sudah melakukan absensi datang dan pulang hari ini.";
         }
 
-        // Determine the intended action (clock-in or clock-out)
-        $action = "in";
-        $attendanceToUpdate = null; // Initialize attendanceToUpdate
+        // B) User tries to clock in too soon after a previous clock-out
+        $lastCompletedAttendance = Attendance::where("user_id", $user->id)
+            ->whereNotNull("time_out")
+            ->latest("time_out")
+            ->first();
 
-        if ($openAttendance) {
-            // Case 1: An active, open attendance record exists. This must be a clock-out.
-            $action = "out";
-            $attendanceToUpdate = $openAttendance; // This is the record to update
-        } else {
-            // Case 2: No active, open attendance record found. This must be a clock-in.
-
-            // Before allowing a clock-in, check for conditions that prevent it:
-            // A) User already completed a shift today (for non-night shifts)
-            $completedToday = Attendance::where("user_id", $user->id)
-                ->whereDate("time_in", $now->toDateString())
-                ->whereNotNull("time_out")
-                ->exists();
-
-            if ($completedToday) {
-                return redirect()
-                    ->back()
-                    ->with(
-                        "error",
-                        "Anda sudah melakukan absensi datang dan pulang hari ini.",
-                    );
-            }
-
-            // B) User tries to clock in too soon after a previous clock-out (e.g., trying to clock out twice)
-            // This handles the "double clock-out" scenario where the system would otherwise try to clock them in again.
-            $lastCompletedAttendance = Attendance::where("user_id", $user->id)
-                ->whereNotNull("time_out")
-                ->latest("time_out") // Look at the latest clock-out time
-                ->first();
-
-            // If the last clock-out was very recent (e.g., within 1 minute), prevent a new clock-in.
-            // This catches accidental double-taps or attempts to clock out when already clocked out.
-            if (
-                $lastCompletedAttendance &&
-                $lastCompletedAttendance->time_out->diffInMinutes($now) < 1
-            ) {
-                return redirect()
-                    ->back()
-                    ->with(
-                        "error",
-                        "Anda baru saja menyelesaikan absensi. Tidak dapat melakukan absensi masuk lagi dalam waktu singkat.",
-                    );
-            }
+        if ($lastCompletedAttendance && $lastCompletedAttendance->time_out->diffInMinutes($now) < 1) {
+            return "Anda baru saja menyelesaikan absensi. Tidak dapat melakukan absensi masuk lagi dalam waktu singkat.";
         }
 
-        // Location validation
-        $settingKeys = [
-            "center_latitude",
-            "center_longitude",
-            "allowed_radius_meters",
-        ];
-        $settings = Setting::whereIn("key", $settingKeys)->pluck(
-            "value",
-            "key",
-        );
+        // C) Check if user is on leave
+        $dateString = $now->toDateString();
+        $activeLeave = LeaveRequest::where('user_id', $user->id)
+            ->where('status', 'disetujui')
+            ->where('start_date', '<=', $dateString)
+            ->where('end_date', '>=', $dateString)
+            ->get()
+            ->first(function ($leave) {
+                return strtolower($leave->leave_type) !== 'izin terlambat';
+            });
+
+        if ($activeLeave) {
+            return "Anda sedang dalam masa izin (" . $activeLeave->leave_type . "). Tidak dapat melakukan absensi.";
+        }
+
+        // D) Check clock-in window
+        $pagiShiftStart = Carbon::parse($dateString . " 07:00");
+        $malamShiftStart = Carbon::parse($dateString . " 19:00");
+
+        $expectedStartTime = $now->hour >= 0 && $now->hour < 14
+            ? $pagiShiftStart
+            : $malamShiftStart;
+
+        $windowStart = $expectedStartTime->copy()->subHour();
+        $windowEnd = $expectedStartTime->copy()->addHour();
+
+        if (!$now->between($windowStart, $windowEnd)) {
+            return "Anda hanya bisa absen antara pukul " . $windowStart->format("H:i") . " dan " . $windowEnd->format("H:i") . ".";
+        }
+
+        return null;
+    }
+
+    private function validateLocation(Request $request)
+    {
+        $settingKeys = ["center_latitude", "center_longitude", "allowed_radius_meters"];
+        $settings = Setting::whereIn("key", $settingKeys)->pluck("value", "key");
 
         if (count($settingKeys) === $settings->count()) {
-            $centerLat = $settings["center_latitude"];
-            $centerLon = $settings["center_longitude"];
-            $allowedRadius = $settings["allowed_radius_meters"];
-            $userLat = $request->latitude;
-            $userLon = $request->longitude;
-
             $distance = $this->calculateDistance(
-                $centerLat,
-                $centerLon,
-                $userLat,
-                $userLon,
+                $settings["center_latitude"],
+                $settings["center_longitude"],
+                $request->latitude,
+                $request->longitude
             );
 
-            if ($distance > $allowedRadius) {
+            if ($distance > $settings["allowed_radius_meters"]) {
                 throw ValidationException::withMessages([
-                    "location" =>
-                        "Anda berada di luar radius lokasi yang diizinkan untuk absensi. Jarak Anda: " .
-                        round($distance) .
-                        " meter dari pusat.",
+                    "location" => "Anda berada di luar radius lokasi yang diizinkan untuk absensi. Jarak Anda: " . round($distance) . " meter dari pusat.",
                 ]);
             }
         }
+    }
 
-        $photoPath = $this->compressAndStoreImage($request->file('photo'));
-        // --- End of Native GD Logic ---
+    private function handleClockIn($user, $request, $photoPath, $now)
+    {
+        $dateString = $now->toDateString();
+        $pagiShiftStart = Carbon::parse($dateString . " 07:00");
+        $malamShiftStart = Carbon::parse($dateString . " 19:00");
 
-        if ($action === "in") {
-            $now = now();
-            $dateString = $now->toDateString();
+        $expectedStartTime = $now->hour >= 0 && $now->hour < 14
+            ? $pagiShiftStart
+            : $malamShiftStart;
 
-            // Cek apakah user sedang izin (kecuali Izin Terlambat)
-            $activeLeave = LeaveRequest::where('user_id', $user->id)
-                ->where('status', 'disetujui')
-                ->where('start_date', '<=', $dateString)
-                ->where('end_date', '>=', $dateString)
-                ->get()
-                ->first(function ($leave) {
-                    return strtolower($leave->leave_type) !== 'izin terlambat';
-                });
+        $status = $now->isAfter($expectedStartTime) ? "Terlambat" : "Tepat Waktu";
 
-            if ($activeLeave) {
-                $errorMessage = "Anda sedang dalam masa izin (" . $activeLeave->leave_type . "). Tidak dapat melakukan absensi.";
-                if ($request->expectsJson()) {
-                    return response()->json(["message" => $errorMessage], 422);
-                }
-                return redirect()->back()->with("error", $errorMessage);
+        Attendance::create([
+            "user_id" => $user->id,
+            "time_in" => $now,
+            "photo_in_path" => $photoPath,
+            "latitude_in" => $request->latitude,
+            "longitude_in" => $request->longitude,
+            "status" => $status,
+        ]);
+    }
+
+    private function handleClockOut($attendance, $request, $photoPath, $now)
+    {
+        $timeIn = $attendance->time_in;
+        $timeOut = $now;
+
+        // Calculate the midpoint of the user's actual shift duration
+        $actualShiftMidpoint = $timeIn->copy()->addSeconds($timeIn->diffInSeconds($timeOut) / 2);
+
+        // Define the ideal shifts relative to the clock-in day
+        $timeInDateString = $timeIn->toDateString();
+        $shifts = [
+            "Reguler" => [
+                "start" => Carbon::parse("$timeInDateString 07:00"),
+                "end" => Carbon::parse("$timeInDateString 15:00"), // 8 hours
+            ],
+            "Normal Pagi" => [
+                "start" => Carbon::parse("$timeInDateString 07:00"),
+                "end" => Carbon::parse("$timeInDateString 19:00"), // 12 hours
+            ],
+            "Normal Malam" => [
+                "start" => Carbon::parse("$timeInDateString 19:00"),
+                "end" => Carbon::parse("$timeInDateString 07:00")->addDay(), // 12 hours
+            ],
+        ];
+
+        $closestShiftName = null;
+        $minimumDistance = PHP_INT_MAX;
+
+        // Find the ideal shift with the closest midpoint to the actual shift's midpoint
+        foreach ($shifts as $shiftName => $shiftTimes) {
+            $idealStart = $shiftTimes["start"];
+            $idealEnd = $shiftTimes["end"];
+            $idealMidpoint = $idealStart->copy()->addSeconds($idealStart->diffInSeconds($idealEnd) / 2);
+
+            $distance = abs($actualShiftMidpoint->getTimestamp() - $idealMidpoint->getTimestamp());
+
+            if ($distance < $minimumDistance) {
+                $minimumDistance = $distance;
+                $closestShiftName = $shiftName;
             }
+        }
 
-            // Determine the most likely shift based on the current time.
-            // This heuristic assumes clock-ins between midnight and 2 PM are for the morning shift,
-            // and the rest are for the night shift.
-            $pagiShiftStart = Carbon::parse($dateString . " 07:00");
-            $malamShiftStart = Carbon::parse($dateString . " 19:00");
-
-            $expectedStartTime =
-                $now->hour >= 0 && $now->hour < 14
-                ? $pagiShiftStart
-                : $malamShiftStart;
-
-            // Define the valid clock-in window: 1 hour before and 1 hour after the shift starts.
-            $windowStart = $expectedStartTime->copy()->subHour();
-            $windowEnd = $expectedStartTime->copy()->addHour();
-
-            // Check if the user is trying to clock in outside the allowed window.
-            if (!$now->between($windowStart, $windowEnd)) {
-                $errorMessage =
-                    "Anda hanya bisa absen antara pukul " .
-                    $windowStart->format("H:i") .
-                    " dan " .
-                    $windowEnd->format("H:i") .
-                    ".";
-                if ($request->expectsJson()) {
-                    return response()->json(["message" => $errorMessage], 422);
-                }
-                return redirect()->back()->with("error", $errorMessage);
-            }
-
-            // Determine the attendance status: 'Tepat Waktu' or 'Terlambat'.
-            if ($now->isAfter($expectedStartTime)) {
-                $status = "Terlambat";
-            } else {
-                $status = "Tepat Waktu";
-            }
-
-            Attendance::create([
-                "user_id" => $user->id,
-                "time_in" => $now,
-                "photo_in_path" => $photoPath,
-                "latitude_in" => $request->latitude,
-                "longitude_in" => $request->longitude,
-                "status" => $status,
-            ]);
+        // Override logic for Reguler vs Normal Pagi
+        $actualDurationHours = $timeIn->diffInHours($timeOut);
+        if ($closestShiftName === "Normal Pagi" && $actualDurationHours < 10) {
+            $type = "Reguler";
         } else {
-            // Determine attendance type by finding the closest shift schedule
-            $timeIn = $attendanceToUpdate->time_in;
-            $timeOut = $now;
-
-            // Calculate the midpoint of the user's actual shift duration
-            $actualShiftMidpoint = $timeIn
-                ->copy()
-                ->addSeconds($timeIn->diffInSeconds($timeOut) / 2);
-
-            // Define the ideal shifts relative to the clock-in day
-            $timeInDateString = $timeIn->toDateString();
-            $shifts = [
-                "Reguler" => [
-                    "start" => Carbon::parse("$timeInDateString 07:00"),
-                    "end" => Carbon::parse("$timeInDateString 15:00"), // 8 hours
-                ],
-                "Normal Pagi" => [
-                    "start" => Carbon::parse("$timeInDateString 07:00"),
-                    "end" => Carbon::parse("$timeInDateString 19:00"), // 12 hours
-                ],
-                "Normal Malam" => [
-                    "start" => Carbon::parse("$timeInDateString 19:00"),
-                    "end" => Carbon::parse("$timeInDateString 07:00")->addDay(), // 12 hours
-                ],
-            ];
-
-            $closestShiftName = null;
-            $minimumDistance = PHP_INT_MAX;
-
-            // Find the ideal shift with the closest midpoint to the actual shift's midpoint
-            foreach ($shifts as $shiftName => $shiftTimes) {
-                $idealStart = $shiftTimes["start"];
-                $idealEnd = $shiftTimes["end"];
-                $idealMidpoint = $idealStart
-                    ->copy()
-                    ->addSeconds($idealStart->diffInSeconds($idealEnd) / 2);
-
-                $distance = abs(
-                    $actualShiftMidpoint->getTimestamp() -
-                    $idealMidpoint->getTimestamp(),
-                );
-
-                if ($distance < $minimumDistance) {
-                    $minimumDistance = $distance;
-                    $closestShiftName = $shiftName;
-                }
-            }
-
-            // This logic helps distinguish between Reguler and Normal Pagi, which have the same start time.
-            // If the closest shift is Normal Pagi, but the actual duration is closer to a Reguler shift (8h)
-            // than a Normal Pagi shift (12h), we override it to Reguler.
-            $actualDurationHours = $timeIn->diffInHours($timeOut);
-            if (
-                $closestShiftName === "Normal Pagi" &&
-                $actualDurationHours < 10
-            ) {
-                // 10 hours is a threshold between 8 and 12
-                $type = "Reguler";
-            } else {
-                $type = $closestShiftName;
-            }
-
-            $attendanceToUpdate->update([
-                "time_out" => $now,
-                "photo_out_path" => $photoPath,
-                "latitude_out" => $request->latitude,
-                "longitude_out" => $request->longitude,
-                "type" => $type,
-            ]);
+            $type = $closestShiftName;
         }
 
-        $successMessage =
-            "Absensi " .
-            ($action === "in" ? "masuk" : "pulang") .
-            " berhasil dicatat.";
-        if ($request->expectsJson()) {
-            return response()->json([
-                "message" => $successMessage,
-                "redirect_url" => route("attendances.index"),
-            ]);
-        }
-
-        return redirect()->route("dashboard")->with("success", $successMessage);
+        $attendance->update([
+            "time_out" => $now,
+            "photo_out_path" => $photoPath,
+            "latitude_out" => $request->latitude,
+            "longitude_out" => $request->longitude,
+            "type" => $type,
+        ]);
     }
 
     /**

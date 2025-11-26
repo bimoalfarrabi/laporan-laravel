@@ -6,6 +6,7 @@ use App\Models\ReportType;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ReportTypeController extends Controller
@@ -52,6 +53,9 @@ class ReportTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $this->authorize('create', ReportType::class); // Otorisasi untuk menyimpan jenis laporan
@@ -71,27 +75,22 @@ class ReportTypeController extends Controller
             'fields.*.role_id' => 'nullable|exists:roles,id',
         ]);
 
-        $reportType = new ReportType();
-        $reportType->name = $request->name;
-        $reportType->slug = Str::slug($request->name);
-        $reportType->description = $request->description;
-        $reportType->slug = Str::slug($request->name);
-        $reportType->description = $request->description;
-        $reportType->is_active = $request->boolean('is_active');
-        $reportType->retention_days_images = $request->retention_days_images;
-        $reportType->retention_days_videos = $request->retention_days_videos;
-        $reportType->created_by_user_id = Auth::id();
-        $reportType->updated_by_user_id = Auth::id();
-        $reportType->save();
+        return DB::transaction(function () use ($request) {
+            $reportType = new ReportType();
+            $reportType->name = $request->name;
+            $reportType->slug = Str::slug($request->name);
+            $reportType->description = $request->description;
+            $reportType->is_active = $request->boolean('is_active');
+            $reportType->retention_days_images = $request->retention_days_images;
+            $reportType->retention_days_videos = $request->retention_days_videos;
+            $reportType->created_by_user_id = Auth::id();
+            $reportType->updated_by_user_id = Auth::id();
+            $reportType->save();
 
-        foreach ($request->fields as $fieldData) {
-            if ($fieldData['type'] !== 'role_specific_text') {
-                $fieldData['role_id'] = null;
-            }
-            $reportType->reportTypeFields()->create($fieldData);
-        }
+            $this->syncFields($reportType, $request->fields ?? []);
 
-        return redirect()->route('report-types.index')->with('success', 'Report Type created successfully.');
+            return redirect()->route('report-types.index')->with('success', 'Report Type created successfully.');
+        });
     }
 
     /**
@@ -137,30 +136,39 @@ class ReportTypeController extends Controller
             'fields.*.role_id' => 'nullable|exists:roles,id',
         ]);
 
-        $reportType->name = $request->name;
-        $reportType->description = $request->description;
-        $reportType->is_active = $request->boolean('is_active');
-        $reportType->retention_days_images = $request->retention_days_images;
-        $reportType->retention_days_videos = $request->retention_days_videos;
-        $reportType->updated_by_user_id = Auth::id();
-        $reportType->save();
+        return DB::transaction(function () use ($request, $reportType) {
+            $reportType->name = $request->name;
+            $reportType->slug = Str::slug($request->name); // Update slug as well
+            $reportType->description = $request->description;
+            $reportType->is_active = $request->boolean('is_active');
+            $reportType->retention_days_images = $request->retention_days_images;
+            $reportType->retention_days_videos = $request->retention_days_videos;
+            $reportType->updated_by_user_id = Auth::id();
+            $reportType->save();
 
-        // Sync fields
+            $this->syncFields($reportType, $request->fields ?? []);
+
+            return redirect()->route('report-types.index')->with('success', 'Report Type updated successfully.');
+        });
+    }
+
+    private function syncFields(ReportType $reportType, array $fieldsData)
+    {
         $existingFieldIds = $reportType->reportTypeFields->pluck('id')->toArray();
         $updatedFieldIds = [];
 
-        foreach ($request->fields as $fieldData) {
-            if ($fieldData['type'] !== 'role_specific_text') {
-                $fieldData['role_id'] = null;
+        foreach ($fieldsData as $field) {
+            if ($field['type'] !== 'role_specific_text') {
+                $field['role_id'] = null;
             }
 
-            if (isset($fieldData['id'])) {
+            if (isset($field['id'])) {
                 // Update existing field
-                $reportType->reportTypeFields()->where('id', $fieldData['id'])->update($fieldData);
-                $updatedFieldIds[] = $fieldData['id'];
+                $reportType->reportTypeFields()->where('id', $field['id'])->update($field);
+                $updatedFieldIds[] = $field['id'];
             } else {
                 // Create new field
-                $newField = $reportType->reportTypeFields()->create($fieldData);
+                $newField = $reportType->reportTypeFields()->create($field);
                 $updatedFieldIds[] = $newField->id;
             }
         }
@@ -168,8 +176,6 @@ class ReportTypeController extends Controller
         // Delete fields that were removed from the form
         $fieldsToDelete = array_diff($existingFieldIds, $updatedFieldIds);
         $reportType->reportTypeFields()->whereIn('id', $fieldsToDelete)->delete();
-
-        return redirect()->route('report-types.index')->with('success', 'Report Type updated successfully.');
     }
 
     /**
