@@ -98,7 +98,7 @@
                         <div class="mt-4">
                             <x-input-label for="keterangan" :value="__('Keterangan')" />
                             <textarea id="keterangan" name="keterangan"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('keterangan') }}</textarea>
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition duration-200 ease-in-out">{{ old('keterangan') }}</textarea>
                             <x-input-error :messages="$errors->get('keterangan')" class="mt-2" />
                         </div>
 
