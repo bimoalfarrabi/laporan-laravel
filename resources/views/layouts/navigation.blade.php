@@ -1,5 +1,33 @@
-<nav x-data="{ open: false, darkMode: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-init="$watch('darkMode', val => localStorage.theme = val ? 'dark' : 'light');
-if (darkMode) document.documentElement.classList.add('dark');"
+<nav x-data="{
+    open: false,
+    darkMode: document.documentElement.classList.contains('dark'),
+    toggleTheme() {
+        this.darkMode = !this.darkMode;
+        const theme = this.darkMode ? 'dark' : 'light';
+
+        // Update DOM
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Update localStorage
+        localStorage.theme = theme;
+
+        // Sync with server
+        fetch('{{ route('profile.updateTheme') }}', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            },
+            body: JSON.stringify({ theme: theme })
+        });
+    }
+}" x-init="$watch('darkMode', val => {
+    // Watcher kept for reactivity if needed, but main logic moved to toggleTheme
+})"
     class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 transition-colors duration-200">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -112,7 +140,7 @@ if (darkMode) document.documentElement.classList.add('dark');"
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Dark Mode Toggle -->
-                <button @click="darkMode = !darkMode; document.documentElement.classList.toggle('dark')"
+                <button @click="toggleTheme()"
                     class="p-2 mr-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700">
                     <!-- Sun Icon -->
                     <svg x-show="!darkMode" x-transition:enter="transition ease-out duration-300"
@@ -176,7 +204,7 @@ if (darkMode) document.documentElement.classList.add('dark');"
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
                 <!-- Dark Mode Toggle Mobile -->
-                <button @click="darkMode = !darkMode; document.documentElement.classList.toggle('dark')"
+                <button @click="toggleTheme()"
                     class="p-2 mr-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700">
                     <!-- Sun Icon -->
                     <svg x-show="!darkMode" x-transition:enter="transition ease-out duration-300"

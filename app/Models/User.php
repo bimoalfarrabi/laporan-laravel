@@ -29,6 +29,7 @@ class User extends Authenticatable
         'must_reset_password',
         'nik',
         'phone_number',
+        'theme',
     ];
 
     /**

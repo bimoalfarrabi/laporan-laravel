@@ -13,11 +13,29 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia(
-                '(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
+        // Check for saved theme in database (injected via Blade) or localStorage, or system preference
+        const userTheme = "{{ Auth::user()->theme ?? '' }}";
+        const localTheme = localStorage.theme;
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+        let theme;
+        if (userTheme) {
+            theme = userTheme;
+        } else if (localTheme) {
+            theme = localTheme;
         } else {
-            document.documentElement.classList.remove('dark')
+            theme = systemTheme;
+        }
+
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Ensure localStorage is in sync if userTheme is present
+        if (userTheme) {
+            localStorage.theme = userTheme;
         }
     </script>
 
