@@ -94,13 +94,13 @@
                         </x-nav-link>
                     @endcan
 
-                    @role('superadmin')
+                    @hasanyrole('superadmin|danru')
                         <div class="hidden sm:flex sm:items-center">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
                                     <button
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                        <div>{{ __('Admin') }}</div>
+                                        <div>{{ __('Manajemen') }}</div>
 
                                         <div class="ms-1">
                                             <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
@@ -114,26 +114,30 @@
                                 </x-slot>
 
                                 <x-slot name="content">
-                                    <x-dropdown-link :href="route('report-types.index')">
-                                        {{ __('Manajemen Jenis Laporan') }}
-                                    </x-dropdown-link>
+                                    @role('superadmin')
+                                        <x-dropdown-link :href="route('report-types.index')">
+                                            {{ __('Manajemen Jenis Laporan') }}
+                                        </x-dropdown-link>
+                                    @endrole
                                     <x-dropdown-link :href="route('users.index')">
                                         {{ __('Manajemen Pengguna') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('announcements.index')">
                                         {{ __('Pengumuman') }}
                                     </x-dropdown-link>
-                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                                    <x-dropdown-link :href="route('role-permissions.index')">
-                                        {{ __('Manajemen Hak Akses') }}
-                                    </x-dropdown-link>
-                                    <x-dropdown-link :href="route('settings.location')">
-                                        {{ __('Pengaturan Lokasi Absensi') }}
-                                    </x-dropdown-link>
+                                    @role('superadmin')
+                                        <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                        <x-dropdown-link :href="route('role-permissions.index')">
+                                            {{ __('Manajemen Hak Akses') }}
+                                        </x-dropdown-link>
+                                        <x-dropdown-link :href="route('settings.location')">
+                                            {{ __('Pengaturan Lokasi Absensi') }}
+                                        </x-dropdown-link>
+                                    @endrole
                                 </x-slot>
                             </x-dropdown>
                         </div>
-                    @endrole
+                    @endhasanyrole
                 </div>
             </div>
 
@@ -272,30 +276,34 @@
                     {{ __('Laporan') }}
                 </x-responsive-nav-link>
             @endcan
-            @role('superadmin')
+            @hasanyrole('superadmin|danru')
                 <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
                     <div class="px-4">
-                        <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ __('Admin') }}</div>
+                        <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ __('Manajemen') }}</div>
                     </div>
                     <div class="mt-3 space-y-1">
-                        <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
-                            {{ __('Manajemen Jenis Laporan') }}
-                        </x-responsive-nav-link>
+                        @role('superadmin')
+                            <x-responsive-nav-link :href="route('report-types.index')" :active="request()->routeIs('report-types.*')">
+                                {{ __('Manajemen Jenis Laporan') }}
+                            </x-responsive-nav-link>
+                        @endrole
                         <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('Manajemen Pengguna') }}
                         </x-responsive-nav-link>
                         <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
                             {{ __('Pengumuman') }}
                         </x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('role-permissions.index')" :active="request()->routeIs('role-permissions.*')">
-                            {{ __('Manajemen Hak Akses') }}
-                        </x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('settings.location')" :active="request()->routeIs('settings.location')">
-                            {{ __('Pengaturan Lokasi') }}
-                        </x-responsive-nav-link>
+                        @role('superadmin')
+                            <x-responsive-nav-link :href="route('role-permissions.index')" :active="request()->routeIs('role-permissions.*')">
+                                {{ __('Manajemen Hak Akses') }}
+                            </x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('settings.location')" :active="request()->routeIs('settings.location')">
+                                {{ __('Pengaturan Lokasi') }}
+                            </x-responsive-nav-link>
+                        @endrole
                     </div>
                 </div>
-            @endrole
+            @endhasanyrole
         </div>
 
         <!-- Responsive Settings Options -->
