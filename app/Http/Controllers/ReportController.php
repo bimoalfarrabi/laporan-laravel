@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -33,7 +34,8 @@ class ReportController extends Controller
         $sortDirection = $request->query('sort_direction', 'desc');
 
         // Base query with role-based restrictions
-        $query = Report::query()->with(['reportType', 'user']);
+        // Eager load user roles to prevent N+1
+        $query = Report::query()->with(['reportType', 'user.roles']);
 
         if (Auth::user()->hasRole('superadmin')) {
             // SuperAdmin can see all reports
@@ -72,7 +74,6 @@ class ReportController extends Controller
             $query->whereDate('created_at', $filterDate);
         }
 
-        // Apply sorting
         // Apply sorting
         switch ($sortBy) {
             case 'report_type_name':
@@ -159,99 +160,27 @@ class ReportController extends Controller
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($request->report_type_id);
 
-        $validationRules = [];
-        $reportData = [];
+        return DB::transaction(function () use ($request, $reportType) {
+            try {
+                $reportData = $this->processReportFields($request, $reportType);
 
-        foreach ($reportType->reportTypeFields as $field) {
-            $fieldName = $field->name;
-            $rules = [];
+                $report = new Report();
+                $report->report_type_id = $reportType->id;
+                $report->user_id = Auth::id();
+                $report->data = $reportData;
+                $report->status = 'belum disetujui';
+                $report->last_edited_by_user_id = Auth::id();
+                $report->save();
 
-            if ($field->required) {
-                $rules[] = 'required';
-            } else {
-                $rules[] = 'nullable';
+                return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');
+            } catch (ValidationException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                Log::error('Error storing report: ' . $e->getMessage());
+                // If it's a file storage error, we might want to show a specific message
+                return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan laporan. Silakan coba lagi.')->withInput();
             }
-
-            if ($field->type === 'date') {
-                $rules[] = 'date';
-            } elseif ($field->type === 'time') {
-                $rules[] = 'date_format:H:i';
-            } elseif ($field->type === 'number') {
-                $rules[] = 'numeric';
-            } elseif ($field->type === 'file') {
-                $rules[] = 'array';
-                $rules[] = 'max:3';
-                $validationRules[$fieldName . '.*'] = 'file|mimes:jpg,jpeg,png';
-            } elseif ($field->type === 'video') {
-                $rules[] = 'file';
-                $rules[] = 'mimes:mp4,mov,avi,mkv,webm';
-            }
-
-            $validationRules[$fieldName] = implode('|', $rules);
-        }
-
-        // Custom Error Messages
-        $messages = [
-            'required' => ':attribute wajib diisi.',
-            'date' => ':attribute harus berupa tanggal yang valid.',
-            'date_format' => ':attribute harus berformat waktu yang benar (HH:MM).',
-            'numeric' => ':attribute harus berupa angka.',
-            'array' => ':attribute harus berupa data yang valid.',
-            'max.array' => 'Maksimal :max file yang diperbolehkan untuk :attribute.',
-            'mimes' => ':attribute harus berupa file bertipe: :values.',
-            'file' => ':attribute harus berupa file yang valid.',
-            'max.file' => 'Ukuran :attribute tidak boleh lebih dari :max kilobytes.',
-        ];
-
-        // Custom Attributes (Labels)
-        $customAttributes = [];
-        foreach ($reportType->reportTypeFields as $field) {
-            $customAttributes[$field->name] = $field->label;
-        }
-
-        $validator = Validator::make($request->all(), $validationRules, $messages, $customAttributes);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        foreach ($reportType->reportTypeFields as $field) {
-            if ($field->type === 'role_specific_text' && $field->role_id) {
-                if (!Auth::user()->hasRole(Role::find($field->role_id)->name)) {
-                    continue;
-                }
-            }
-
-            $fieldName = $field->name;
-            if ($field->type === 'file' && $request->hasFile($fieldName)) {
-                $files = $request->file($fieldName);
-                $filePaths = [];
-                if (is_array($files)) {
-                    foreach ($files as $file) {
-                        $filePaths[] = $this->compressAndStoreImage($file);
-                    }
-                } else {
-                    $filePaths[] = $this->compressAndStoreImage($files);
-                }
-                $reportData[$fieldName] = $filePaths;
-            } elseif ($field->type === 'video' && $request->hasFile($fieldName)) {
-                $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
-            } elseif ($field['type'] === 'checkbox') {
-                $reportData[$fieldName] = $request->has($fieldName);
-            } else {
-                $reportData[$fieldName] = $request->input($fieldName);
-            }
-        }
-
-        $report = new Report();
-        $report->report_type_id = $reportType->id;
-        $report->user_id = Auth::id();
-        $report->data = $reportData;
-        $report->status = 'belum disetujui';
-        $report->last_edited_by_user_id = Auth::id();
-        $report->save();
-
-        return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');
+        });
     }
 
     /**
@@ -260,7 +189,17 @@ class ReportController extends Controller
     public function show(Report $report, Request $request)
     {
         // mengambil laporan, termasuk yg sudah dihapus secara soft delete
-        $report = Report::withTrashed()->with('reportType', 'user', 'lastEditedBy', 'deletedBy')->findOrFail($report->id);
+        // Eager load all necessary relationships to avoid N+1
+        $report = Report::withTrashed()
+            ->with([
+                'reportType',
+                'user.roles',
+                'lastEditedBy.roles',
+                'deletedBy',
+                'approvedBy.roles',
+                'rejectedBy'
+            ])
+            ->findOrFail($report->id);
 
         $this->authorize('view', $report);  // Otorisasi untuk melihat laporan spesifik
 
@@ -305,21 +244,60 @@ class ReportController extends Controller
 
         $reportType = ReportType::with('reportTypeFields')->findOrFail($report->report_type_id);
 
-        $validationRules = [];
-        $reportData = $report->data;
+        return DB::transaction(function () use ($request, $report, $reportType) {
+            try {
+                $reportData = $this->processReportFields($request, $reportType, $report->data);
 
+                $report->data = $reportData;
+                $report->last_edited_by_user_id = Auth::id();
+                $report->save();
+
+                return redirect()->route('reports.index')->with('success', 'Laporan berhasil diperbarui.');
+            } catch (ValidationException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                Log::error('Error updating report: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui laporan. Silakan coba lagi.')->withInput();
+            }
+        });
+    }
+
+    /**
+     * Process report fields for store and update methods.
+     *
+     * @param Request $request
+     * @param ReportType $reportType
+     * @param array $currentData Existing data for update scenarios
+     * @return array
+     * @throws ValidationException
+     */
+    private function processReportFields(Request $request, ReportType $reportType, array $currentData = []): array
+    {
+        $validationRules = [];
+        $reportData = $currentData;
+
+        // 1. Build Validation Rules
         foreach ($reportType->reportTypeFields as $field) {
             $fieldName = $field->name;
             $rules = [];
 
             if ($field->required) {
                 if ($field->type === 'file' || $field->type === 'video') {
+                    // For files/videos, check if we have existing files or new uploads
                     $existingFiles = $reportData[$fieldName] ?? [];
                     if (is_string($existingFiles)) {
                         $existingFiles = [$existingFiles];
                     }
+
                     $filesToDelete = $request->input('delete_' . $fieldName, []);
+
+                    // If it's a video, existingFiles might be a single string path or null
+                    if ($field->type === 'video' && !is_array($existingFiles) && $existingFiles) {
+                        $existingFiles = [$existingFiles];
+                    }
+
                     $remainingFilesCount = count($existingFiles) - count($filesToDelete);
+
                     if ($remainingFilesCount <= 0 && !$request->hasFile($fieldName)) {
                         $rules[] = 'required';
                     } else {
@@ -331,7 +309,6 @@ class ReportController extends Controller
             } else {
                 $rules[] = 'nullable';
             }
-
 
             if ($field->type === 'date') {
                 $rules[] = 'date';
@@ -351,7 +328,7 @@ class ReportController extends Controller
             $validationRules[$fieldName] = implode('|', $rules);
         }
 
-        // Custom Error Messages
+        // 2. Custom Error Messages & Attributes
         $messages = [
             'required' => ':attribute wajib diisi.',
             'date' => ':attribute harus berupa tanggal yang valid.',
@@ -364,7 +341,6 @@ class ReportController extends Controller
             'max.file' => 'Ukuran :attribute tidak boleh lebih dari :max kilobytes.',
         ];
 
-        // Custom Attributes (Labels)
         $customAttributes = [];
         foreach ($reportType->reportTypeFields as $field) {
             $customAttributes[$field->name] = $field->label;
@@ -372,6 +348,7 @@ class ReportController extends Controller
 
         $validator = Validator::make($request->all(), $validationRules, $messages, $customAttributes);
 
+        // 3. Additional Validation (e.g., Max 3 files total)
         $validator->after(function ($validator) use ($request, $reportData, $reportType) {
             foreach ($reportType->reportTypeFields as $field) {
                 if ($field->type === 'file') {
@@ -383,6 +360,11 @@ class ReportController extends Controller
                     $filesToDelete = $request->input('delete_' . $fieldName, []);
                     $newFiles = $request->file($fieldName, []);
 
+                    // Ensure newFiles is an array
+                    if (!is_array($newFiles)) {
+                        $newFiles = [$newFiles];
+                    }
+
                     $totalFiles = count($existingFiles) - count($filesToDelete) + count($newFiles);
 
                     if ($totalFiles > 3) {
@@ -393,11 +375,20 @@ class ReportController extends Controller
         });
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            throw new ValidationException($validator);
         }
 
+        // 4. Process Data & Files
         foreach ($reportType->reportTypeFields as $field) {
+            // Skip role-specific fields if user doesn't have the role
+            if ($field->type === 'role_specific_text' && $field->role_id) {
+                if (!Auth::user()->hasRole(Role::find($field->role_id)->name)) {
+                    continue;
+                }
+            }
+
             $fieldName = $field->name;
+
             if ($field->type === 'file') {
                 $existingFiles = $reportData[$fieldName] ?? [];
                 if (is_string($existingFiles))
@@ -406,18 +397,25 @@ class ReportController extends Controller
                 $filesToDelete = $request->input('delete_' . $fieldName, []);
 
                 $updatedFiles = [];
+                // Handle Deletions
                 foreach ($existingFiles as $path) {
                     if (in_array($path, $filesToDelete)) {
-                        if (Storage::disk('public')->exists($path)) {
-                            Storage::disk('public')->delete($path);
-                        } elseif (Storage::disk('nextcloud')->exists($path)) {
-                            Storage::disk('nextcloud')->delete($path);
+                        try {
+                            if (Storage::disk('public')->exists($path)) {
+                                Storage::disk('public')->delete($path);
+                            } elseif (Storage::disk('nextcloud')->exists($path)) {
+                                Storage::disk('nextcloud')->delete($path);
+                            }
+                        } catch (\Exception $e) {
+                            Log::error("Failed to delete file: $path. Error: " . $e->getMessage());
+                            // Continue even if delete fails, to keep DB consistent with user intent
                         }
                     } else {
                         $updatedFiles[] = $path;
                     }
                 }
 
+                // Handle New Uploads
                 if ($request->hasFile($fieldName)) {
                     $files = $request->file($fieldName);
                     if (is_array($files)) {
@@ -430,16 +428,21 @@ class ReportController extends Controller
                 }
 
                 $reportData[$fieldName] = $updatedFiles;
+
             } elseif ($field->type === 'video') {
                 $existingVideo = $reportData[$fieldName] ?? null;
                 $videoToDelete = $request->input('delete_' . $fieldName);
 
                 // Handle deletion of existing video
                 if ($videoToDelete && $existingVideo) {
-                    if (Storage::disk('public')->exists($existingVideo)) {
-                        Storage::disk('public')->delete($existingVideo);
-                    } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
-                        Storage::disk('nextcloud')->delete($existingVideo);
+                    try {
+                        if (Storage::disk('public')->exists($existingVideo)) {
+                            Storage::disk('public')->delete($existingVideo);
+                        } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
+                            Storage::disk('nextcloud')->delete($existingVideo);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Failed to delete video: $existingVideo. Error: " . $e->getMessage());
                     }
                     $reportData[$fieldName] = null; // Clear the field
                 }
@@ -448,10 +451,14 @@ class ReportController extends Controller
                 if ($request->hasFile($fieldName)) {
                     // Delete old video if exists and not already deleted above
                     if ($existingVideo && !$videoToDelete) {
-                        if (Storage::disk('public')->exists($existingVideo)) {
-                            Storage::disk('public')->delete($existingVideo);
-                        } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
-                            Storage::disk('nextcloud')->delete($existingVideo);
+                        try {
+                            if (Storage::disk('public')->exists($existingVideo)) {
+                                Storage::disk('public')->delete($existingVideo);
+                            } elseif (Storage::disk('nextcloud')->exists($existingVideo)) {
+                                Storage::disk('nextcloud')->delete($existingVideo);
+                            }
+                        } catch (\Exception $e) {
+                            Log::error("Failed to delete old video: $existingVideo. Error: " . $e->getMessage());
                         }
                     }
                     $reportData[$fieldName] = $this->storeVideo($request->file($fieldName));
@@ -463,11 +470,7 @@ class ReportController extends Controller
             }
         }
 
-        $report->data = $reportData;
-        $report->last_edited_by_user_id = Auth::id();
-        $report->save();
-
-        return redirect()->route('reports.index')->with('success', 'Laporan berhasil diperbarui.');
+        return $reportData;
     }
 
     /**
