@@ -56,7 +56,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: '{{ session('success') }}',
+                    text: {!! json_encode(session('success')) !!},
                     showConfirmButton: false,
                     timer: 3000
                 });
@@ -67,7 +67,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: '{{ session('error') }}',
+                    text: {!! json_encode(session('error')) !!},
                     showConfirmButton: true,
                 });
             @endif
