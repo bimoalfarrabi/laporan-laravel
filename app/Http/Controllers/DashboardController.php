@@ -18,12 +18,12 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewData = [];
 
-        $approvedReports = Report::with('user', 'reportType')
+        $approvedReports = Report::with('user.roles', 'reportType')
             ->where('status', 'disetujui')
             ->latest()
             ->paginate(5, ['*'], 'approved_reports_page');
 
-        $reportsForApprovalQuery = Report::with('user', 'reportType')
+        $reportsForApprovalQuery = Report::with('user.roles', 'reportType')
             ->where('status', 'belum disetujui')
             ->latest();
 
@@ -52,7 +52,7 @@ class DashboardController extends Controller
             }
         }
 
-        $viewData['announcements'] = Announcement::with('user')
+        $viewData['announcements'] = Announcement::with('user.roles')
             ->where(function ($query) {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
             })
@@ -66,28 +66,28 @@ class DashboardController extends Controller
         if ($user->hasRole('danru')) {
             $viewData['reportsForApproval'] = $reportsForApproval;
             $viewData['approvedReports'] = $approvedReports;
-            $viewData['pendingLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+            $viewData['pendingLeaveRequests'] = \App\Models\LeaveRequest::with('user.roles')
                 ->where('status', 'menunggu persetujuan')
                 ->latest()
                 ->get();
-            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user.roles')
                 ->latest()
                 ->take(5)
                 ->get();
         } elseif ($user->hasRole('manajemen')) {
             $viewData['reportsForApproval'] = $reportsForApproval;
             $viewData['approvedReports'] = $approvedReports;
-            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user.roles')
                 ->latest()
                 ->take(5)
                 ->get();
         } elseif ($user->hasRole('anggota')) {
-            $viewData['myRecentReports'] = Report::with('user', 'reportType')->where('user_id', $user->id)
+            $viewData['myRecentReports'] = Report::with('user.roles', 'reportType')->where('user_id', $user->id)
                 ->latest()
                 ->take(5)
                 ->get();
             $viewData['approvedReports'] = $approvedReports;
-            $viewData['myLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+            $viewData['myLeaveRequests'] = \App\Models\LeaveRequest::with('user.roles')
                 ->where('user_id', $user->id)
                 ->latest()
                 ->get();
@@ -97,8 +97,8 @@ class DashboardController extends Controller
                 ->selectRaw('status, count(*) as count')
                 ->groupBy('status')
                 ->pluck('count', 'status');
-            $viewData['recentReports'] = Report::with('user', 'reportType')->latest()->take(5)->get();
-            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user')
+            $viewData['recentReports'] = Report::with('user.roles', 'reportType')->latest()->take(5)->get();
+            $viewData['latestLeaveRequests'] = \App\Models\LeaveRequest::with('user.roles')
                 ->latest()
                 ->take(5)
                 ->get();

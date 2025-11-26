@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -138,11 +139,13 @@ class UserController extends Controller
             }
         }
 
-        $user = User::create($userData);
+        return DB::transaction(function () use ($request, $userData) {
+            $user = User::create($userData);
 
-        $user->assignRole($request->role); // tugaskan peran menggunakan spatie
+            $user->assignRole($request->role); // tugaskan peran menggunakan spatie
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil dibuat.');
+            return redirect()->route('users.index')->with('success', 'Pengguna berhasil dibuat.');
+        });
     }
 
     public function show(User $user)
@@ -213,12 +216,14 @@ class UserController extends Controller
             }
         }
 
-        $user->save();
+        return DB::transaction(function () use ($user, $request) {
+            $user->save();
 
-        // Perbarui peran Spatie
-        $user->syncRoles([$request->role]);
+            // Perbarui peran Spatie
+            $user->syncRoles([$request->role]);
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');
+            return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');
+        });
     }
 
     public function destroy(User $user)
@@ -230,7 +235,9 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus diri sendiri.');
         }
 
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            $user->delete();
+        });
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 
@@ -238,9 +245,11 @@ class UserController extends Controller
     {
         $this->authorize('resetPassword', $user);
 
-        $user->password = Hash::make('123456');
-        $user->must_reset_password = true;
-        $user->save();
+        DB::transaction(function () use ($user) {
+            $user->password = Hash::make('123456');
+            $user->must_reset_password = true;
+            $user->save();
+        });
 
         return redirect()->route('users.index')->with('success', 'Password pengguna ' . $user->name . ' berhasil di-reset ke "123456". Pengguna akan diminta untuk mengubah password saat login berikutnya.');
     }
@@ -295,7 +304,9 @@ class UserController extends Controller
         $user = User::withTrashed()->findOrFail($id);
         $this->authorize('restore', $user);
 
-        $user->restore();
+        DB::transaction(function () use ($user) {
+            $user->restore();
+        });
 
         return redirect()->route('users.index')->with('success', 'Pengguna ' . $user->name . ' berhasil dipulihkan.');
     }
@@ -305,7 +316,9 @@ class UserController extends Controller
         $user = User::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $user);
 
-        $user->forceDelete();
+        DB::transaction(function () use ($user) {
+            $user->forceDelete();
+        });
 
         return redirect()->route('users.archive')->with('success', 'Pengguna ' . $user->name . ' berhasil dihapus permanen');
     }
