@@ -112,6 +112,10 @@
                 <td>NIK</td>
                 <td>: {{ $leaveRequest->user->nik ?? '-' }}</td>
             </tr>
+            <tr>
+                <td>Penempatan</td>
+                <td>: RSUD Blambangan</td>
+            </tr>
         </table>
 
         @if ($leaveRequest->leave_type == 'Izin terlambat')
