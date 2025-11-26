@@ -1,42 +1,46 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Buat Pengumuman Baru') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="POST" action="{{ route('announcements.store') }}">
                         @csrf
 
                         <!-- Title -->
                         <div>
                             <x-input-label for="title" :value="__('Judul')" />
-                            <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required autofocus />
+                            <x-text-input id="title" class="block mt-1 w-full" type="text" name="title"
+                                :value="old('title')" required autofocus />
                             <x-input-error :messages="$errors->get('title')" class="mt-2" />
                         </div>
 
                         <!-- Content -->
                         <div class="mt-4">
                             <x-input-label for="content" :value="__('Isi Pengumuman')" />
-                            <textarea id="content" name="content" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('content') }}</textarea>
+                            <textarea id="content" name="content"
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('content') }}</textarea>
                             <x-input-error :messages="$errors->get('content')" class="mt-2" />
                         </div>
 
                         <!-- Starts At -->
                         <div class="mt-4">
                             <x-input-label for="starts_at" :value="__('Berlaku pada Tanggal (Opsional)')" />
-                            <x-text-input id="starts_at" class="block mt-1 w-full" type="datetime-local" name="starts_at" :value="old('starts_at')" />
+                            <x-text-input id="starts_at" class="block mt-1 w-full" type="datetime-local"
+                                name="starts_at" :value="old('starts_at')" />
                             <x-input-error :messages="$errors->get('starts_at')" class="mt-2" />
                         </div>
 
                         <!-- Expires At -->
                         <div class="mt-4">
                             <x-input-label for="expires_at" :value="__('Tanggal Kedaluwarsa (Opsional)')" />
-                            <x-text-input id="expires_at" class="block mt-1 w-full" type="datetime-local" name="expires_at" :value="old('expires_at')" />
+                            <x-text-input id="expires_at" class="block mt-1 w-full" type="datetime-local"
+                                name="expires_at" :value="old('expires_at')" />
                             <x-input-error :messages="$errors->get('expires_at')" class="mt-2" />
                         </div>
 

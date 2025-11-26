@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Edit Laporan Dinamis: ') . $report->reportType->name }}
         </h2>
         <style>
@@ -23,8 +23,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <script>
                         // Define a global base URL for serving files to be used by Alpine components
                         const fileServeUrl = '/storage/files/';
@@ -52,7 +52,7 @@
                                         $field->type === 'number' ||
                                         $field->type === 'role_specific_text')
                                     <input id="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         type="{{ $field->type === 'role_specific_text' ? 'text' : $field->type }}"
                                         name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}"
@@ -61,14 +61,14 @@
                                     <input id="{{ $field->name }}_input" type="hidden" name="{{ $field->name }}"
                                         value="{{ old($field->name, $report->data[$field->name] ?? '') }}">
                                     <trix-editor id="{{ $field->name }}" input="{{ $field->name }}_input"
-                                        class="trix-content block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm min-h-[150px]"></trix-editor>
+                                        class="trix-content block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm min-h-[150px]"></trix-editor>
                                 @elseif ($field->type === 'select')
                                     {{-- Assuming 'select' type will still have options --}}
                                     {{-- This part needs significant re-evaluation: where do options come from now? --}}
                                     {{-- For now, commenting out or simplifying --}}
                                     {{-- You would likely need to store options in ReportTypeField or a related model --}}
                                     <select id="{{ $field->name }}" name="{{ $field->name }}"
-                                        class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                        class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         {{ $field->required ? 'required' : '' }}>
                                         <option value="">Pilih {{ $field->label }}</option>
 
@@ -113,7 +113,7 @@
                                                 class="hidden" @change="handleFileSelect" />
 
                                             <label for="{{ $field->name }}"
-                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                                class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-300 dark:hover:border-indigo-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 transition ease-in-out duration-150 cursor-pointer group">
                                                 <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -132,7 +132,7 @@
                                                 capture="environment" class="hidden" @change="handleFileSelect" />
 
                                             <label for="{{ $field->name }}_camera"
-                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                                class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-300 dark:hover:border-indigo-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 transition ease-in-out duration-150 cursor-pointer group">
                                                 <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -179,7 +179,7 @@
                                                 class="hidden" @change="handleFileSelect" />
 
                                             <label for="{{ $field->name }}"
-                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                                class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-300 dark:hover:border-indigo-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 transition ease-in-out duration-150 cursor-pointer group">
                                                 <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -196,7 +196,7 @@
                                                 capture="environment" class="hidden" @change="handleFileSelect" />
 
                                             <label for="{{ $field->name }}_camera"
-                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 hover:border-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 transition ease-in-out duration-150 cursor-pointer group">
+                                                class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-300 dark:hover:border-indigo-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 transition ease-in-out duration-150 cursor-pointer group">
                                                 <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-indigo-600 transition-colors duration-150"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -214,7 +214,7 @@
                                         {{-- Compression Loading Overlay --}}
                                         <div x-show="isCompressing" style="display: none;"
                                             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                                            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
                                                 <div class="flex items-start space-x-4">
                                                     <svg class="animate-spin h-8 w-8 text-indigo-600 flex-shrink-0"
                                                         xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -226,7 +226,9 @@
                                                         </path>
                                                     </svg>
                                                     <div>
-                                                        <h3 class="text-lg font-medium text-gray-900">Mengompresi Video
+                                                        <h3
+                                                            class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                                            Mengompresi Video
                                                         </h3>
                                                         <p class="mt-1 text-sm text-gray-500"
                                                             x-text="compressionProgress">Memproses...</p>
@@ -243,9 +245,11 @@
                                         <div x-show="existingVideoUrl && !isMarkedForDeletion && !videoPreviewUrl"
                                             class="relative group mb-4">
                                             <div
-                                                class="bg-gray-100 rounded-lg p-2 border border-gray-300 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
+                                                class="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 border border-gray-300 dark:border-gray-600 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-sm font-medium text-gray-700">Video Saat
+                                                    <span
+                                                        class="text-sm font-medium text-gray-700 dark:text-gray-300">Video
+                                                        Saat
                                                         Ini</span>
                                                     <button type="button" @click="markForDeletion"
                                                         class="text-red-500 hover:text-red-700 focus:outline-none">
@@ -269,9 +273,10 @@
                                         <div x-show="videoPreviewUrl" class="relative group mt-2"
                                             style="display: none;">
                                             <div
-                                                class="bg-gray-100 rounded-lg p-2 border border-gray-300 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
+                                                class="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 border border-gray-300 dark:border-gray-600 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-sm font-medium text-gray-700 truncate"
+                                                    <span
+                                                        class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate"
                                                         x-text="videoFileName"></span>
                                                     <button type="button" @click="removeVideo"
                                                         class="text-red-500 hover:text-red-700 focus:outline-none">
@@ -296,7 +301,7 @@
 
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('dashboard') }}"
-                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150 mr-3">
+                                class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150 mr-3">
                                 Batal
                             </a>
                             <x-primary-button>

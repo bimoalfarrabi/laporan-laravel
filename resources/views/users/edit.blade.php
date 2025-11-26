@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <form method="POST" action="{{ route('users.update', $user->id) }}">
                         @csrf
@@ -40,14 +40,16 @@
                         <!-- NIK -->
                         <div class="mt-4">
                             <x-input-label for="nik" :value="__('NIK')" />
-                            <x-text-input id="nik" class="block mt-1 w-full" type="text" name="nik" :value="old('nik', $user->nik)" autofocus autocomplete="nik" />
+                            <x-text-input id="nik" class="block mt-1 w-full" type="text" name="nik"
+                                :value="old('nik', $user->nik)" autofocus autocomplete="nik" />
                             <x-input-error :messages="$errors->get('nik')" class="mt-2" />
                         </div>
 
                         <!-- Phone Number -->
                         <div class="mt-4">
                             <x-input-label for="phone_number" :value="__('No. HP')" />
-                            <x-text-input id="phone_number" class="block mt-1 w-full" type="text" name="phone_number" :value="old('phone_number', $user->phone_number)" autofocus autocomplete="phone_number" />
+                            <x-text-input id="phone_number" class="block mt-1 w-full" type="text" name="phone_number"
+                                :value="old('phone_number', $user->phone_number)" autofocus autocomplete="phone_number" />
                             <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                         </div>
 
@@ -88,7 +90,7 @@
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
 
-                        {{-- @if(Auth::user()->hasRole('superadmin'))
+                        {{-- @if (Auth::user()->hasRole('superadmin'))
                         <!-- Shift -->
                         <div class="mt-4">
                             <x-input-label for="shift" :value="__('Shift')" />

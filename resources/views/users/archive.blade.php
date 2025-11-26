@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Arsip Pengguna (Dihapus)') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <a href="{{ route('users.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         Kembali ke Daftar Pengguna Aktif
                     </a>
 
@@ -22,61 +22,63 @@
                     @endif
 
                     @if ($users->isEmpty())
-                        <p class="mt-4">Tidak ada pengguna yang diarsipkan.</p>
+                        <p class="mt-4 text-gray-500 dark:text-gray-400">Tidak ada pengguna yang diarsipkan.</p>
                     @else
                         <div class="mt-6 overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
                                         <th scope="col"
-                                            class="sticky left-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                            class="sticky left-0 bg-gray-50 dark:bg-gray-700 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-r dark:border-gray-600">
                                             ID
                                         </th>
                                         <th scope="col"
-                                            class="sticky left-16 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                            class="sticky left-16 bg-gray-50 dark:bg-gray-700 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-r dark:border-gray-600">
                                             Nama
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Username
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Email
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Peran (Spatie)
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Waktu Dihapus
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach ($users as $user)
                                         <tr>
-                                            <td class="sticky left-0 bg-white px-6 py-4 whitespace-nowrap border-r">
+                                            <td
+                                                class="sticky left-0 bg-white dark:bg-gray-800 px-6 py-4 whitespace-nowrap border-r dark:border-gray-700 dark:text-gray-100">
                                                 {{ $user->id }}
                                             </td>
-                                            <td class="sticky left-16 bg-white px-6 py-4 whitespace-nowrap border-r">
+                                            <td
+                                                class="sticky left-16 bg-white dark:bg-gray-800 px-6 py-4 whitespace-nowrap border-r dark:border-gray-700 dark:text-gray-100">
                                                 {{ $user->name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
                                                 {{ $user->username }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
                                                 {{ $user->email }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
                                                 {{ $user->roles->pluck('name')->join(', ') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
                                                 {{ $user->deleted_at->format('d-m-Y H:i') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -85,9 +87,8 @@
                                                         class="inline">
                                                         @csrf
                                                         <button type="submit"
-                                                            class="text-green-600 hover:text-green-900 mr-2"
-                                                            data-confirm-dialog="true"
-                                                            data-swal-title="Pulihkan Pengguna?"
+                                                            class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-2"
+                                                            data-confirm-dialog="true" data-swal-title="Pulihkan Pengguna?"
                                                             data-swal-text="Pengguna akan dikembalikan ke daftar aktif."
                                                             data-swal-icon="info">Pulihkan</button>
                                                     </form>
@@ -97,11 +98,10 @@
                                                         method="POST" class="inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900"
-                                                            data-confirm-dialog="true"
-                                                            data-swal-title="Hapus Permanen?"
-                                                            data-swal-text="PERINGATAN: Pengguna akan dihapus selamanya dan tidak dapat dipulihkan!"
-                                                            >Hapus
+                                                        <button type="submit"
+                                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                            data-confirm-dialog="true" data-swal-title="Hapus Permanen?"
+                                                            data-swal-text="PERINGATAN: Pengguna akan dihapus selamanya dan tidak dapat dipulihkan!">Hapus
                                                             Permanen</button>
                                                     </form>
                                                 @endcan

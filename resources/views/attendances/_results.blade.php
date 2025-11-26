@@ -1,12 +1,13 @@
 @if ($attendances->isEmpty())
     <div class="text-center py-10">
-        <p class="text-gray-500">Tidak ada data absensi atau izin yang ditemukan untuk tanggal ini.</p>
+        <p class="text-gray-500 dark:text-gray-400">Tidak ada data absensi atau izin yang ditemukan untuk tanggal ini.
+        </p>
     </div>
 @else
     {{-- Table View for Larger Screens --}}
     <div class="mt-6 overflow-x-auto hidden sm:block">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                     @php
                         $columns = [
@@ -19,7 +20,7 @@
 
                     @foreach ($columns as $column => $title)
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => $column, 'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
                                 class="flex items-center">
                                 {{ $title }}
@@ -43,14 +44,16 @@
                     @endforeach
 
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Foto
                         Masuk</th>
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Lokasi
                         Masuk</th>
 
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         <a href="{{ route('attendances.index', array_merge(request()->query(), ['sort_by' => 'time_out', 'sort_direction' => $sortBy == 'time_out' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
                             class="flex items-center">
                             Waktu Pulang
@@ -73,31 +76,33 @@
                     </th>
 
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Foto
                         Pulang</th>
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Lokasi
                         Pulang</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($attendances as $attendance)
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                             {{ $attendance->user->name }}
                             @if ($attendance->user->roles->isNotEmpty())
                                 <span
-                                    class="text-sm text-gray-500">({{ $attendance->user->roles->first()->name }})</span>
+                                    class="text-sm text-gray-500 dark:text-gray-400">({{ $attendance->user->roles->first()->name }})</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->status == 'libur')
                                 -
                             @else
                                 {{ $attendance->type ?? '-' }}
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->status == 'Izin' && isset($attendance->leaveRequest))
                                 <a href="{{ route('leave-requests.show', $attendance->leaveRequest->id) }}"
                                     class="text-blue-500 hover:underline font-semibold">
@@ -116,7 +121,7 @@
                                 {{ $attendance->status }}
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
                                 {{ \Carbon\Carbon::parse($attendance->time_in)->format('d M Y') }}
                             @elseif ($attendance->time_in)
@@ -127,7 +132,7 @@
                                     $diff_minutes = $expected_start_time->diffInMinutes($time_in, false);
 
                                     $indicator_text = '';
-                                    $color_class = 'text-gray-500'; // Default color
+                                    $color_class = 'text-gray-500 dark:text-gray-400'; // Default color
 
                                     if ($diff_minutes <= 0) {
                                         // Early or on time
@@ -167,15 +172,15 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
                                 -
                             @elseif (isset($attendance->photo_in_path) && $attendance->photo_in_path)
                                 <div x-data="{ imageLoaded: false }"
-                                    class="relative block aspect-square w-10 h-10 overflow-hidden rounded-full bg-gray-50 border border-gray-200 shadow-sm mx-auto">
+                                    class="relative block aspect-square w-10 h-10 overflow-hidden rounded-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm mx-auto">
                                     <!-- Skeleton Loader -->
                                     <div x-show="!imageLoaded"
-                                        class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                                        class="absolute inset-0 bg-gray-200 dark:bg-gray-600 animate-pulse flex items-center justify-center">
                                         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -200,7 +205,7 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
                                 -
                             @elseif (isset($attendance->latitude_in) && $attendance->latitude_in)
@@ -219,7 +224,7 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if ($attendance->time_out)
                                 @php
                                     $time_out = \Carbon\Carbon::parse($attendance->time_out);
@@ -236,7 +241,7 @@
                                     }
 
                                     $indicator_text_out = '';
-                                    $color_class_out = 'text-gray-500'; // Default color
+                                    $color_class_out = 'text-gray-500 dark:text-gray-400'; // Default color
 
                                     if ($expected_end_time) {
                                         $diff_minutes_out = $expected_end_time->diffInMinutes($time_out, false);
@@ -304,10 +309,10 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if (isset($attendance->photo_out_path) && $attendance->photo_out_path)
                                 <div x-data="{ imageLoaded: false }"
-                                    class="relative block aspect-square w-10 h-10 overflow-hidden rounded-full bg-gray-50 border border-gray-200 shadow-sm mx-auto">
+                                    class="relative block aspect-square w-10 h-10 overflow-hidden rounded-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm mx-auto">
                                     <!-- Skeleton Loader -->
                                     <div x-show="!imageLoaded"
                                         class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -335,7 +340,7 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             @if (isset($attendance->latitude_out) && $attendance->longitude_out)
                                 @php
                                     $url_out =
@@ -361,12 +366,16 @@
     {{-- Card View for Small Screens --}}
     <div class="mt-6 sm:hidden space-y-4">
         @foreach ($attendances as $attendance)
-            <div class="bg-white p-4 shadow-md rounded-lg border border-gray-200">
+            <div
+                class="bg-white dark:bg-gray-800 p-4 shadow-md rounded-lg border border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between items-start mb-3">
                     <div>
-                        <div class="font-bold text-lg text-gray-800">{{ $attendance->user->name }}</div>
+                        <div class="font-bold text-lg text-gray-800 dark:text-gray-200">{{ $attendance->user->name }}
+                        </div>
                         @if ($attendance->user->roles->isNotEmpty())
-                            <div class="text-sm text-gray-500">({{ $attendance->user->roles->first()->name }})</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                ({{ $attendance->user->roles->first()->name }})
+                            </div>
                         @endif
                     </div>
                     <div class="text-right">
@@ -389,7 +398,7 @@
                             <span
                                 class="px-2 py-1 inline-flex leading-5 font-semibold rounded-full bg-green-200 text-green-800 text-xs">{{ $attendance->status }}</span>
                         @endif
-                        <div class="text-xs text-gray-500 mt-1">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             @if ($attendance->status == 'libur')
                                 -
                             @else
@@ -400,9 +409,9 @@
                 </div>
 
                 @if ($attendance->status != 'Izin')
-                    <div class="border-t border-gray-200 pt-3 space-y-3 text-sm">
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3 text-sm">
                         <div class="flex items-start">
-                            <strong class="text-gray-600 w-1/3">Masuk:</strong>
+                            <strong class="text-gray-600 dark:text-gray-400 w-1/3">Masuk:</strong>
                             <div class="w-2/3">
                                 <p>
                                     @if ($attendance->status == 'Izin' || $attendance->status == 'libur')
@@ -420,7 +429,7 @@
                                             );
 
                                             $indicator_text_card = '';
-                                            $color_class_card = 'text-gray-500'; // Default color
+                                            $color_class_card = 'text-gray-500 dark:text-gray-400'; // Default color
 
                                             if ($diff_minutes_card <= 0) {
                                                 // Early or on time
@@ -467,10 +476,10 @@
                                     <div class="flex items-center mt-1">
                                         @if (isset($attendance->photo_in_path) && $attendance->photo_in_path)
                                             <div x-data="{ imageLoaded: false }"
-                                                class="relative block aspect-square w-10 h-10 overflow-hidden rounded-md bg-gray-50 border border-gray-200 shadow-sm mr-2">
+                                                class="relative block aspect-square w-10 h-10 overflow-hidden rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm mr-2">
                                                 <!-- Skeleton Loader -->
                                                 <div x-show="!imageLoaded"
-                                                    class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                                                    class="absolute inset-0 bg-gray-200 dark:bg-gray-600 animate-pulse flex items-center justify-center">
                                                     <svg class="w-6 h-6 text-gray-400" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -512,7 +521,7 @@
                             </div>
                         </div>
                         <div class="flex items-start">
-                            <strong class="text-gray-600 w-1/3">Pulang:</strong>
+                            <strong class="text-gray-600 dark:text-gray-400 w-1/3">Pulang:</strong>
                             <div class="w-2/3">
                                 <p>
                                     @if ($attendance->time_out)
@@ -537,7 +546,7 @@
                                             }
 
                                             $indicator_text_out_card = '';
-                                            $color_class_out_card = 'text-gray-500'; // Default color
+                                            $color_class_out_card = 'text-gray-500 dark:text-gray-400'; // Default color
 
                                             if ($expected_end_time_card) {
                                                 $diff_minutes_out_card = $expected_end_time_card->diffInMinutes(
@@ -617,7 +626,7 @@
                                     <div class="flex items-center mt-1">
                                         @if (isset($attendance->photo_out_path) && $attendance->photo_out_path)
                                             <div x-data="{ imageLoaded: false }"
-                                                class="relative block aspect-square w-10 h-10 overflow-hidden rounded-md bg-gray-50 border border-gray-200 shadow-sm mr-2">
+                                                class="relative block aspect-square w-10 h-10 overflow-hidden rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm mr-2">
                                                 <!-- Skeleton Loader -->
                                                 <div x-show="!imageLoaded"
                                                     class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -668,6 +677,6 @@
     </div>
 
     <div class="mt-4">
-        {{ $attendances->links() }}
+        {{ $attendances->links('pagination.custom') }}
     </div>
 @endif

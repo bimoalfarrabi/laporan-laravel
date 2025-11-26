@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Buat Jenis Laporan Baru') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="POST" action="{{ route('report-types.store') }}">
                         @csrf
 
@@ -24,14 +24,14 @@
                         <div class="mt-4 mb-4">
                             <x-input-label for="description" :value="__('Deskripsi')" />
                             <textarea id="description" name="description"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description') }}</textarea>
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description') }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
                         <div class="mb-4">
                             <x-input-label for="is_active" :value="__('Status')" />
                             <select id="is_active" name="is_active"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="1" {{ old('is_active') == '1' ? 'selected' : '' }}>Aktif</option>
                                 <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Tidak Aktif
                                 </option>
@@ -45,7 +45,8 @@
                                 <x-text-input id="retention_days_images" class="block mt-1 w-full" type="number"
                                     name="retention_days_images" :value="old('retention_days_images')" min="1"
                                     placeholder="Kosongkan untuk simpan selamanya" />
-                                <p class="text-sm text-gray-500 mt-1">Gambar yang lebih tua dari jumlah hari ini akan
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gambar yang lebih tua dari
+                                    jumlah hari ini akan
                                     dihapus.</p>
                                 <x-input-error :messages="$errors->get('retention_days_images')" class="mt-2" />
                             </div>
@@ -54,7 +55,8 @@
                                 <x-text-input id="retention_days_videos" class="block mt-1 w-full" type="number"
                                     name="retention_days_videos" :value="old('retention_days_videos')" min="1"
                                     placeholder="Kosongkan untuk simpan selamanya" />
-                                <p class="text-sm text-gray-500 mt-1">Video yang lebih tua dari jumlah hari ini akan
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Video yang lebih tua dari
+                                    jumlah hari ini akan
                                     dihapus.</p>
                                 <x-input-error :messages="$errors->get('retention_days_videos')" class="mt-2" />
                             </div>
@@ -67,7 +69,7 @@
                                 <!-- Field templates will be added here by JavaScript -->
                             </div>
                             <button type="button" id="add-field"
-                                class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                                class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600">
                                 Tambah Field
                             </button>
                         </div>
@@ -112,6 +114,10 @@
             .sortable-ghost {
                 opacity: 0.4;
                 background-color: #DBEAFE;
+            }
+
+            .dark .sortable-ghost {
+                background-color: #1E3A8A;
                 border: 2px dashed #3B82F6;
             }
 
@@ -142,9 +148,9 @@
                 function addField(field = {}) {
                     const newFieldId = `field-${fieldCounter++}`;
                     const fieldHtml = `
-                    <div class="field-item p-4 border rounded-md bg-gray-50 relative">
+                    <div class="field-item p-4 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 relative">
                         <!-- Drag Handle -->
-                        <div class="drag-handle absolute left-2 top-2 cursor-move text-gray-400 hover:text-gray-600 z-10" title="Drag untuk mengubah urutan">
+                        <div class="drag-handle absolute left-2 top-2 cursor-move text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 z-10" title="Drag untuk mengubah urutan">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
                             </svg>
@@ -165,13 +171,13 @@
                             </div>
                             <div>
                                 <x-input-label for="${newFieldId}-type" value="Tipe Field" />
-                                <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
                                     ${fieldTypes.map(type => `<option value="${type}" ${field.type === type ? 'selected' : ''}>${type}</option>`).join('')}
                                 </select>
                             </div>
                             <div id="${newFieldId}-role-container" class="role-container" style="display: none;">
                                 <x-input-label for="${newFieldId}-role" value="Pilih Role" />
-                                <select id="${newFieldId}-role" name="fields[${newFieldId}][role_id]" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <select id="${newFieldId}-role" name="fields[${newFieldId}][role_id]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="">Pilih Role</option>
                                     ${roles.map(role => `<option value="${role.id}" ${field.role_id == role.id ? 'selected' : ''}>${role.name}</option>`).join('')}
                                 </select>

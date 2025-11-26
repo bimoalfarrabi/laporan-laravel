@@ -70,3 +70,71 @@ trix-toolbar .trix-button {
         min-height: 200px; /* Ensure enough touch space */
     }
 }
+
+/* Dark Mode Scrollbar */
+.dark ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #1f2937; /* gray-800 */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #4b5563; /* gray-600 */
+    border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* gray-500 */
+}
+
+/* Trix Editor Dark Mode Overrides */
+.dark trix-toolbar .trix-button {
+    background-color: #374151; /* gray-700 */
+    border-color: #4b5563; /* gray-600 */
+}
+
+.dark trix-toolbar .trix-button:hover {
+    background-color: #4b5563; /* gray-600 */
+}
+
+.dark trix-toolbar .trix-button.trix-active {
+    background-color: #4f46e5; /* indigo-600 */
+    border-color: #4f46e5;
+}
+
+.dark .trix-button--icon::before {
+    filter: invert(100%) brightness(150%) !important; /* Invert icons to make them white and bright */
+    opacity: 0.9;
+}
+
+.dark trix-editor {
+    background-color: #111827; /* gray-900 */
+    color: #d1d5db; /* gray-300 */
+    border-color: #4b5563; /* gray-600 */
+}
+
+.dark .trix-button-group {
+    border-color: #4b5563; /* gray-600 */
+}
+
+/* SweetAlert2 Dark Mode Overrides */
+.dark .swal2-popup {
+    background-color: #1f2937 !important; /* gray-800 */
+    color: #e5e7eb !important; /* gray-200 */
+}
+
+.dark .swal2-title {
+    color: #e5e7eb !important;
+}
+
+.dark .swal2-html-container {
+    color: #d1d5db !important; /* gray-300 */
+}
+
+.dark .swal2-validation-message {
+    background-color: #374151 !important; /* gray-700 */
+    color: #e5e7eb !important;
+}

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Detail Laporan: ') . $report->reportType->name }}
             </h2>
             <button id="share-button"
@@ -13,14 +13,14 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
 
                     {{-- Navigation Buttons --}}
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                         @if ($previousReport)
                             <a href="{{ route('reports.show', $previousReport->id) }}"
-                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center py-2 px-4 border border-indigo-200 dark:border-indigo-700 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                 data-report-id="{{ $previousReport->id }}">
                                 <svg class="w-4 h-4 mr-1 md:mr-1" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -35,7 +35,7 @@
 
                         @if ($nextReport)
                             <a href="{{ route('reports.show', $nextReport->id) }}"
-                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 inline-flex items-center py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                class="nav-report-btn text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center py-2 px-4 border border-indigo-200 dark:border-indigo-700 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                 data-report-id="{{ $nextReport->id }}">
                                 <span class="hidden md:inline">Laporan Berikutnya</span>
                                 <svg class="w-4 h-4 ml-1 md:ml-1" fill="none" stroke="currentColor"
@@ -56,7 +56,7 @@
                     ])
 
                     {{-- Action Buttons --}}
-                    <div class="mt-8 pt-6 border-t">
+                    <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex flex-wrap items-center justify-start sm:justify-end gap-4">
                             @if ($report->deleted_at)
                                 @can('restore', $report)
@@ -119,7 +119,7 @@
                                 @endcan --}}
                             @endif
                             <a href="{{ route('reports.index') }}"
-                                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                 {{ __('Kembali') }}
                             </a>
                         </div>

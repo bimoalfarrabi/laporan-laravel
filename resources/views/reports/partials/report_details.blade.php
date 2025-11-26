@@ -2,15 +2,15 @@
     {{-- Simplified Report Metadata --}}
     <div class="space-y-4 mb-6">
         <div class="text-lg">
-            <p class="text-gray-600"><strong>ID Laporan:</strong> <span
-                    class="font-mono bg-gray-100 px-2 py-1 rounded">#{{ $report->id }}</span></p>
-            <p class="text-gray-600"><strong>Jenis Laporan:</strong> <span
-                    class="font-semibold text-gray-800">{{ $report->reportType->name }}</span></p>
+            <p class="text-gray-600 dark:text-gray-400"><strong>ID Laporan:</strong> <span
+                    class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">#{{ $report->id }}</span></p>
+            <p class="text-gray-600 dark:text-gray-400"><strong>Jenis Laporan:</strong> <span
+                    class="font-semibold text-gray-800 dark:text-gray-200">{{ $report->reportType->name }}</span></p>
             @if ($report->shift)
-                <p class="text-gray-600"><strong>Shift:</strong> <span
-                        class="font-semibold text-gray-800">{{ $report->shift }}</span></p>
+                <p class="text-gray-600 dark:text-gray-400"><strong>Shift:</strong> <span
+                        class="font-semibold text-gray-800 dark:text-gray-200">{{ $report->shift }}</span></p>
             @endif
-            <p class="text-gray-600"><strong>Status:</strong>
+            <p class="text-gray-600 dark:text-gray-400"><strong>Status:</strong>
                 @php
                     $bgColor = '';
                     switch ($report->status) {
@@ -35,13 +35,15 @@
     </div>
 
     {{-- Signature/History Block --}}
-    <div class="mt-8 pt-6 border-t border-gray-200">
-        <h3 class="font-semibold text-lg text-gray-800 mb-4">Riwayat Laporan</h3>
-        <div class="flex flex-col md:flex-row md:justify-between text-base text-gray-700 space-y-3 md:space-y-0">
+    <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="font-semibold text-lg text-gray-800 dark:text-gray-200 mb-4">Riwayat Laporan</h3>
+        <div
+            class="flex flex-col md:flex-row md:justify-between text-base text-gray-700 dark:text-gray-300 space-y-3 md:space-y-0">
             {{-- Left Side --}}
             <div class="space-y-3">
                 <p><strong>Dibuat oleh:</strong> {{ $report->user->name }} @if ($report->user->roles->isNotEmpty())
-                        <span class="text-sm text-gray-500">({{ $report->user->roles->first()->name }})</span>
+                        <span
+                            class="text-sm text-gray-500 dark:text-gray-400">({{ $report->user->roles->first()->name }})</span>
                     @endif pada
                     <span class="font-medium">{{ $report->created_at->format('d-m-Y H:i') }}</span>
                 </p>
@@ -49,7 +51,7 @@
                     <p><strong>Terakhir diperbarui oleh:</strong> {{ $report->lastEditedBy->name }}
                         @if ($report->lastEditedBy->roles->isNotEmpty())
                             <span
-                                class="text-sm text-gray-500">({{ $report->lastEditedBy->roles->first()->name }})</span>
+                                class="text-sm text-gray-500 dark:text-gray-400">({{ $report->lastEditedBy->roles->first()->name }})</span>
                         @endif
                         pada
                         <span class="font-medium">{{ $report->updated_at->format('d-m-Y H:i') }}</span>
@@ -63,7 +65,7 @@
                     <p><strong>Disetujui oleh:</strong> {{ $report->approvedBy->name }}
                         @if ($report->approvedBy->roles->isNotEmpty())
                             <span
-                                class="text-sm text-gray-500">({{ $report->approvedBy->roles->first()->name }})</span>
+                                class="text-sm text-gray-500 dark:text-gray-400">({{ $report->approvedBy->roles->first()->name }})</span>
                         @endif pada
                         <span class="font-medium">{{ $report->approved_at->format('d-m-Y H:i') }}</span>
                     </p>
@@ -74,7 +76,7 @@
                     </p>
                 @endif
                 @if ($report->deleted_at)
-                    <p class="text-red-700"><strong>Dihapus oleh:</strong>
+                    <p class="text-red-700 dark:text-red-400"><strong>Dihapus oleh:</strong>
                         {{ $report->deletedBy?->name ?? 'Pengguna telah dihapus' }} pada
                         <span class="font-medium">{{ $report->deleted_at->format('d-m-Y H:i') }}</span>
                     </p>
@@ -98,7 +100,7 @@
             @foreach ($fields as $field)
                 {{-- Skip rendering the 'time' or 'waktu' field as it's merged with the 'date' or 'tanggal' field --}}
                 <div>
-                    <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                    <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         @if ($field->name === 'date' || $field->name === 'tanggal')
                             Waktu Kejadian
                         @elseif ($field->type === 'file')
@@ -107,7 +109,7 @@
                             {{ $field->label }}
                         @endif
                     </h4>
-                    <div class="mt-2 text-base text-gray-900">
+                    <div class="mt-2 text-base text-gray-900 dark:text-gray-100">
                         @if ($field->name === 'date' || $field->name === 'tanggal')
                             @php
                                 $dateData = $report->data['date'] ?? ($report->data['tanggal'] ?? null);
@@ -115,7 +117,7 @@
                             @endphp
                             <span class="font-medium">{{ $dateValue ?? '-' }}</span>
                             @if ($timeFieldValue)
-                                <span class="ml-2 text-gray-600">{{ $timeFieldValue }} WIB</span>
+                                <span class="ml-2 text-gray-600 dark:text-gray-400">{{ $timeFieldValue }} WIB</span>
                             @endif
                         @elseif ($field->type === 'textarea' || $field->type === 'text')
                             <div class="trix-content prose max-w-none text-lg leading-relaxed">{!! $report->data[$field->name] ?? '-' !!}
@@ -170,11 +172,11 @@
                                                         }
                                                     }
                                                 }"
-                                                class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                                class="group relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200">
 
                                                 <!-- Skeleton Loader -->
                                                 <div x-show="!imageLoaded"
-                                                    class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                                                    class="absolute inset-0 bg-gray-200 dark:bg-gray-600 animate-pulse flex items-center justify-center">
                                                     <svg class="w-12 h-12 text-gray-400" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -201,7 +203,7 @@
                                             </a>
                                         @else
                                             <a href="{{ $fullImageUrl }}" target="_blank"
-                                                class="text-blue-600 hover:underline text-base flex items-center justify-center h-40 border rounded-lg bg-gray-50">
+                                                class="text-blue-600 hover:underline text-base flex items-center justify-center h-40 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                                                 Lihat File
                                                 ({{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }})
                                             </a>
@@ -209,7 +211,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-gray-500 text-base">
+                                <p class="text-gray-500 dark:text-gray-400 text-base">
                                     Tidak ada file yang diunggah.
                                 </p>
                             @endif
@@ -235,11 +237,11 @@
                                                 videoUrl: '{{ route('files.serve', ['path' => $videoPath]) }}',
                                                 videoFileName: '{{ basename($videoPath) }}'
                                             })"
-                                            class="group relative block aspect-video w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200">
+                                            class="group relative block aspect-video w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-300 dark:border-gray-600 shadow-lg hover:shadow-xl transition-all duration-200">
 
                                             <!-- Skeleton Loader -->
                                             <div x-show="!videoLoaded"
-                                                class="absolute inset-0 bg-gray-700 animate-pulse flex flex-col items-center justify-center">
+                                                class="absolute inset-0 bg-gray-700 dark:bg-gray-800 animate-pulse flex flex-col items-center justify-center">
                                                 <svg class="w-16 h-16 text-gray-500 mb-2" fill="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path d="M8 5v14l11-7z" />
@@ -276,12 +278,12 @@
                                             </div>
                                         </a>
                                     </div>
-                                    <p class="text-sm text-gray-500 mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                         {{ basename($videoPath) }}
                                     </p>
                                 </div>
                             @else
-                                <p class="text-gray-500 text-base">
+                                <p class="text-gray-500 dark:text-gray-400 text-base">
                                     Video tidak tersedia.
                                 </p>
                             @endif
