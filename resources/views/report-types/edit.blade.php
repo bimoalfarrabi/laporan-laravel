@@ -32,7 +32,7 @@
                         <div class="mb-4">
                             <x-input-label for="is_active" :value="__('Status')" />
                             <select id="is_active" name="is_active"
-                                class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition duration-200 ease-in-out">
                                 <option value="1"
                                     {{ old('is_active', $reportType->is_active) == '1' ? 'selected' : '' }}>Aktif
                                 </option>
@@ -175,13 +175,13 @@
                             </div>
                             <div>
                                 <x-input-label for="${newFieldId}-type" value="Tipe Field" />
-                                <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                <select id="${newFieldId}-type" name="fields[${newFieldId}][type]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition duration-200 ease-in-out" required>
                                     ${fieldTypes.map(type => `<option value="${type}" ${field.type === type ? 'selected' : ''}>${type}</option>`).join('')}
                                 </select>
                             </div>
                             <div id="${newFieldId}-role-container" class="role-container" style="display: ${field.type === 'role_specific_text' ? 'block' : 'none'};">
                                 <x-input-label for="${newFieldId}-role" value="Pilih Role" />
-                                <select id="${newFieldId}-role" name="fields[${newFieldId}][role_id]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <select id="${newFieldId}-role" name="fields[${newFieldId}][role_id]" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition duration-200 ease-in-out">
                                     <option value="">Pilih Role</option>
                                     ${roles.map(role => `<option value="${role.id}" ${field.role_id == role.id ? 'selected' : ''}>${role.name}</option>`).join('')}
                                 </select>

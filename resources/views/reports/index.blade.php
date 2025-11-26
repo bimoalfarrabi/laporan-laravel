@@ -47,7 +47,7 @@
                                 </div>
                                 <div class="lg:col-span-1">
                                     <select name="report_type_id"
-                                        class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm transition duration-200 ease-in-out">
                                         <option value="">Semua Jenis Laporan</option>
                                         @foreach ($reportTypes as $reportType)
                                             <option value="{{ $reportType->id }}"
@@ -59,7 +59,7 @@
                                 </div>
                                 <div class="lg:col-span-1">
                                     <select name="filter_by_status"
-                                        class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm transition duration-200 ease-in-out">
                                         <option value="">Semua Status</option>
                                         <option value="belum disetujui"
                                             {{ $filterByStatus == 'belum disetujui' ? 'selected' : '' }}>Belum

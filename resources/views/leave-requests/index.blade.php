@@ -34,7 +34,7 @@
                                     class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
 
                                 <select name="status"
-                                    class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm transition duration-200 ease-in-out">
                                     <option value="">Semua Status</option>
                                     <option value="menunggu persetujuan"
                                         {{ request('status') == 'menunggu persetujuan' ? 'selected' : '' }}>Menunggu

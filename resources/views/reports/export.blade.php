@@ -28,7 +28,7 @@
                             method="GET" id="monthlyExportForm">
                             <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                                 <select name="month" id="exportMonth"
-                                    class="block w-full sm:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    class="block w-full sm:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm transition duration-200 ease-in-out">
                                     @foreach (range(1, 12) as $m)
                                         <option value="{{ sprintf('%02d', $m) }}"
                                             {{ date('m') == $m ? 'selected' : '' }}>
@@ -37,7 +37,7 @@
                                     @endforeach
                                 </select>
                                 <select name="year" id="exportYear"
-                                    class="block w-full sm:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    class="block w-full sm:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm transition duration-200 ease-in-out">
                                     @foreach (range(date('Y'), date('Y') - 5) as $y)
                                         <option value="{{ $y }}" {{ date('Y') == $y ? 'selected' : '' }}>
                                             {{ $y }}</option>

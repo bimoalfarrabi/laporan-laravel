@@ -20,7 +20,7 @@
                                     class="text-red-600 text-xs font-bold ml-1 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">(Wajib)</span>
                             </x-input-label>
                             <select id="leave_type" name="leave_type"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition duration-200 ease-in-out"
                                 required>
                                 <option value="">Pilih Jenis Izin</option>
                                 <option value="Izin sakit" {{ old('leave_type') == 'Izin sakit' ? 'selected' : '' }}>
