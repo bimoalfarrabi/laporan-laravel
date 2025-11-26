@@ -120,7 +120,8 @@
                                 <span class="ml-2 text-gray-600 dark:text-gray-400">{{ $timeFieldValue }} WIB</span>
                             @endif
                         @elseif ($field->type === 'textarea' || $field->type === 'text')
-                            <div class="trix-content prose max-w-none text-lg leading-relaxed">{!! $report->data[$field->name] ?? '-' !!}
+                            <div class="trix-content prose dark:prose-invert max-w-none text-lg leading-relaxed">
+                                {!! $report->data[$field->name] ?? '-' !!}
                             </div>
                         @elseif ($field->type === 'checkbox')
                             <span

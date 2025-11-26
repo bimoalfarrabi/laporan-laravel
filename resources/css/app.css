@@ -123,8 +123,17 @@ trix-toolbar .trix-button {
 /* SweetAlert2 Dark Mode Overrides */
 .dark .swal2-popup {
     background-color: #1f2937 !important; /* gray-800 */
-    color: #e5e7eb !important; /* gray-200 */
+    color: #d1d5db !important; /* gray-300 */
 }
+
+/* Date, Time, and DateTime Input Icons Dark Mode */
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+    cursor: pointer;
+}
+
 
 .dark .swal2-title {
     color: #e5e7eb !important;
