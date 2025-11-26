@@ -143,7 +143,7 @@
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 transform scale-100"
         x-transition:leave-end="opacity-0 transform scale-95" class="relative z-10 w-full">
 
-        <div class="relative mx-auto max-w-[90vw] max-h-[90vh] min-h-[60vh] flex items-center justify-center">
+        <div class="relative mx-auto max-w-[90vw] max-h-[90vh] flex items-center justify-center">
             <!-- Loading Spinner -->
             <div x-show="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-800/50 rounded-lg">
                 <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -157,7 +157,7 @@
             </div>
 
             <img :src="imageUrl" @load="handleImageLoad($event)" alt="Image"
-                class="object-contain rounded-lg shadow-lg max-w-full max-h-full"
+                class="object-contain rounded-lg shadow-lg max-w-full max-h-full w-auto h-auto mx-auto"
                 :style="{ transform: `rotate(${rotation}deg)` }" x-show="!isLoading">
 
             <!-- Action Buttons Container -->

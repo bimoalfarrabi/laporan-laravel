@@ -675,11 +675,34 @@ class ReportController extends Controller
             return $path;
         }
 
+        // Handle EXIF Rotation immediately after creating resource
+        if (function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($originalPath);
+                if ($exif && isset($exif['Orientation'])) {
+                    $orientation = $exif['Orientation'];
+                    switch ($orientation) {
+                        case 3:
+                            $imageResource = imagerotate($imageResource, 180, 0);
+                            break;
+                        case 6:
+                            $imageResource = imagerotate($imageResource, -90, 0);
+                            break;
+                        case 8:
+                            $imageResource = imagerotate($imageResource, 90, 0);
+                            break;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore EXIF errors
+            }
+        }
+
         $originalWidth = imagesx($imageResource);
         $originalHeight = imagesy($imageResource);
 
-        $maxWidth = 1280; // Max width for images (reverted)
-        $maxHeight = 1280; // Max height for images (reverted)
+        $maxWidth = 1280;
+        $maxHeight = 1280;
 
         $newWidth = $originalWidth;
         $newHeight = $originalHeight;
@@ -693,37 +716,6 @@ class ReportController extends Controller
             } else { // Portrait or Square
                 $newHeight = $maxHeight;
                 $newWidth = $maxHeight * $ratio;
-            }
-        }
-
-        // Handle EXIF Rotation
-        if (function_exists('exif_read_data')) {
-            try {
-                $exif = @exif_read_data($originalPath);
-                if ($exif && isset($exif['Orientation'])) {
-                    $orientation = $exif['Orientation'];
-                    switch ($orientation) {
-                        case 3:
-                            $imageResource = imagerotate($imageResource, 180, 0);
-                            break;
-                        case 6:
-                            $imageResource = imagerotate($imageResource, -90, 0);
-                            // Swap dimensions for 90 degree rotation
-                            $tempWidth = $newWidth;
-                            $newWidth = $newHeight;
-                            $newHeight = $tempWidth;
-                            break;
-                        case 8:
-                            $imageResource = imagerotate($imageResource, 90, 0);
-                            // Swap dimensions for 90 degree rotation
-                            $tempWidth = $newWidth;
-                            $newWidth = $newHeight;
-                            $newHeight = $tempWidth;
-                            break;
-                    }
-                }
-            } catch (\Exception $e) {
-                // Ignore EXIF errors
             }
         }
 

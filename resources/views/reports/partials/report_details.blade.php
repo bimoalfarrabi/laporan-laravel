@@ -156,7 +156,7 @@
                                             @endphp
                                             <a href="#"
                                                 @click.prevent="$dispatch('open-modal', { 
-                                                        imageUrl: '{{ route('files.serve', ['path' => $path, 'size' => '800x800']) }}', 
+                                                        imageUrl: '{{ $fullImageUrl }}', 
                                                         fullImageUrl: '{{ $fullImageUrl }}',
                                                         reportId: '{{ $report->id }}',
                                                         imagePath: '{{ $path }}'
