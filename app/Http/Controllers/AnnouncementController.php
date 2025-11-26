@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Announcement;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
@@ -26,7 +27,7 @@ class AnnouncementController extends Controller
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDirection = $request->query('sort_direction', 'desc');
 
-        $query = Announcement::with('user')
+        $query = Announcement::with('user.roles')
             ->where(function ($query) {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
             })
@@ -36,8 +37,8 @@ class AnnouncementController extends Controller
 
         if ($sortBy == 'user_name') {
             $query->join('users', 'announcements.user_id', '=', 'users.id')
-                  ->orderBy('users.name', $sortDirection)
-                  ->select('announcements.*'); // Hindari ambiguitas kolom
+                ->orderBy('users.name', $sortDirection)
+                ->select('announcements.*'); // Hindari ambiguitas kolom
         } else {
             $query->orderBy($sortBy, $sortDirection);
         }
@@ -64,16 +65,18 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after_or_equal:today'. ($request->input('starts_at') ? '|after:starts_at' : ''),
+            'expires_at' => 'nullable|date|after_or_equal:today' . ($request->input('starts_at') ? '|after:starts_at' : ''),
         ]);
 
-        Announcement::create([
-            'title' => $request->input('title'),
-            'content' => $request->input('content'),
-            'starts_at' => $request->input('starts_at'),
-            'expires_at' => $request->input('expires_at'),
-            'user_id' => Auth::id(),
-        ]);
+        DB::transaction(function () use ($request) {
+            Announcement::create([
+                'title' => $request->input('title'),
+                'content' => $request->input('content'),
+                'starts_at' => $request->input('starts_at'),
+                'expires_at' => $request->input('expires_at'),
+                'user_id' => Auth::id(),
+            ]);
+        });
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil dibuat.');
     }
@@ -103,15 +106,17 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after_or_equal:today'. ($request->input('starts_at') ? '|after:starts_at' : ''),
+            'expires_at' => 'nullable|date|after_or_equal:today' . ($request->input('starts_at') ? '|after:starts_at' : ''),
         ]);
 
-        $announcement->update([
-            'title' => $request->input('title'),
-            'content' => $request->input('content'),
-            'starts_at' => $request->input('starts_at'),
-            'expires_at' => $request->input('expires_at'),
-        ]);
+        DB::transaction(function () use ($announcement, $request) {
+            $announcement->update([
+                'title' => $request->input('title'),
+                'content' => $request->input('content'),
+                'starts_at' => $request->input('starts_at'),
+                'expires_at' => $request->input('expires_at'),
+            ]);
+        });
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil diperbarui.');
     }
@@ -121,21 +126,25 @@ class AnnouncementController extends Controller
      */
     public function destroy(Announcement $announcement)
     {
-        $announcement->delete(); // Soft delete
+        DB::transaction(function () use ($announcement) {
+            $announcement->delete(); // Soft delete
+        });
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil dihapus.');
     }
 
     public function archive()
     {
-        $announcements = Announcement::onlyTrashed()->with('user')->latest()->get();
+        $announcements = Announcement::onlyTrashed()->with('user.roles')->latest()->get();
         return view('announcements.archive', compact('announcements'));
     }
 
     public function restore($id)
     {
         $announcement = Announcement::withTrashed()->findOrFail($id);
-        $announcement->restore();
+        DB::transaction(function () use ($announcement) {
+            $announcement->restore();
+        });
 
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil dipulihkan.');
     }
@@ -144,7 +153,10 @@ class AnnouncementController extends Controller
     {
         $this->authorize('announcements:force-delete');
         $announcement = Announcement::withTrashed()->findOrFail($id);
-        $announcement->forceDelete();
+
+        DB::transaction(function () use ($announcement) {
+            $announcement->forceDelete();
+        });
 
         return redirect()->route('announcements.archive')->with('success', 'Pengumuman berhasil dihapus permanen.');
     }
