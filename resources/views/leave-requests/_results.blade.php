@@ -8,18 +8,59 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Pemohon</th>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Jenis Izin</th>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Tanggal</th>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Status</th>
+                    @php
+                        $columns = [
+                            'user_name' => 'Pemohon',
+                            'leave_type' => 'Jenis Izin',
+                            'start_date' => 'Tanggal',
+                            'status' => 'Status',
+                        ];
+                        $currentSortBy = request('sort_by', 'created_at');
+                        $currentSortOrder = request('sort_order', 'desc');
+                    @endphp
+
+                    @foreach ($columns as $field => $label)
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer group">
+                            @php
+                                $nextSortOrder =
+                                    $currentSortBy === $field && $currentSortOrder === 'asc' ? 'desc' : 'asc';
+                                $url = request()->fullUrlWithQuery([
+                                    'sort_by' => $field,
+                                    'sort_order' => $nextSortOrder,
+                                ]);
+                            @endphp
+                            <a href="{{ $url }}"
+                                class="flex items-center group-hover:text-gray-700 dark:group-hover:text-gray-200 sort-link"
+                                data-sort-by="{{ $field }}" data-sort-order="{{ $nextSortOrder }}">
+                                {{ $label }}
+                                @if ($currentSortBy === $field)
+                                    <span class="ml-1">
+                                        @if ($currentSortOrder === 'asc')
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                @else
+                                    <span class="ml-1 text-gray-400 opacity-0 group-hover:opacity-100">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                        </svg>
+                                    </span>
+                                @endif
+                            </a>
+                        </th>
+                    @endforeach
                     <th
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Aksi</th>

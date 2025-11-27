@@ -78,7 +78,7 @@
                         .then(response => response.text())
                         .then(html => {
                             resultsContainer.innerHTML = html;
-                            attachPaginationListeners();
+                            attachEvents();
                         })
                         .catch(error => console.error('Error fetching results:', error));
                 }
@@ -88,6 +88,16 @@
                     debounceTimeout = setTimeout(() => {
                         const formData = new FormData(form);
                         const params = new URLSearchParams(formData);
+
+                        // Preserve sorting parameters
+                        const currentUrlParams = new URLSearchParams(window.location.search);
+                        if (currentUrlParams.has('sort_by')) {
+                            params.set('sort_by', currentUrlParams.get('sort_by'));
+                        }
+                        if (currentUrlParams.has('sort_order')) {
+                            params.set('sort_order', currentUrlParams.get('sort_order'));
+                        }
+
                         const url = form.action + '?' + params.toString();
 
                         history.pushState(null, '', url);
@@ -95,8 +105,19 @@
                     }, 300);
                 }
 
-                function attachPaginationListeners() {
+                function attachEvents() {
+                    // Pagination
                     resultsContainer.querySelectorAll('.pagination a').forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const url = this.getAttribute('href');
+                            history.pushState(null, '', url);
+                            fetchResults(url);
+                        });
+                    });
+
+                    // Sorting
+                    resultsContainer.querySelectorAll('.sort-link').forEach(link => {
                         link.addEventListener('click', function(e) {
                             e.preventDefault();
                             const url = this.getAttribute('href');
@@ -111,7 +132,7 @@
                     input.addEventListener('change', handleFormChange);
                 });
 
-                attachPaginationListeners();
+                attachEvents();
 
                 window.addEventListener('popstate', function() {
                     fetchResults(location.href);

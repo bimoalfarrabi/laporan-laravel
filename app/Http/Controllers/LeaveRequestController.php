@@ -37,6 +37,23 @@ class LeaveRequestController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        $validSorts = ['created_at', 'leave_type', 'start_date', 'status', 'user_name'];
+        if (!in_array($sortBy, $validSorts)) {
+            $sortBy = 'created_at';
+        }
+
+        if ($sortBy === 'user_name') {
+            $query->join('users', 'leave_requests.user_id', '=', 'users.id')
+                ->orderBy('users.name', $sortOrder)
+                ->select('leave_requests.*'); // Avoid column collision
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
         $leaveRequests = $query->paginate(15)->appends($request->query());
 
         if ($request->ajax()) {
@@ -169,7 +186,7 @@ class LeaveRequestController extends Controller
         $leaveRequest->load(['user.roles', 'approvedBy.roles']);
 
         $pdf = Pdf::loadView('leave-requests.pdf', compact('leaveRequest'));
-        
+
         $applicantName = Str::slug($leaveRequest->user->name);
         $startDate = Carbon::parse($leaveRequest->start_date)->format('Ymd');
         $filename = "surat-izin-{$applicantName}-{$startDate}.pdf";
