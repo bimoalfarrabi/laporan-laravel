@@ -74,7 +74,7 @@ class LeaveRequestPolicy
         }
 
         // Superadmin, Manajemen, and Danru can export any approved leave request
-        return $user->hasRole(['superadmin', 'manajemen', 'danru']);
+        return $user->can('leave-requests:export-pdf');
     }
 
     /**

@@ -548,7 +548,7 @@ class ReportController extends Controller
 
     public function exportPdf(Report $report)
     {
-        $this->authorize('view', $report);  // Use the existing view policy
+        $this->authorize('exportPdf', $report);
 
         $report->load('reportType.reportTypeFields');  // Eager load fields
 

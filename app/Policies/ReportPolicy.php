@@ -145,4 +145,9 @@ class ReportPolicy
         }
         return $user->can('reports:reject');
     }
+
+    public function exportPdf(User $user, Report $report): bool
+    {
+        return $this->view($user, $report) && $user->can('reports:export-pdf');
+    }
 }

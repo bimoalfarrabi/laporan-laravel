@@ -36,9 +36,9 @@ class AttendancePolicy
     /**
      * Determine whether the user can export models.
      */
-    public function export(User $user): bool
+    public function exportPdf(User $user): bool
     {
-        return $user->hasRole(['superadmin', 'manajemen', 'danru']);
+        return $user->can('attendances:export-pdf');
     }
 
     /**

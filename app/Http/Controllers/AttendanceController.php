@@ -27,7 +27,7 @@ class AttendanceController extends Controller
             "create",
             "store",
         ]);
-        $this->middleware("can:export,App\Models\Attendance")->only([
+        $this->middleware("can:exportPdf,App\Models\Attendance")->only([
             "showExportForm",
             "exportPdf",
         ]);
@@ -724,13 +724,13 @@ class AttendanceController extends Controller
 
     public function showExportForm()
     {
-        $this->authorize("export", Attendance::class);
+        $this->authorize("exportPdf", Attendance::class);
         return view("attendances.export-form");
     }
 
     public function exportPdf(Request $request)
     {
-        $this->authorize("export", Attendance::class);
+        $this->authorize("exportPdf", Attendance::class);
 
         $request->validate([
             "month" => "required|date_format:Y-m",
