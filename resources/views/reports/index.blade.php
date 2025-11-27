@@ -128,6 +128,16 @@
                     debounceTimeout = setTimeout(() => {
                         const formData = new FormData(form);
                         const params = new URLSearchParams(formData);
+
+                        // Preserve sorting parameters
+                        const currentUrlParams = new URLSearchParams(window.location.search);
+                        if (currentUrlParams.has('sort_by')) {
+                            params.set('sort_by', currentUrlParams.get('sort_by'));
+                        }
+                        if (currentUrlParams.has('sort_direction')) {
+                            params.set('sort_direction', currentUrlParams.get('sort_direction'));
+                        }
+
                         const url = form.action + '?' + params.toString();
 
                         history.pushState(null, '', url);

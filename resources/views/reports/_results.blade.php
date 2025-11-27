@@ -179,7 +179,7 @@
         @endforeach
     </div>
 
-    <div class="mt-4">
+    <div class="mt-4 pagination">
         {{ $reports->links('pagination.custom') }}
     </div>
 @endif
