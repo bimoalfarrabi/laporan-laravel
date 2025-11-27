@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
     Route::get('role-permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('role-permissions.edit');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
+    Route::post('role-permissions/{role}/copy', [RolePermissionController::class, 'copy'])->name('role-permissions.copy');
 
     // Manajemen Role
     Route::get('roles/archive', [RoleController::class, 'archive'])->name('roles.archive');

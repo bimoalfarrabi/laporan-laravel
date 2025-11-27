@@ -59,4 +59,19 @@ class RolePermissionController extends Controller
 
         return redirect()->route('role-permissions.index')->with('success', 'Hak akses untuk peran ' . $role->name . ' berhasil diperbarui.');
     }
+
+    /**
+     * Menyalin hak akses dari satu peran ke peran lain.
+     */
+    public function copy(Request $request, Role $role)
+    {
+        $validated = $request->validate([
+            'source_role_id' => 'required|exists:roles,id|different:role',
+        ]);
+
+        $sourceRole = Role::findOrFail($validated['source_role_id']);
+        $role->syncPermissions($sourceRole->permissions);
+
+        return redirect()->route('role-permissions.index')->with('success', 'Hak akses berhasil disalin dari peran ' . $sourceRole->name . ' ke peran ' . $role->name . '.');
+    }
 }
