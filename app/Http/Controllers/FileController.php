@@ -94,9 +94,20 @@ class FileController extends Controller
                 'gif' => 'image/gif',
                 'mp4' => 'video/mp4',
                 'webm' => 'video/webm',
+                'mov' => 'video/quicktime',
+                'qt' => 'video/quicktime',
+                'avi' => 'video/x-msvideo',
+                'wmv' => 'video/x-ms-wmv',
                 'pdf' => 'application/pdf',
-                default => 'application/octet-stream',
             };
+        }
+
+        // Optimization: For local files (public disk), use response()->file()
+        // This handles HTTP Range requests (streaming) much better than Storage::response()
+        if ($disk === 'public') {
+            return response()->file(Storage::disk('public')->path($finalPath), [
+                'Content-Type' => $mimeType
+            ]);
         }
 
         return Storage::disk($disk)->response($finalPath, null, ['Content-Type' => $mimeType]);

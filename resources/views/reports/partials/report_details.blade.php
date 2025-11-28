@@ -254,8 +254,19 @@
                                             <video preload="metadata" @loadeddata="videoLoaded = true"
                                                 class="h-full w-full object-cover transition-opacity duration-300"
                                                 :class="{ 'opacity-0': !videoLoaded }" muted>
+                                                @php
+                                                    $extension = strtolower(pathinfo($videoPath, PATHINFO_EXTENSION));
+                                                    $mimeType = match ($extension) {
+                                                        'mp4' => 'video/mp4',
+                                                        'webm' => 'video/webm',
+                                                        'mov', 'qt' => 'video/quicktime',
+                                                        'avi' => 'video/x-msvideo',
+                                                        'wmv' => 'video/x-ms-wmv',
+                                                        default => 'video/' . $extension,
+                                                    };
+                                                @endphp
                                                 <source src="{{ route('files.serve', ['path' => $videoPath]) }}"
-                                                    type="video/{{ pathinfo($videoPath, PATHINFO_EXTENSION) }}">
+                                                    type="{{ $mimeType }}">
                                             </video>
 
                                             {{-- Play Button Overlay --}}
