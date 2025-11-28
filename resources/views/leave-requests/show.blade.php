@@ -26,7 +26,7 @@
                         @endif
                         <p><strong>Keterangan:</strong></p>
                         <div
-                            class="prose max-w-none p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                            class="prose dark:prose-invert max-w-none p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200">
                             {{ $leaveRequest->keterangan }}
                         </div>
                         <p><strong>Status:</strong>
