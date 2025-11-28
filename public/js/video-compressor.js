@@ -39,7 +39,7 @@ window.VideoCompressor = {
             // Create video element
             const video = document.createElement('video');
             video.preload = 'metadata';
-            video.muted = true;
+            video.muted = false; // Must be unmuted to capture audio via AudioContext
             video.playsInline = true;
             video.src = URL.createObjectURL(file);
 
@@ -71,8 +71,23 @@ window.VideoCompressor = {
             canvas.height = height;
             const ctx = canvas.getContext('2d');
 
-            // Try to get stream with audio
-            const stream = canvas.captureStream(30); // 30 fps
+            // Audio Context Setup to capture audio
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaElementSource(video);
+            const destination = audioCtx.createMediaStreamDestination();
+            source.connect(destination);
+
+            // Get video stream from canvas
+            const canvasStream = canvas.captureStream(30); // 30 fps
+            
+            // Combine video and audio tracks
+            const combinedStream = new MediaStream();
+            canvasStream.getVideoTracks().forEach(track => combinedStream.addTrack(track));
+            
+            // Add audio track if available
+            if (destination.stream.getAudioTracks().length > 0) {
+                combinedStream.addTrack(destination.stream.getAudioTracks()[0]);
+            }
 
             // Check for MediaRecorder support
             let mimeType = 'video/webm;codecs=vp8,opus';
@@ -81,7 +96,7 @@ window.VideoCompressor = {
             }
 
             const chunks = [];
-            const mediaRecorder = new MediaRecorder(stream, {
+            const mediaRecorder = new MediaRecorder(combinedStream, {
                 mimeType: mimeType,
                 videoBitsPerSecond: videoBitrate
             });
@@ -97,6 +112,9 @@ window.VideoCompressor = {
             // Start recording
             mediaRecorder.start(100); // Collect data every 100ms
             video.currentTime = 0;
+            
+            // Ensure video is unmuted for capture (AudioContext handles silence on output)
+            video.muted = false; 
             await video.play();
 
             let lastProgress = 40;
@@ -140,6 +158,9 @@ window.VideoCompressor = {
             
             // Clean up
             URL.revokeObjectURL(video.src);
+            if (audioCtx.state !== 'closed') {
+                audioCtx.close();
+            }
 
             const compressedSize = compressedBlob.size;
             const compressionRatio = Math.round(((originalSize - compressedSize) / originalSize) * 100);

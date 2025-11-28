@@ -12,6 +12,8 @@
         $nextTick(() => {
             const video = $el.querySelector('video');
             if (video) {
+                video.muted = false;
+                video.volume = 1.0;
                 video.play().catch(error => {
                     console.log('Autoplay prevented:', error);
                 });
@@ -50,7 +52,7 @@
                 </svg>
             </div>
 
-            <video :src="videoUrl" controls preload="metadata"
+            <video :src="videoUrl" controls preload="metadata" playsinline webkit-playsinline
                 class="w-full h-auto transition-opacity duration-300" style="max-height: 85vh;"
                 @loadeddata="isLoading = false" :class="{ 'opacity-0': isLoading }"></video>
         </div>
