@@ -11,8 +11,13 @@
         isLoading = true;
         $nextTick(() => {
             const video = $el.querySelector('video');
-            if (video && video.readyState >= 3) {
-                isLoading = false;
+            if (video) {
+                video.play().catch(error => {
+                    console.log('Autoplay prevented:', error);
+                });
+                if (video.readyState >= 3) {
+                    isLoading = false;
+                }
             }
         });
     "
@@ -45,7 +50,7 @@
                 </svg>
             </div>
 
-            <video :src="videoUrl" controls autoplay preload="metadata"
+            <video :src="videoUrl" controls preload="metadata"
                 class="w-full h-auto transition-opacity duration-300" style="max-height: 85vh;"
                 @loadeddata="isLoading = false" :class="{ 'opacity-0': isLoading }"></video>
         </div>
