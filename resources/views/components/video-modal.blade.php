@@ -2,7 +2,18 @@
     show: false,
     videoUrl: '',
     videoFileName: '',
-    isLoading: true
+    isLoading: true,
+    init() {
+        this.$watch('show', value => {
+            if (!value) {
+                const video = this.$el.querySelector('video');
+                if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+            }
+        });
+    }
 }" x-show="show"
     x-on:open-video-modal.window="
         show = true; 
