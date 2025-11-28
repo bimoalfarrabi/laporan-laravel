@@ -243,25 +243,20 @@
 
                                         <!-- Existing Video Preview -->
                                         <div x-show="existingVideoUrl && !isMarkedForDeletion && !videoPreviewUrl"
-                                            class="relative group mb-4">
-                                            <div
-                                                class="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 border border-gray-300 dark:border-gray-600 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <span
-                                                        class="text-sm font-medium text-gray-700 dark:text-gray-300">Video
-                                                        Saat
-                                                        Ini</span>
-                                                    <button type="button" @click="markForDeletion"
-                                                        class="text-red-500 hover:text-red-700 focus:outline-none">
-                                                        <svg class="w-5 h-5 fill-none stroke-currentColor"
-                                                            viewBox="0 0 24 24" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
+                                            class="relative group mb-4 max-w-full md:max-w-md">
+                                            <div class="relative">
                                                 <video :src="fileServeUrl + existingVideoUrl" controls
-                                                    class="w-full h-auto rounded-md"></video>
+                                                    class="w-full h-auto rounded-md border border-gray-300 dark:border-gray-600"></video>
+                                                <button type="button" @click="markForDeletion"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none shadow-md transition-transform transform hover:scale-110 z-10">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Video Saat Ini
                                             </div>
                                         </div>
 
@@ -270,27 +265,26 @@
                                             :value="isMarkedForDeletion ? existingVideoUrl : ''">
 
                                         <!-- New Video Preview -->
-                                        <div x-show="videoPreviewUrl" class="relative group mt-2"
-                                            style="display: none;">
-                                            <div
-                                                class="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 border border-gray-300 dark:border-gray-600 max-w-full md:max-w-md md:mr-auto mx-auto md:mx-0">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <span
-                                                        class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate"
-                                                        x-text="videoFileName"></span>
-                                                    <button type="button" @click="removeVideo"
-                                                        class="text-red-500 hover:text-red-700 focus:outline-none">
-                                                        <svg class="w-5 h-5 fill-none stroke-currentColor"
-                                                            viewBox="0 0 24 24" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
+                                        <div x-show="videoPreviewUrl"
+                                            class="relative group mt-2 max-w-full md:max-w-md" style="display: none;">
+                                            <div class="relative">
                                                 <video :src="videoPreviewUrl" controls
-                                                    class="w-full h-auto rounded-md"></video>
+                                                    class="w-full h-auto rounded-md border border-gray-300 dark:border-gray-600"></video>
+                                                <button type="button" @click="removeVideo"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none shadow-md transition-transform transform hover:scale-110 z-10">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
                                             </div>
-                                            <div class="mt-2 text-xs text-gray-500" x-html="getCompressionInfo()">
+                                            <div class="mt-1 flex justify-between items-start">
+                                                <span
+                                                    class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[70%]"
+                                                    x-text="videoFileName"></span>
+                                                <div class="text-xs text-gray-500" x-html="getCompressionInfo()">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
