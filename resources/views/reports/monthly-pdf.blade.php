@@ -74,9 +74,26 @@
                         @elseif ($field->type === 'checkbox')
                             <p>{{ $report->data[$field->name] ? 'Ya' : 'Tidak' }}</p>
                         @elseif ($field->type === 'file')
-                            <p>File: <a
-                                    href="{{ route('files.serve', ['path' => $report->data[$field->name]]) }}">{{ basename($report->data[$field->name]) }}</a>
-                            </p>
+                            <p class="field-label">{{ $field->label }}:</p>
+                            @php
+                                $filePaths = $report->data[$field->name] ?? [];
+                                if (is_string($filePaths)) {
+                                    $filePaths = [$filePaths];
+                                }
+                            @endphp
+                            @if (!empty($filePaths))
+                                <ul>
+                                    @foreach ($filePaths as $path)
+                                        <li>
+                                            <a href="{{ route('files.serve', ['path' => $path]) }}">
+                                                {{ basename($path) }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p>-</p>
+                            @endif
                         @else
                             <p>{{ $report->data[$field->name] }}</p>
                         @endif
