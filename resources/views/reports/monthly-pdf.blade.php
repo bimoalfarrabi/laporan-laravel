@@ -66,7 +66,7 @@
                     @if (isset($report->data[$field->name]))
                         <p class="field-label">{{ $field->label }}:</p>
                         @if ($field->type === 'textarea' || $field->type === 'text')
-                            <p>{{ $report->data[$field->name] }}</p>
+                            <p>{!! $report->data[$field->name] !!}</p>
                         @elseif ($field->type === 'date')
                             <p>{{ Carbon\Carbon::parse($report->data[$field->name])->format('d-m-Y') }}</p>
                         @elseif ($field->type === 'time')
@@ -74,7 +74,6 @@
                         @elseif ($field->type === 'checkbox')
                             <p>{{ $report->data[$field->name] ? 'Ya' : 'Tidak' }}</p>
                         @elseif ($field->type === 'file')
-                            <p class="field-label">{{ $field->label }}:</p>
                             @php
                                 $filePaths = $report->data[$field->name] ?? [];
                                 if (is_string($filePaths)) {
