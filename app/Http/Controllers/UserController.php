@@ -38,7 +38,7 @@ class UserController extends Controller
         } elseif (Auth::user()->hasRole('danru')) {
             // danru hanya melihat pengguna dengan peran anggota
             $users = User::whereHas('roles', function ($query) {
-                $query->where('name', 'anggota');
+                $query->whereIn('name', ['anggota', 'backup']);
             })
                 ->with('roles')
                 ->orderBy($sortBy, $sortDirection)
@@ -206,9 +206,9 @@ class UserController extends Controller
         if (Auth::user()->hasRole('superadmin')) {
             $user->shift = $request->shift;
         } elseif (Auth::user()->hasRole('danru')) {
-            // Ensure danru can only assign 'anggota'
-            if ($request->role !== 'anggota') {
-                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat mengubah pengguna dengan peran anggota.'])->withInput();
+            // Ensure danru can only assign 'anggota' or 'backup'
+            if (!in_array($request->role, ['anggota', 'backup'])) {
+                return redirect()->back()->withErrors(['role' => 'Anda hanya dapat mengubah pengguna dengan peran anggota atau backup.'])->withInput();
             }
             // Danru cannot change shift
             if ($user->shift !== Auth::user()->shift) {
