@@ -39,8 +39,8 @@ class ReportPolicy
             return true;
         }
 
-        // danru, manajemen, and anggota can view any approved report
-        if ($report->status === 'disetujui' && $user->hasRole(['danru', 'manajemen', 'anggota'])) {
+        // danru, manajemen, anggota, and backup can view any approved report
+        if ($report->status === 'disetujui' && $user->hasRole(['danru', 'manajemen', 'anggota', 'backup'])) {
             return true;
         }
 
