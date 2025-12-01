@@ -81,7 +81,7 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(5)
                 ->get();
-        } elseif ($user->hasRole('anggota')) {
+        } elseif ($user->hasRole(['anggota', 'backup'])) {
             $viewData['myRecentReports'] = Report::with('user.roles', 'reportType')->where('user_id', $user->id)
                 ->latest()
                 ->take(5)

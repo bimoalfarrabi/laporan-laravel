@@ -261,7 +261,7 @@
                             @endif
                         </div>
                         {{-- ANGGOTA DASHBOARD --}}
-                    @elseif (Auth::user()->hasRole('anggota'))
+                    @elseif (Auth::user()->hasRole(['anggota', 'backup']))
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold">5 Laporan Terakhir Anda</h3>
                             <a href="{{ route('reports.create') }}"
