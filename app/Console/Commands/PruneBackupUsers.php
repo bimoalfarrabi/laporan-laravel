@@ -20,7 +20,7 @@ class PruneBackupUsers extends Command
      *
      * @var string
      */
-    protected $description = 'Soft deletes backup users that are older than 3 days.';
+    protected $description = 'Soft deletes backup users that are older than 4 days.';
 
     /**
      * Execute the console command.
@@ -29,12 +29,12 @@ class PruneBackupUsers extends Command
     {
         $this->info('Starting to prune expired backup users...');
 
-        $threeDaysAgo = Carbon::now()->subDays(3);
+        $fourDaysAgo = Carbon::now()->subDays(4);
         $prunedCount = 0;
 
-        // Find users with the 'backup' role who were created more than 3 days ago
+        // Find users with the 'backup' role who were created more than 4 days ago
         $expiredUsers = User::role('backup')
-            ->where('created_at', '<', $threeDaysAgo)
+            ->where('created_at', '<', $fourDaysAgo)
             ->get();
 
         if ($expiredUsers->isEmpty()) {

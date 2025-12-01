@@ -19,7 +19,7 @@
                         <p><strong>Waktu Dibuat:</strong> <x-waktu-dibuat :date="$user->created_at" /></p>
                         @if ($user->hasRole('backup'))
                             <p class="text-red-600 dark:text-red-400"><strong>Jadwal Penghapusan Otomatis:</strong>
-                                <x-waktu-dibuat :date="$user->created_at->addDays(3)" />
+                                <x-waktu-dibuat :date="$user->created_at->addDays(4)" />
                             </p>
                         @endif
                         <p><strong>Terakhir Login:</strong>
