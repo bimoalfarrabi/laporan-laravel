@@ -93,7 +93,7 @@ class AttendanceController extends Controller
 
     private function applyRoleBasedFilters($attendanceQuery, $leaveQuery, $user)
     {
-        if ($user->hasRole("anggota")) {
+        if ($user->hasRole(["anggota", "backup"])) {
             $attendanceQuery->where("user_id", $user->id);
             $leaveQuery->where("user_id", $user->id);
         } elseif ($user->hasRole("danru")) {

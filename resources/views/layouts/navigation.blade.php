@@ -64,7 +64,7 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                @hasanyrole('danru|anggota')
+                                @hasanyrole('danru|anggota|backup')
                                     <x-dropdown-link :href="route('attendances.create')">
                                         {{ __('Buat Absensi') }}
                                     </x-dropdown-link>
@@ -253,7 +253,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @hasanyrole('danru|anggota')
+            @hasanyrole('danru|anggota|backup')
                 <x-responsive-nav-link :href="route('attendances.create')" :active="request()->routeIs('attendances.create')">
                     {{ __('Buat Absensi') }}
                 </x-responsive-nav-link>

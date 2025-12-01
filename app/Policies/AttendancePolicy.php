@@ -30,7 +30,7 @@ class AttendancePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['danru', 'anggota']);
+        return $user->hasRole(['danru', 'anggota', 'backup']);
     }
 
     /**
