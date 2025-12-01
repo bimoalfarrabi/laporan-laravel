@@ -30,7 +30,7 @@ class DashboardController extends Controller
         if ($user->hasRole('danru')) {
             $reportsForApprovalQuery->whereHas('user', function ($query) {
                 $query->whereHas('roles', function ($q) {
-                    $q->where('name', 'anggota');
+                    $q->whereIn('name', ['anggota', 'backup']);
                 });
             });
         } elseif ($user->hasRole('manajemen')) {

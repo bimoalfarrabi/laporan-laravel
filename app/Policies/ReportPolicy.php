@@ -51,7 +51,7 @@ class ReportPolicy
         if ($user->can('reports:view-any')) {
             // If user is danru, they can only view reports from anggota
             if ($user->hasRole('danru')) {
-                return $report->user->hasRole(['anggota', 'danru']);
+                return $report->user->hasRole(['anggota', 'danru', 'backup']);
             }
             // Other roles with view-any can see everything
             return true;
@@ -133,7 +133,7 @@ class ReportPolicy
     public function approve(User $user, Report $report): bool
     {
         if ($user->hasRole('danru')) {
-            return $report->user->hasRole(['anggota', 'danru']) && $user->id !== $report->user_id && $user->can('reports:approve');
+            return $report->user->hasRole(['anggota', 'danru', 'backup']) && $user->id !== $report->user_id && $user->can('reports:approve');
         }
         return $user->can('reports:approve');
     }
@@ -141,7 +141,7 @@ class ReportPolicy
     public function reject(User $user, Report $report): bool
     {
         if ($user->hasRole('danru')) {
-            return $report->user->hasRole(['anggota', 'danru']) && $user->id !== $report->user_id && $user->can('reports:reject');
+            return $report->user->hasRole(['anggota', 'danru', 'backup']) && $user->id !== $report->user_id && $user->can('reports:reject');
         }
         return $user->can('reports:reject');
     }
