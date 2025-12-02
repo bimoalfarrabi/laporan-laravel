@@ -85,7 +85,12 @@
                 @foreach ($dataMatrix as $userId => $userData)
                     <tr>
                         <td style="text-align: center;">{{ $loop->iteration }}</td>
-                        <td class="user-name">{{ $userData['user_name'] }}</td>
+                        <td class="user-name">
+                            {{ $userData['user_name'] }}
+                            <div style="font-weight: normal; font-size: 6px; margin-top: 2px;">
+                                {{ $userData['user_role'] ?? '' }}
+                            </div>
+                        </td>
                         @foreach ($dateRange as $date)
                             @php
                                 $dateString = $date->format('Y-m-d');

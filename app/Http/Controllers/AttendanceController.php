@@ -769,6 +769,7 @@ class AttendanceController extends Controller
             ->whereHas("roles", function ($query) {
                 $query->whereIn("name", ["danru", "anggota", "backup"]);
             })
+            ->with('roles')
             ->whereNotIn('id', [2, 32, 33])
             ->where(function ($query) use ($startDate) {
                 $query->whereNull('deleted_at')
@@ -808,6 +809,9 @@ class AttendanceController extends Controller
 
         foreach ($users as $user) {
             $dataMatrix[$user->id]["user_name"] = $user->name;
+            $dataMatrix[$user->id]["user_role"] = $user->roles->pluck('name')->map(function ($name) {
+                return ucfirst($name);
+            })->join(', ');
             $dataMatrix[$user->id]["dates"] = [];
 
             foreach ($dateRange as $date) {
