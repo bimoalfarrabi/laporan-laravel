@@ -53,10 +53,13 @@
             text-align: center;
         }
         .status {
-             font-weight: bold;
+            font-weight: bold;
         }
         .user-name {
             font-weight: bold;
+        }
+        .date-header {
+            text-align: center;
         }
     </style>
 </head>
