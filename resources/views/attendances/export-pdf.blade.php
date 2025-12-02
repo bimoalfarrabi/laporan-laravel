@@ -55,12 +55,16 @@
         .status {
              font-weight: bold;
         }
+        .user-name {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Laporan Absensi Bulanan</h1>
+            <h1>Satpam RSUD Blambangan - PT Wira Buana Arum</h1>
             <p>{{ $monthName }}</p>
         </div>
 

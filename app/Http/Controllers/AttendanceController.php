@@ -769,6 +769,7 @@ class AttendanceController extends Controller
             ->whereHas("roles", function ($query) {
                 $query->whereIn("name", ["danru", "anggota", "backup"]);
             })
+            ->whereNotIn('id', [2, 32, 33])
             ->where(function ($query) use ($startDate) {
                 $query->whereNull('deleted_at')
                     ->orWhere('deleted_at', '>=', $startDate);
