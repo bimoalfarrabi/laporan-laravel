@@ -70,6 +70,10 @@
                             <div class="mt-8">
                                 <h3 class="text-lg font-semibold mb-4">Pengajuan Izin Menunggu Persetujuan</h3>
                                 @if ($pendingLeaveRequests->isNotEmpty())
+                                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700" role="alert">
+                                        <p class="font-bold">Perhatian!</p>
+                                        <p>Terdapat {{ $pendingLeaveRequests->count() }} pengajuan izin yang menunggu persetujuan Anda.</p>
+                                    </div>
                                     {{-- Table View for Larger Screens --}}
                                     <div class="overflow-x-auto hidden sm:block">
                                         <table class="min-w-full divide-y divide-gray-200">
