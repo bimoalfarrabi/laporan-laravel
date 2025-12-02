@@ -9,6 +9,18 @@ use Illuminate\Auth\Access\Response;
 class AttendancePolicy
 {
     /**
+     * Perform pre-authorization checks.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
+
+        return null;
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
@@ -36,7 +48,7 @@ class AttendancePolicy
     /**
      * Determine whether the user can export models.
      */
-    public function exportPdf(User $user): bool
+    public function export(User $user): bool
     {
         return $user->can('attendances:export-pdf');
     }

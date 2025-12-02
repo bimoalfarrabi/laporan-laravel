@@ -22,16 +22,44 @@ class RolesAndPermissionsSeeder extends Seeder
         // Buat Permissions untuk Laporan (Reports)
         $permissions = [
             // Reports
-            'reports:view-any', 'reports:view-own', 'reports:create', 'reports:update-any', 'reports:update-own', 'reports:delete-any', 'reports:delete-own', 'reports:restore', 'reports:force-delete', 'reports:approve', 'reports:reject',
+            'reports:view-any',
+            'reports:view-own',
+            'reports:create',
+            'reports:update-any',
+            'reports:update-own',
+            'reports:delete-any',
+            'reports:delete-own',
+            'reports:restore',
+            'reports:force-delete',
+            'reports:approve',
+            'reports:reject',
 
             // Report Types
-            'report-types:view-any', 'report-types:create', 'report-types:update', 'report-types:delete',
+            'report-types:view-any',
+            'report-types:create',
+            'report-types:update',
+            'report-types:delete',
 
             // Users
-            'users:view-any', 'users:view', 'users:create', 'users:update', 'users:delete', 'users:restore', 'users:force-delete', 'users:reset-password',
+            'users:view-any',
+            'users:view',
+            'users:create',
+            'users:update',
+            'users:delete',
+            'users:restore',
+            'users:force-delete',
+            'users:reset-password',
 
             // Announcements
-            'announcements:view-any', 'announcements:create', 'announcements:update', 'announcements:delete', 'announcements:force-delete', 'announcements:restore',
+            'announcements:view-any',
+            'announcements:create',
+            'announcements:update',
+            'announcements:delete',
+            'announcements:force-delete',
+            'announcements:restore',
+
+            // Attendances
+            'attendances:export-pdf',
         ];
 
         foreach ($permissions as $permission) {
@@ -47,16 +75,32 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdminRole->givePermissionTo(Permission::all());
         $danruRole->givePermissionTo([
             // Reports
-            'reports:view-any', 'reports:create', 'reports:update-any', 'reports:delete-any', 'reports:restore', 'reports:approve', 'reports:reject',
+            'reports:view-any',
+            'reports:create',
+            'reports:update-any',
+            'reports:delete-any',
+            'reports:restore',
+            'reports:approve',
+            'reports:reject',
             // Users
-            'users:view-any', 'users:view',
+            'users:view-any',
+            'users:view',
             // Announcements
-            'announcements:view-any', 'announcements:create', 'announcements:update', 'announcements:delete', 'announcements:restore',
+            'announcements:view-any',
+            'announcements:create',
+            'announcements:update',
+            'announcements:delete',
+            'announcements:restore',
+            // Attendances
+            'attendances:export-pdf',
         ]);
 
         $anggotaRole->givePermissionTo([
             // Reports
-            'reports:view-own', 'reports:create', 'reports:update-own', 'reports:delete-own',
+            'reports:view-own',
+            'reports:create',
+            'reports:update-own',
+            'reports:delete-own',
         ]);
 
 
