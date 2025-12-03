@@ -28,7 +28,7 @@ class NewReportNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', \NotificationChannels\WebPush\WebPushChannel::class];
     }
 
     /**
@@ -44,5 +44,15 @@ class NewReportNotification extends Notification
             'user_name' => $this->report->user->name,
             'created_at' => $this->report->created_at,
         ];
+    }
+
+    public function toWebPush($notifiable, $notification)
+    {
+        return (new \NotificationChannels\WebPush\WebPushMessage)
+            ->title('Laporan Baru!')
+            ->icon('/logo.png') // Ensure you have a logo or use a default
+            ->body($this->report->user->name . ' membuat laporan baru: ' . $this->report->reportType->name)
+            ->action('Lihat Laporan', 'view_report')
+            ->data(['url' => route('reports.show', $this->report->id)]);
     }
 }

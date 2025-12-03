@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
 
     // Notifications
     Route::get('/notifications/check', [App\Http\Controllers\NotificationController::class, 'check'])->name('notifications.check');
+    Route::post('/notifications/subscribe', [App\Http\Controllers\NotificationController::class, 'subscribe'])->name('notifications.subscribe');
     Route::get('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::get('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 

@@ -148,29 +148,101 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.unread_count > lastNotificationCount) {
-                                // New notification received
-                                Swal.fire({
-                                    icon: 'info',
-                                    title: 'Laporan Baru!',
-                                    text: 'Ada laporan baru yang masuk.',
+                                // Play sound or show toast
+                                const Toast = Swal.mixin({
                                     toast: true,
-                                    position: 'top-end',
+                                    position: "top-end",
                                     showConfirmButton: false,
-                                    timer: 5000,
+                                    timer: 3000,
                                     timerProgressBar: true,
                                     didOpen: (toast) => {
-                                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                        toast.addEventListener('click', () => {
-                                            window.location.reload();
-                                        })
+                                        toast.onmouseenter = Swal.stopTimer;
+                                        toast.onmouseleave = Swal.resumeTimer;
                                     }
                                 });
-                                lastNotificationCount = data.unread_count;
-                                // Optional: Update bell icon badge here if you want real-time update without reload
+                                Toast.fire({
+                                    icon: "info",
+                                    title: "Laporan Baru Masuk!",
+                                    text: "Klik untuk melihat detail."
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                                
+                                // Update Badge
+                                const badge = document.querySelector('.notification-badge');
+                                if (badge) {
+                                    badge.innerText = data.unread_count;
+                                } else {
+                                    // Create badge if not exists (simplified, better to reload or use more complex DOM manipulation)
+                                    // For now, reloading is a safe bet for complex UI updates, but let's try to update the count if element exists
+                                }
                             }
+                            lastNotificationCount = data.unread_count;
                         });
                 }, 30000); // Check every 30 seconds
+
+            // Web Push Subscription
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                navigator.serviceWorker.register('/sw.js').then(function(swReg) {
+                    console.log('Service Worker is registered', swReg);
+
+                    swReg.pushManager.getSubscription().then(function(subscription) {
+                        if (subscription === null) {
+                            // User is not subscribed, ask for permission
+                             Notification.requestPermission().then(function(permission) {
+                                if (permission === 'granted') {
+                                    subscribeUser(swReg);
+                                }
+                            });
+                        } else {
+                            // User is already subscribed
+                            console.log('User is already subscribed');
+                            updateSubscriptionOnServer(subscription);
+                        }
+                    });
+                }).catch(function(error) {
+                    console.error('Service Worker Error', error);
+                });
+            }
+
+            function subscribeUser(swReg) {
+                const applicationServerKey = urlB64ToUint8Array('{{ config('webpush.vapid.public_key') }}');
+                swReg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                }).then(function(subscription) {
+                    console.log('User is subscribed:', subscription);
+                    updateSubscriptionOnServer(subscription);
+                }).catch(function(err) {
+                    console.log('Failed to subscribe the user: ', err);
+                });
+            }
+
+            function updateSubscriptionOnServer(subscription) {
+                fetch('{{ route('notifications.subscribe') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                    },
+                    body: JSON.stringify(subscription)
+                });
+            }
+
+            function urlB64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding)
+                    .replace(/\-/g, '+')
+                    .replace(/_/g, '/');
+
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
             @endauth
         });
     </script>

@@ -30,4 +30,22 @@ class NotificationController extends Controller
             'unread_count' => auth()->user()->unreadNotifications->count()
         ]);
     }
+
+    public function subscribe(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'endpoint' => 'required',
+            'keys.auth' => 'required',
+            'keys.p256dh' => 'required',
+        ]);
+
+        $user = auth()->user();
+        $user->updatePushSubscription(
+            $request->endpoint,
+            $request->keys['p256dh'],
+            $request->keys['auth']
+        );
+
+        return response()->json(['success' => true]);
+    }
 }
