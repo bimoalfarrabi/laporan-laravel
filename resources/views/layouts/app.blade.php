@@ -138,6 +138,40 @@
                     });
                 });
             });
+
+            // Polling for new notifications
+            @auth
+                let lastNotificationCount = {{ auth()->user()->unreadNotifications->count() }};
+                
+                setInterval(() => {
+                    fetch('{{ route('notifications.check') }}')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.unread_count > lastNotificationCount) {
+                                // New notification received
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Laporan Baru!',
+                                    text: 'Ada laporan baru yang masuk.',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 5000,
+                                    timerProgressBar: true,
+                                    didOpen: (toast) => {
+                                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                        toast.addEventListener('click', () => {
+                                            window.location.reload();
+                                        })
+                                    }
+                                });
+                                lastNotificationCount = data.unread_count;
+                                // Optional: Update bell icon badge here if you want real-time update without reload
+                            }
+                        });
+                }, 30000); // Check every 30 seconds
+            @endauth
         });
     </script>
 </body>

@@ -34,6 +34,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/theme', [ProfileController::class, 'updateTheme'])->name('profile.updateTheme');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Notifications
+    Route::get('/notifications/check', [App\Http\Controllers\NotificationController::class, 'check'])->name('notifications.check');
+    Route::get('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::get('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
     // Manajemen Jenis Laporan
     Route::get('report-types/explanation', [ReportTypeController::class, 'explanation'])->name('report-types.explanation');
     Route::resource('report-types', ReportTypeController::class);
