@@ -167,7 +167,11 @@
                             @forelse(auth()->user()->unreadNotifications as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
+                                    @if ($notification->type === 'App\Notifications\NewReportNotification')
                                         <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
+                                    @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
+                                        <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
+                                    @endif
                                         <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                 </x-dropdown-link>
@@ -272,7 +276,11 @@
                             @forelse(auth()->user()->unreadNotifications as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
+                                    @if ($notification->type === 'App\Notifications\NewReportNotification')
                                         <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
+                                    @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
+                                        <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
+                                    @endif
                                         <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                 </x-dropdown-link>

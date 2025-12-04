@@ -162,7 +162,7 @@
                                 });
                                 Toast.fire({
                                     icon: "info",
-                                    title: "Laporan Baru Masuk!",
+                                    title: "Notifikasi Baru!",
                                     text: "Klik untuk melihat detail."
                                 }).then(() => {
                                     window.location.reload();

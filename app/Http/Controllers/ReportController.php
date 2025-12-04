@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\NewReportNotification;
+use App\Notifications\ReportStatusNotification;
 use App\Models\User;
 
 class ReportController extends Controller
@@ -533,6 +534,10 @@ class ReportController extends Controller
         $this->authorize('approve', $report);  // Menggunakan policy approve
 
         $report->status = 'disetujui';
+        $report->save();
+
+        // Notify the user who created the report
+        $report->user->notify(new ReportStatusNotification($report));
         $report->approved_by_user_id = Auth::id();
         $report->approved_at = now();
         $report->save();
@@ -545,6 +550,10 @@ class ReportController extends Controller
 
         if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
             $report->status = 'ditolak';
+            $report->save();
+
+            // Notify the user who created the report
+            $report->user->notify(new ReportStatusNotification($report));
             $report->rejected_by_user_id = Auth::id();
             $report->rejected_at = now();
             $report->save();
