@@ -171,6 +171,8 @@
                                         <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
                                     @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
                                         <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
+                                    @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
+                                        <span class="font-medium">Pengajuan Cuti ({{ $notification->data['leave_type'] }}) Anda {{ $notification->data['status'] }}</span>
                                     @endif
                                         <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
@@ -280,6 +282,8 @@
                                         <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
                                     @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
                                         <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
+                                    @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
+                                        <span class="font-medium">Pengajuan Cuti ({{ $notification->data['leave_type'] }}) Anda {{ $notification->data['status'] }}</span>
                                     @endif
                                         <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
