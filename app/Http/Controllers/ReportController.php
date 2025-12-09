@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NewReportNotification;
+use App\Notifications\ReportStatusNotification;
+use App\Models\User;
 
 class ReportController extends Controller
 {
@@ -171,6 +174,12 @@ class ReportController extends Controller
                 $report->status = 'belum disetujui';
                 $report->last_edited_by_user_id = Auth::id();
                 $report->save();
+
+                // Notify Danru
+                $danruUsers = User::role('danru')->get();
+                foreach ($danruUsers as $danru) {
+                    $danru->notify(new NewReportNotification($report));
+                }
 
                 return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat.');
             } catch (ValidationException $e) {
@@ -525,6 +534,10 @@ class ReportController extends Controller
         $this->authorize('approve', $report);  // Menggunakan policy approve
 
         $report->status = 'disetujui';
+        $report->save();
+
+        // Notify the user who created the report
+        $report->user->notify(new ReportStatusNotification($report));
         $report->approved_by_user_id = Auth::id();
         $report->approved_at = now();
         $report->save();
@@ -537,6 +550,10 @@ class ReportController extends Controller
 
         if (Auth::user()->hasRole(['danru', 'superadmin', 'manajemen'])) {
             $report->status = 'ditolak';
+            $report->save();
+
+            // Notify the user who created the report
+            $report->user->notify(new ReportStatusNotification($report));
             $report->rejected_by_user_id = Auth::id();
             $report->rejected_at = now();
             $report->save();

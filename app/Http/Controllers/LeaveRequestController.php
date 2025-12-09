@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use App\Notifications\LeaveRequestStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -155,6 +156,9 @@ class LeaveRequestController extends Controller
             'rejected_at' => null,
         ]);
 
+        // Notify the user who created the request
+        $leaveRequest->user->notify(new LeaveRequestStatusNotification($leaveRequest));
+
         return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan izin telah disetujui.');
     }
 
@@ -172,6 +176,9 @@ class LeaveRequestController extends Controller
             'approved_by' => null,
             'approved_at' => null,
         ]);
+
+        // Notify the user who created the request
+        $leaveRequest->user->notify(new LeaveRequestStatusNotification($leaveRequest));
 
         return redirect()->route('leave-requests.show', $leaveRequest)->with('success', 'Pengajuan izin telah ditolak.');
     }
