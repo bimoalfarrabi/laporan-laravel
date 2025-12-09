@@ -65,10 +65,12 @@ class User extends Authenticatable
     protected static function booted(): void
     {
         static::deleting(function ($user) {
-            // Before a user is deleted (soft or force), detach all their roles and permissions.
-            // This prevents orphaned records in the Spatie pivot tables.
-            $user->roles()->detach();
-            $user->permissions()->detach();
+            if ($user->isForceDeleting()) {
+                // Before a user is deleted (force), detach all their roles and permissions.
+                // Soft deleted users retain their roles for archive viewing.
+                $user->roles()->detach();
+                $user->permissions()->detach();
+            }
         });
     }
 

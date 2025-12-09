@@ -277,9 +277,8 @@ class UserController extends Controller
             }
         } elseif (Auth::user()->hasRole('danru')) {
             // Danru hanya bisa melihat anggota dan backup di arsip
-            $query->whereHas('roles', function ($q) {
-                $q->whereIn('name', ['anggota', 'backup']);
-            });
+            // Gunakan kolom role string agar data lama yang terlanjur detached tetap muncul
+            $query->whereIn('role', ['anggota', 'backup']);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
