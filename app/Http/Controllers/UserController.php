@@ -276,9 +276,9 @@ class UserController extends Controller
                 $query->role($filterRole);
             }
         } elseif (Auth::user()->hasRole('danru')) {
-            // Danru hanya bisa melihat anggota di arsip
+            // Danru hanya bisa melihat anggota dan backup di arsip
             $query->whereHas('roles', function ($q) {
-                $q->where('name', 'anggota');
+                $q->whereIn('name', ['anggota', 'backup']);
             });
 
             if ($search) {
