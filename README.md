@@ -13,41 +13,57 @@ This is a reporting application built with Laravel. It provides a comprehensive 
 
 ## Key Features
 
-*   **Dynamic Report Management:**
-    *   Create custom report types with a dynamic form builder (defining fields like text, date, number, file, etc.).
-    *   Users can submit reports based on the defined report types.
-    *   Supervisors (Danru) can approve or reject submitted reports.
-    *   Automatic compression for all uploaded images to save storage space.
+-   **Dynamic Report Management:**
 
-*   **User Management:**
-    *   Full CRUD (Create, Read, Update, Delete) functionality for users.
-    *   Soft delete and restore capabilities for users.
-    *   Forced password reset functionality.
+    -   Create custom report types with a dynamic form builder (defining fields like text, date, number, file, etc.).
+    -   Users can submit reports based on the defined report types.
+    -   Supervisors (Danru) can approve or reject submitted reports.
+    -   Automatic compression for all uploaded images to save storage space.
 
-*   **Role & Permission Management:**
-    *   Granular permission system powered by `spatie/laravel-permission`.
-    *   Superadmins can create, edit, and soft-delete roles through the UI.
-    *   An archive page allows for restoring deleted roles.
-    *   Easily assign permissions to roles in a grouped interface.
+-   **User Management:**
 
+    -   Full CRUD (Create, Read, Update, Delete) functionality for users.
+    -   Soft delete and restore capabilities for users.
+    -   Forced password reset functionality.
 
+-   **Role & Permission Management:**
+
+    -   Granular permission system powered by `spatie/laravel-permission`.
+    -   Superadmins can create, edit, and soft-delete roles through the UI.
+    -   An archive page allows for restoring deleted roles.
+    -   Easily assign permissions to roles in a grouped interface.
+
+-   **Notification System (Real-time & Web Push):**
+
+    -   **In-App Notifications:** Real-time updates via a bell icon for new reports and status changes.
+    -   **Web Push Notifications:** Browser-based push notifications even when the app is in the background.
+    -   **Comprehensive Coverage:** Notifications for new report submissions, report approvals/rejections, and leave request status updates.
+    -   **Role-Aware:** Targeted notifications for 'danru' (new reports) and 'anggota' (status updates).
+
+-   **Leave Request Management (Cuti):**
+    -   Dedicated workflow for submitting and tracking leave requests.
+    -   Approval system for supervisors/admins.
+    -   Status tracking (Pending, Approved, Rejected).
 
 ## Getting Started
 
 Follow these steps to set up the project locally:
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/bimoalfarrabi/laporan-laravel.git
     cd laporan
     ```
 
 2.  **Install PHP Dependencies:**
+
     ```bash
     composer install
     ```
 
 3.  **Environment Setup:**
+
     -   Copy the example environment file:
         ```bash
         cp .env.example .env
@@ -59,17 +75,20 @@ Follow these steps to set up the project locally:
     -   Edit the `.env` file and configure your database credentials (DB_DATABASE, DB_USERNAME, DB_PASSWORD).
 
 4.  **Database Migration and Seeding:**
+
     -   Run migrations and seed the database with initial data (including roles, permissions, and default users):
         ```bash
         php artisan migrate:fresh --seed
         ```
 
 5.  **Install Node.js Dependencies:**
+
     ```bash
     npm install
     ```
 
 6.  **Build Frontend Assets:**
+
     -   Compile the frontend assets (CSS, JavaScript):
         ```bash
         npm run build
@@ -80,17 +99,29 @@ Follow these steps to set up the project locally:
         ```
 
 7.  **Start the Local Server:**
+
     ```bash
     php artisan serve
     ```
 
 8.  **Access the Application:**
+
     -   Open your web browser and navigate to the URL provided by `php artisan serve` (e.g., `http://127.0.0.1:8000`).
 
 9.  **Default Login Credentials:**
+
     -   **Superadmin:**
         -   Email: `superadmin@example.com`
         -   Password: `password`
+
+10. **Web Push Notification Setup:**
+    -   This project uses `laravel-notification-channels/webpush`.
+    -   Generate VAPID keys for browser notifications:
+        ```bash
+        php artisan webpush:vapid
+        ```
+    -   This will automatically append `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to your `.env` file.
+    -   Ensure your application is served over HTTPS (or use localhost for testing) as Service Workers require a secure context.
 
 ## Learning Laravel
 
@@ -106,14 +137,14 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+-   **[Vehikl](https://vehikl.com)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Redberry](https://redberry.international/laravel-development)**
+-   **[Active Logic](https://activelogic.com)**
 
 ## Contributing
 
