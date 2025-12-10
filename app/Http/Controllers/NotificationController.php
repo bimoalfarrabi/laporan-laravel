@@ -6,9 +6,14 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $notifications = auth()->user()->notifications()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('notifications._results', compact('notifications'));
+        }
+
         return view('notifications.index', compact('notifications'));
     }
 
