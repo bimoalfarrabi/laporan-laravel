@@ -164,7 +164,7 @@
                             <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
                                 Notifikasi
                             </div>
-                            @forelse(auth()->user()->unreadNotifications as $notification)
+                            @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
                                     @if ($notification->type === 'App\Notifications\NewReportNotification')
@@ -182,6 +182,10 @@
                                     Tidak ada notifikasi baru
                                 </div>
                             @endforelse
+                            <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                            <x-dropdown-link :href="route('notifications.index')" class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                                Lihat Semua Notifikasi
+                            </x-dropdown-link>
                             @if(auth()->user()->unreadNotifications->count() > 0)
                                 <div class="border-t border-gray-100 dark:border-gray-600"></div>
                                 <x-dropdown-link :href="route('notifications.markAllAsRead')" class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
@@ -275,7 +279,7 @@
                             <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
                                 Notifikasi
                             </div>
-                            @forelse(auth()->user()->unreadNotifications as $notification)
+                            @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
                                     @if ($notification->type === 'App\Notifications\NewReportNotification')
@@ -293,6 +297,10 @@
                                     Tidak ada notifikasi baru
                                 </div>
                             @endforelse
+                            <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                            <x-dropdown-link :href="route('notifications.index')" class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                                Lihat Semua Notifikasi
+                            </x-dropdown-link>
                             @if(auth()->user()->unreadNotifications->count() > 0)
                                 <div class="border-t border-gray-100 dark:border-gray-600"></div>
                                 <x-dropdown-link :href="route('notifications.markAllAsRead')" class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
