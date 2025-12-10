@@ -65,29 +65,69 @@ trix-toolbar .trix-button {
         white-space: nowrap;
         padding-bottom: 0.5rem;
     }
-    
+
     trix-editor {
         min-height: 200px; /* Ensure enough touch space */
     }
 }
 
-/* Dark Mode Scrollbar */
-.dark ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+/* Custom Scrollbar Utility */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 14px; /* Slightly thicker for ease of use */
+    height: 14px;
+    display: block !important; /* Force display */
 }
 
-.dark ::-webkit-scrollbar-track {
-    background: #1f2937; /* gray-800 */
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-    background: #4b5563; /* gray-600 */
-    border-radius: 5px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 6px;
+    border: 3px solid #f1f1f1; /* Creates a padding effect */
+    min-height: 40px; /* Ensure thumb is always large enough to grab */
+    min-width: 40px;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-    background: #6b7280; /* gray-500 */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #a8a8a8;
+}
+
+/* Dark Mode Overrides for Utility */
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937;
+    border-color: #1f2937;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+    border-color: #1f2937;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #6b7280;
+}
+
+/* Firefox Support for Utility */
+.custom-scrollbar {
+    scrollbar-width: auto;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.dark .custom-scrollbar {
+    scrollbar-color: #4b5563 #1f2937;
+}
+
+/* Firefox Support */
+* {
+    scrollbar-width: auto;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.dark * {
+    scrollbar-color: #4b5563 #1f2937;
 }
 
 /* Trix Editor Dark Mode Overrides */
@@ -133,7 +173,6 @@ trix-toolbar .trix-button {
     filter: invert(1) !important;
     cursor: pointer;
 }
-
 
 .dark .swal2-title {
     color: #e5e7eb !important;

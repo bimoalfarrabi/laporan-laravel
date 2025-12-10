@@ -1,10 +1,9 @@
 @if ($users->isEmpty())
     <p class="mt-4 text-gray-500 dark:text-gray-400">Belum ada pengguna yang ditemukan.</p>
 @else
-    {{-- Table View for Larger Screens --}}
-    <div class="mt-6 overflow-x-auto hidden sm:block">
+    <div class="mt-6 overflow-x-scroll custom-scrollbar hidden sm:block" id="table-container">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-30">
                 <tr>
                     @php
                         $columns = [
@@ -20,7 +19,7 @@
 
                     @foreach ($columns as $column => $title)
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider {{ $column === 'id' ? 'sticky left-0 z-50 bg-gray-50 dark:bg-gray-700' : '' }} {{ $column === 'name' ? 'sticky left-16 z-50 bg-gray-50 dark:bg-gray-700' : '' }}">
                             <a href="{{ route('users.index', array_merge(request()->query(), ['sort_by' => $column, 'sort_direction' => $sortBy == $column && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
                                 class="flex items-center">
                                 {{ $title }}
@@ -57,11 +56,11 @@
                 @foreach ($users as $user)
                     <tr>
                         <td
-                            class="sticky left-0 bg-white dark:bg-gray-800 px-6 py-4 border-r dark:border-gray-700 dark:text-gray-100">
+                            class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-6 py-4 border-r dark:border-gray-700 dark:text-gray-100">
                             {{ $user->id }}
                         </td>
                         <td
-                            class="sticky left-16 bg-white dark:bg-gray-800 px-6 py-4 border-r dark:border-gray-700 dark:text-gray-100">
+                            class="sticky left-16 z-10 bg-white dark:bg-gray-800 px-6 py-4 border-r dark:border-gray-700 dark:text-gray-100">
                             {{ $user->name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">

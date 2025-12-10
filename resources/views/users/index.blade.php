@@ -11,7 +11,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     @can('create', App\Models\User::class)
                         <div class="flex items-center mb-4 space-x-4"> {{-- Tambahkan space-x-4 --}}
@@ -79,12 +79,71 @@
         </div>
     </div>
 
+    {{-- Floating Scrollbar --}}
+    <div id="floating-scrollbar-container" class="fixed bottom-0 left-0 z-50 w-full overflow-x-auto bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 hidden">
+         <div id="floating-scrollbar-content" class="h-4"></div>
+    </div>
+
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.getElementById('filter-form');
                 const resultsContainer = document.getElementById('user-results');
+                const floatingScrollbarContainer = document.getElementById('floating-scrollbar-container');
+                const floatingScrollbarContent = document.getElementById('floating-scrollbar-content');
+                let tableContainer = document.getElementById('table-container'); // Get initial reference
+
                 let debounceTimeout;
+
+                function initFloatingScrollbar() {
+                    tableContainer = document.getElementById('table-container'); // Re-fetch in case of AJAX update
+                    if (!tableContainer) {
+                        floatingScrollbarContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    // Sync content width
+                    floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+
+                    // Sync scroll events
+                    tableContainer.addEventListener('scroll', function() {
+                        floatingScrollbarContainer.scrollLeft = tableContainer.scrollLeft;
+                    });
+
+                    floatingScrollbarContainer.addEventListener('scroll', function() {
+                        tableContainer.scrollLeft = floatingScrollbarContainer.scrollLeft;
+                    });
+
+                    // Initial visibility check
+                    checkScrollbarVisibility();
+                }
+
+                function checkScrollbarVisibility() {
+                     if (!tableContainer) return;
+
+                     const rect = tableContainer.getBoundingClientRect();
+                     const isTableBottomVisible = (rect.bottom <= window.innerHeight);
+                     const hasHorizontalOverflow = tableContainer.scrollWidth > tableContainer.clientWidth;
+
+                     if (hasHorizontalOverflow && !isTableBottomVisible) {
+                         floatingScrollbarContainer.classList.remove('hidden');
+                         // Sync width again just in case
+                         floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                     } else {
+                         floatingScrollbarContainer.classList.add('hidden');
+                     }
+                }
+
+                // Window resize and scroll handling for visibility
+                window.addEventListener('resize', () => {
+                   if(tableContainer) {
+                        floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                        checkScrollbarVisibility();
+                   }
+                });
+                
+                window.addEventListener('scroll', checkScrollbarVisibility);
+
 
                 function fetchResults(url) {
                     fetch(url, {
@@ -97,6 +156,7 @@
                             resultsContainer.innerHTML = html;
                             attachPaginationListeners();
                             attachSortableListeners(); // Re-attach for new content
+                            initFloatingScrollbar(); // Re-init scrollbar
                         })
                         .catch(error => console.error('Error fetching results:', error));
                 }
@@ -144,6 +204,7 @@
                 // Initial attachment of listeners
                 attachPaginationListeners();
                 attachSortableListeners();
+                initFloatingScrollbar(); // Init on load
 
                 // Handle back/forward browser buttons
                 window.addEventListener('popstate', function() {
