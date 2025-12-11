@@ -61,13 +61,71 @@
         </div>
     </div>
 
+    {{-- Floating Scrollbar --}}
+    <div id="floating-scrollbar-container"
+        class="fixed bottom-0 left-0 z-50 w-full overflow-x-auto bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 hidden">
+        <div id="floating-scrollbar-content" class="h-4"></div>
+    </div>
+
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.getElementById('filter-form');
                 const resultsContainer = document.getElementById('attendance-results');
                 const loadingIndicator = document.getElementById('loading-indicator');
+                const floatingScrollbarContainer = document.getElementById('floating-scrollbar-container');
+                const floatingScrollbarContent = document.getElementById('floating-scrollbar-content');
+                let tableContainer = document.getElementById('table-container');
+
                 let debounceTimeout;
+
+                function initFloatingScrollbar() {
+                    tableContainer = document.getElementById('table-container'); // Re-fetch
+                    if (!tableContainer) {
+                        floatingScrollbarContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    // Sync content width
+                    floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+
+                    // Sync scroll events
+                    tableContainer.addEventListener('scroll', function() {
+                        floatingScrollbarContainer.scrollLeft = tableContainer.scrollLeft;
+                    });
+
+                    floatingScrollbarContainer.addEventListener('scroll', function() {
+                        tableContainer.scrollLeft = floatingScrollbarContainer.scrollLeft;
+                    });
+
+                    // Initial visibility check
+                    checkScrollbarVisibility();
+                }
+
+                function checkScrollbarVisibility() {
+                    if (!tableContainer) return;
+
+                    const rect = tableContainer.getBoundingClientRect();
+                    const isTableBottomVisible = (rect.bottom <= window.innerHeight);
+                    const hasHorizontalOverflow = tableContainer.scrollWidth > tableContainer.clientWidth;
+
+                    if (hasHorizontalOverflow && !isTableBottomVisible) {
+                        floatingScrollbarContainer.classList.remove('hidden');
+                        floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                    } else {
+                        floatingScrollbarContainer.classList.add('hidden');
+                    }
+                }
+
+                // Window resize and scroll handling
+                window.addEventListener('resize', () => {
+                    if (tableContainer) {
+                        floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                        checkScrollbarVisibility();
+                    }
+                });
+
+                window.addEventListener('scroll', checkScrollbarVisibility);
 
                 function fetchResults(url) {
                     loadingIndicator.classList.remove('hidden');
@@ -82,6 +140,7 @@
                             attachPaginationListeners();
                             attachModalListeners();
                             attachSortableListeners(); // Re-attach listeners for new content
+                            initFloatingScrollbar(); // Re-init scrollbar
                         })
                         .catch(error => console.error('Error fetching results:', error))
                         .finally(() => {
@@ -182,6 +241,7 @@
                 attachPaginationListeners();
                 attachModalListeners();
                 attachSortableListeners();
+                initFloatingScrollbar(); // Init on load
 
                 window.addEventListener('popstate', function() {
                     fetchResults(location.href);

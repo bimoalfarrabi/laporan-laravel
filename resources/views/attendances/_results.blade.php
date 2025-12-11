@@ -5,7 +5,7 @@
     </div>
 @else
     {{-- Table View for Larger Screens --}}
-    <div class="mt-6 overflow-x-auto hidden sm:block">
+    <div class="mt-6 overflow-x-scroll custom-scrollbar hidden sm:block" id="table-container">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
