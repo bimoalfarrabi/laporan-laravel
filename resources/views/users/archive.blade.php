@@ -76,7 +76,7 @@
                                                 {{ $user->email }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
-                                                {{ $user->roles->pluck('name')->join(', ') }}
+                                                {{ $user->roles->pluck('name')->join(', ') ?: $user->role }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
                                                 {{ $user->deleted_at->format('d-m-Y H:i') }}
@@ -129,7 +129,7 @@
                                         <p><strong class="text-gray-600 dark:text-gray-400">Email:</strong>
                                             {{ $user->email }}</p>
                                         <p><strong class="text-gray-600 dark:text-gray-400">Peran:</strong>
-                                            {{ $user->roles->pluck('name')->join(', ') }}</p>
+                                            {{ $user->roles->pluck('name')->join(', ') ?: $user->role }}</p>
                                         <p><strong class="text-gray-600 dark:text-gray-400">Waktu Dihapus:</strong>
                                             {{ $user->deleted_at->format('d-m-Y H:i') }}
                                         </p>
