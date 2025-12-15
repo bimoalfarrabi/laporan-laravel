@@ -280,7 +280,7 @@
                 init() {
                     // No initial files for create
                 },
-                handleFileSelect(event) {
+                async handleFileSelect(event) {
                     const newFiles = Array.from(event.target.files);
                     const totalFiles = this.files.length + newFiles.length;
 
@@ -294,18 +294,42 @@
                         return;
                     }
 
-                    newFiles.forEach(file => {
-                        if (!file.type.startsWith('image/')) return;
+                    // Show loading state if needed, though usually fast enough for images
 
-                        this.files.push({
-                            file: file,
-                            url: URL.createObjectURL(file)
-                        });
-                    });
+                    for (const file of newFiles) {
+                        if (!file.type.startsWith('image/')) continue;
+
+                        try {
+                            // Read file into memory to avoid ERR_UPLOAD_FILE_CHANGED
+                            // This creates a new independent File object from the buffer
+                            const arrayBuffer = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = e => resolve(e.target.result);
+                                reader.onerror = e => reject(e);
+                                reader.readAsArrayBuffer(file);
+                            });
+
+                            const blob = new Blob([arrayBuffer], {
+                                type: file.type
+                            });
+                            const memoryFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: file.lastModified
+                            });
+
+                            this.files.push({
+                                file: memoryFile,
+                                url: URL.createObjectURL(memoryFile)
+                            });
+                        } catch (error) {
+                            console.error('Error reading file:', error);
+                        }
+                    }
 
                     this.images = this.files; // Update images for rendering
                     this.updateActualInput();
-                    event.target.value = ''; // Reset input to allow selecting same file again if needed
+                    event.target.value =
+                    ''; // Reset input to allow selecting same file again if needed
                 },
                 removeImage(index) {
                     this.images.splice(index, 1);
