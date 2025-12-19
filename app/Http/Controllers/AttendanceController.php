@@ -727,12 +727,14 @@ class AttendanceController extends Controller
             'time_in' => 'required|date',
             'time_out' => 'nullable|date|after_or_equal:time_in',
             'status' => 'required|string|in:Tepat Waktu,Terlambat,Izin,Sakit,Alpha',
+            'type' => 'nullable|string|in:Reguler,Normal Pagi,Normal Malam',
         ]);
 
         $attendance->update([
             'time_in' => $request->time_in,
             'time_out' => $request->time_out,
             'status' => $request->status,
+            'type' => $request->type,
         ]);
 
         return redirect()->route('attendances.index')->with('success', 'Data absensi berhasil diperbarui.');

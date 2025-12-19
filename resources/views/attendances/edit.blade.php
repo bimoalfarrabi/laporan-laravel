@@ -61,6 +61,24 @@
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />
                         </div>
 
+                        <!-- Type (Shift) -->
+                        <div class="mb-4">
+                            <x-input-label for="type" :value="__('Tipe Shift')" />
+                            <select id="type" name="type"
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="" {{ is_null($attendance->type) ? 'selected' : '' }}>-- Tidak Ada
+                                    --</option>
+                                <option value="Reguler" {{ $attendance->type == 'Reguler' ? 'selected' : '' }}>Reguler
+                                    (07:00 - 15:00)</option>
+                                <option value="Normal Pagi" {{ $attendance->type == 'Normal Pagi' ? 'selected' : '' }}>
+                                    Normal Pagi (07:00 - 19:00)</option>
+                                <option value="Normal Malam"
+                                    {{ $attendance->type == 'Normal Malam' ? 'selected' : '' }}>Normal Malam (19:00 -
+                                    07:00)</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('attendances.index') }}"
                                 class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 focus:bg-gray-300 dark:focus:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 mr-2">
