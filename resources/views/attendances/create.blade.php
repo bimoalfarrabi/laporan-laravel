@@ -445,6 +445,13 @@
                                 }
                             });
 
+                            const contentType = response.headers.get("content-type");
+                            if (!contentType || !contentType.includes("application/json")) {
+                                throw new Error(
+                                    `Server returned non-JSON response: ${response.status} ${response.statusText}`
+                                    );
+                            }
+
                             const result = await response.json();
 
                             if (!response.ok) {
@@ -452,30 +459,24 @@
                                 if (result.errors) {
                                     errorText = Object.values(result.errors).flat().join('\n');
                                 }
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    text: errorText
-                                }).then(() => {
-                                    window.location.href = "{{ route('attendances.index') }}";
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: result.message,
-                                    showConfirmButton: false,
-                                    timer: 2000
-                                }).then(() => {
-                                    window.location.href = result.redirect_url;
-                                });
+                                throw new Error(errorText);
                             }
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: result.message,
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(() => {
+                                window.location.href = result.redirect_url;
+                            });
                         } catch (error) {
                             console.error('Submission error:', error);
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Error!',
-                                text: 'Tidak dapat terhubung ke server.'
+                                title: 'Gagal!',
+                                text: error.message || 'Tidak dapat terhubung ke server.'
                             }).then(() => {
                                 window.location.href = "{{ route('attendances.index') }}";
                             });
