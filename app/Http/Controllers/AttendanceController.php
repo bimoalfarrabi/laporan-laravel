@@ -703,7 +703,13 @@ class AttendanceController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $attendance = Attendance::findOrFail($id);
+
+        if (!Auth::user()->hasRole('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('attendances.edit', compact('attendance'));
     }
 
     /**
@@ -711,7 +717,25 @@ class AttendanceController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $attendance = Attendance::findOrFail($id);
+
+        if (!Auth::user()->hasRole('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'time_in' => 'required|date',
+            'time_out' => 'nullable|date|after_or_equal:time_in',
+            'status' => 'required|string|in:Tepat Waktu,Terlambat,Izin,Sakit,Alpha',
+        ]);
+
+        $attendance->update([
+            'time_in' => $request->time_in,
+            'time_out' => $request->time_out,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('attendances.index')->with('success', 'Data absensi berhasil diperbarui.');
     }
 
     /**

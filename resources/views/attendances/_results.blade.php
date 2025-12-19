@@ -83,6 +83,12 @@
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Lokasi
                         Pulang</th>
+                    @role('superadmin')
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Aksi
+                        </th>
+                    @endrole
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -357,6 +363,12 @@
                                 -
                             @endif
                         </td>
+                        @role('superadmin')
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ route('attendances.edit', $attendance->id) }}"
+                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Edit</a>
+                            </td>
+                        @endrole
                     </tr>
                 @endforeach
             </tbody>
@@ -405,6 +417,12 @@
                                 {{ $attendance->type ?? 'N/A' }}
                             @endif
                         </div>
+                        @role('superadmin')
+                            <div class="mt-2 text-right">
+                                <a href="{{ route('attendances.edit', $attendance->id) }}"
+                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 text-sm font-medium">Edit</a>
+                            </div>
+                        @endrole
                     </div>
                 </div>
 
