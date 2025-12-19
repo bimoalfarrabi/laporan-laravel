@@ -42,41 +42,12 @@
                             <x-input-error :messages="$errors->get('time_out')" class="mt-2" />
                         </div>
 
-                        <!-- Status -->
-                        <div class="mb-4">
-                            <x-input-label for="status" :value="__('Status')" />
-                            <select id="status" name="status"
-                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                <option value="Tepat Waktu"
-                                    {{ $attendance->status == 'Tepat Waktu' ? 'selected' : '' }}>Tepat Waktu</option>
-                                <option value="Terlambat" {{ $attendance->status == 'Terlambat' ? 'selected' : '' }}>
-                                    Terlambat</option>
-                                <option value="Izin" {{ $attendance->status == 'Izin' ? 'selected' : '' }}>Izin
-                                </option>
-                                <option value="Sakit" {{ $attendance->status == 'Sakit' ? 'selected' : '' }}>Sakit
-                                </option>
-                                <option value="Alpha" {{ $attendance->status == 'Alpha' ? 'selected' : '' }}>Alpha
-                                </option>
-                            </select>
-                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                        </div>
-
-                        <!-- Type (Shift) -->
-                        <div class="mb-4">
-                            <x-input-label for="type" :value="__('Tipe Shift')" />
-                            <select id="type" name="type"
-                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                <option value="" {{ is_null($attendance->type) ? 'selected' : '' }}>-- Tidak Ada
-                                    --</option>
-                                <option value="Reguler" {{ $attendance->type == 'Reguler' ? 'selected' : '' }}>Reguler
-                                    (07:00 - 15:00)</option>
-                                <option value="Normal Pagi" {{ $attendance->type == 'Normal Pagi' ? 'selected' : '' }}>
-                                    Normal Pagi (07:00 - 19:00)</option>
-                                <option value="Normal Malam"
-                                    {{ $attendance->type == 'Normal Malam' ? 'selected' : '' }}>Normal Malam (19:00 -
-                                    07:00)</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                        <!-- Info Box -->
+                        <div
+                            class="mb-4 p-4 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 dark:border-blue-700 text-blue-700 dark:text-blue-200 rounded-lg">
+                            <p class="font-bold">Informasi otentikasi:</p>
+                            <p class="text-sm">Status (Tepat Waktu/Terlambat) dan Tipe Shift akan dikalkulasi ulang
+                                secara otomatis berdasarkan Waktu Masuk dan Waktu Pulang yang Anda masukkan.</p>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
