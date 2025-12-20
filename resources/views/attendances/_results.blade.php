@@ -365,8 +365,10 @@
                         </td>
                         @role('superadmin')
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('attendances.edit', $attendance->id) }}"
-                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Edit</a>
+                                @if (isset($attendance->id))
+                                    <a href="{{ route('attendances.edit', $attendance->id) }}"
+                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Edit</a>
+                                @endif
                             </td>
                         @endrole
                     </tr>
@@ -419,8 +421,10 @@
                         </div>
                         @role('superadmin')
                             <div class="mt-2 text-right">
-                                <a href="{{ route('attendances.edit', $attendance->id) }}"
-                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 text-sm font-medium">Edit</a>
+                                @if (isset($attendance->id))
+                                    <a href="{{ route('attendances.edit', $attendance->id) }}"
+                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 text-sm font-medium">Edit</a>
+                                @endif
                             </div>
                         @endrole
                     </div>
