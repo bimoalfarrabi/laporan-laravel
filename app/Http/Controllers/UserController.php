@@ -305,6 +305,17 @@ class UserController extends Controller
 
         DB::transaction(function () use ($user) {
             $user->restore();
+
+            // Force re-assign role to ensure Spatie permissions are restored
+            if ($user->role) {
+                $user->syncRoles([$user->role]);
+            }
+
+            // If user is a backup, refresh their created_at to avoid immediate pruning
+            if ($user->role === 'backup') {
+                $user->created_at = now();
+                $user->save();
+            }
         });
 
         return redirect()->route('users.index')->with('success', 'Pengguna ' . $user->name . ' berhasil dipulihkan.');
