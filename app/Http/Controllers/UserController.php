@@ -299,8 +299,17 @@ class UserController extends Controller
             abort(403, 'Anda tidak memiliki akses ke arsip pengguna.');
         }
 
-        $users = $query->latest()->get();
+        $users = $query->latest()->paginate(15);
         $roles = Role::all();
+
+        if ($request->ajax()) {
+            return view('users._archive_results', compact(
+                'users',
+                'roles',
+                'search',
+                'filterRole'
+            ))->render();
+        }
 
         return view('users.archive', compact('users', 'roles', 'search', 'filterRole'));
     }

@@ -7,10 +7,10 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <a href="{{ route('users.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 mb-4">
                         Kembali ke Daftar Pengguna Aktif
                     </a>
 
@@ -21,150 +21,160 @@
                         </div>
                     @endif
 
-                    @if ($users->isEmpty())
-                        <p class="mt-4 text-gray-500 dark:text-gray-400">Tidak ada pengguna yang diarsipkan.</p>
-                    @else
-                        <div class="mt-6 overflow-x-auto hidden sm:block">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th scope="col"
-                                            class="sticky left-0 bg-gray-50 dark:bg-gray-700 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-r dark:border-gray-600">
-                                            ID
-                                        </th>
-                                        <th scope="col"
-                                            class="sticky left-16 bg-gray-50 dark:bg-gray-700 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-r dark:border-gray-600">
-                                            Nama
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Username
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Peran (Spatie)
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Waktu Dihapus
-                                        </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Aksi
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    @foreach ($users as $user)
-                                        <tr>
-                                            <td
-                                                class="sticky left-0 bg-white dark:bg-gray-800 px-6 py-4 whitespace-nowrap border-r dark:border-gray-700 dark:text-gray-100">
-                                                {{ $user->id }}
-                                            </td>
-                                            <td
-                                                class="sticky left-16 bg-white dark:bg-gray-800 px-6 py-4 whitespace-nowrap border-r dark:border-gray-700 dark:text-gray-100">
-                                                {{ $user->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
-                                                {{ $user->username }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
-                                                {{ $user->email }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
-                                                {{ $user->roles->pluck('name')->join(', ') ?: $user->role }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap dark:text-gray-100">
-                                                {{ $user->deleted_at->format('d-m-Y H:i') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                @can('restore', $user)
-                                                    <form action="{{ route('users.restore', $user->id) }}" method="POST"
-                                                        class="inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-2"
-                                                            data-confirm-dialog="true" data-swal-title="Pulihkan Pengguna?"
-                                                            data-swal-text="Pengguna akan dikembalikan ke daftar aktif."
-                                                            data-swal-icon="info">Pulihkan</button>
-                                                    </form>
-                                                @endcan
-                                                @can('forceDelete', $user)
-                                                    <form action="{{ route('users.forceDelete', $user->id) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                            data-confirm-dialog="true" data-swal-title="Hapus Permanen?"
-                                                            data-swal-text="PERINGATAN: Pengguna akan dihapus selamanya dan tidak dapat dipulihkan!">Hapus
-                                                            Permanen</button>
-                                                    </form>
-                                                @endcan
-                                            </td>
-                                        </tr>
+                    {{-- Form Search dan Filter --}}
+                    <form id="filter-form" method="GET" action="{{ route('users.archive') }}" class="mb-4">
+                        <div
+                            class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                            <input type="text" name="search" placeholder="Cari nama, username, atau email..."
+                                value="{{ $search }}"
+                                class="block w-full sm:w-auto flex-grow border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            @if (Auth::user()->hasRole('superadmin')) {{-- Hanya SuperAdmin yang bisa filter peran --}}
+                                <select name="role"
+                                    class="block w-full sm:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">Semua Peran</option>
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->name }}"
+                                            {{ $filterRole == $role->name ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
                                     @endforeach
-                                </tbody>
-                            </table>
+                                </select>
+                            @endif
+                            <a href="{{ route('users.archive') }}"
+                                class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-500 focus:bg-gray-300 dark:focus:bg-gray-500 active:bg-gray-400 dark:active:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full sm:w-auto">
+                                {{ __('Reset') }}
+                            </a>
                         </div>
+                    </form>
+                    {{-- End Form Search dan Filter --}}
 
-                        {{-- Card View for Small Screens --}}
-                        <div class="mt-6 sm:hidden space-y-4">
-                            @foreach ($users as $user)
-                                <div
-                                    class="bg-white dark:bg-gray-800 p-4 shadow-md rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <div class="font-bold text-lg text-gray-800 dark:text-gray-200">
-                                            {{ $user->name }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">#{{ $user->id }}
-                                        </div>
-                                    </div>
-                                    <div class="border-t border-gray-200 dark:border-gray-700 pt-2 space-y-1 text-sm">
-                                        <p><strong class="text-gray-600 dark:text-gray-400">Username:</strong>
-                                            {{ $user->username }}</p>
-                                        <p><strong class="text-gray-600 dark:text-gray-400">Email:</strong>
-                                            {{ $user->email }}</p>
-                                        <p><strong class="text-gray-600 dark:text-gray-400">Peran:</strong>
-                                            {{ $user->roles->pluck('name')->join(', ') ?: $user->role }}</p>
-                                        <p><strong class="text-gray-600 dark:text-gray-400">Waktu Dihapus:</strong>
-                                            {{ $user->deleted_at->format('d-m-Y H:i') }}
-                                        </p>
-                                    </div>
-                                    <div class="mt-3 flex justify-end space-x-2 text-sm">
-                                        @can('restore', $user)
-                                            <form action="{{ route('users.restore', $user->id) }}" method="POST"
-                                                class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-2"
-                                                    data-confirm-dialog="true" data-swal-title="Pulihkan Pengguna?"
-                                                    data-swal-text="Pengguna akan dikembalikan ke daftar aktif."
-                                                    data-swal-icon="info">Pulihkan</button>
-                                            </form>
-                                        @endcan
-                                        @can('forceDelete', $user)
-                                            <form action="{{ route('users.forceDelete', $user->id) }}" method="POST"
-                                                class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                    data-confirm-dialog="true" data-swal-title="Hapus Permanen?"
-                                                    data-swal-text="PERINGATAN: Pengguna akan dihapus selamanya dan tidak dapat dipulihkan!">Hapus
-                                                    Permanen</button>
-                                            </form>
-                                        @endcan
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+                    <div id="user-results">
+                        @include('users._archive_results')
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- Floating Scrollbar --}}
+    <div id="floating-scrollbar-container"
+        class="fixed bottom-0 left-0 z-50 w-full overflow-x-auto bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 hidden">
+        <div id="floating-scrollbar-content" class="h-4"></div>
+    </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('filter-form');
+                const resultsContainer = document.getElementById('user-results');
+                const floatingScrollbarContainer = document.getElementById('floating-scrollbar-container');
+                const floatingScrollbarContent = document.getElementById('floating-scrollbar-content');
+                let tableContainer = document.querySelector('#user-results .overflow-x-auto'); // Adjusted selector
+
+                let debounceTimeout;
+
+                function initFloatingScrollbar() {
+                    tableContainer = document.querySelector('#user-results .overflow-x-auto'); // Re-fetch
+                    if (!tableContainer) {
+                        floatingScrollbarContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    // Sync content width
+                    floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+
+                    // Sync scroll events
+                    tableContainer.addEventListener('scroll', function() {
+                        floatingScrollbarContainer.scrollLeft = tableContainer.scrollLeft;
+                    });
+
+                    floatingScrollbarContainer.addEventListener('scroll', function() {
+                        tableContainer.scrollLeft = floatingScrollbarContainer.scrollLeft;
+                    });
+
+                    // Initial visibility check
+                    checkScrollbarVisibility();
+                }
+
+                function checkScrollbarVisibility() {
+                    if (!tableContainer) return;
+
+                    const rect = tableContainer.getBoundingClientRect();
+                    const isTableBottomVisible = (rect.bottom <= window.innerHeight);
+                    const hasHorizontalOverflow = tableContainer.scrollWidth > tableContainer.clientWidth;
+
+                    if (hasHorizontalOverflow && !isTableBottomVisible) {
+                        floatingScrollbarContainer.classList.remove('hidden');
+                        floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                    } else {
+                        floatingScrollbarContainer.classList.add('hidden');
+                    }
+                }
+
+                // Window resize and scroll handling for visibility
+                window.addEventListener('resize', () => {
+                    if (tableContainer) {
+                        floatingScrollbarContent.style.width = tableContainer.scrollWidth + 'px';
+                        checkScrollbarVisibility();
+                    }
+                });
+
+                window.addEventListener('scroll', checkScrollbarVisibility);
+
+
+                function fetchResults(url) {
+                    fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            resultsContainer.innerHTML = html;
+                            attachPaginationListeners();
+                            initFloatingScrollbar(); // Re-init scrollbar
+                        })
+                        .catch(error => console.error('Error fetching results:', error));
+                }
+
+                function handleFormChange() {
+                    clearTimeout(debounceTimeout);
+                    debounceTimeout = setTimeout(() => {
+                        const formData = new FormData(form);
+                        const params = new URLSearchParams(formData);
+                        const url = form.action + '?' + params.toString();
+
+                        history.pushState(null, '', url);
+                        fetchResults(url);
+                    }, 300); // 300ms debounce
+                }
+
+                function attachPaginationListeners() {
+                    resultsContainer.querySelectorAll('.pagination a').forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const url = this.getAttribute('href');
+                            history.pushState(null, '', url);
+                            fetchResults(url);
+                        });
+                    });
+                }
+
+                // Listen for changes on all form inputs
+                form.querySelectorAll('input, select').forEach(input => {
+                    input.addEventListener('input', handleFormChange);
+                    input.addEventListener('change', handleFormChange); // For select
+                });
+
+                // Initial attachment of listeners
+                attachPaginationListeners();
+                initFloatingScrollbar(); // Init on load
+
+                // Handle back/forward browser buttons
+                window.addEventListener('popstate', function() {
+                    fetchResults(location.href);
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>
