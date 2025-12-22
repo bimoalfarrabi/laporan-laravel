@@ -17,11 +17,7 @@
                         <p><strong>No. HP:</strong> {{ $user->phone_number }}</p>
                         <p><strong>Peran:</strong> {{ $user->roles->pluck('name')->join(', ') }}</p>
                         <p><strong>Waktu Dibuat:</strong> <x-waktu-dibuat :date="$user->created_at" /></p>
-                        @if ($user->hasRole('backup'))
-                            <p class="text-red-600 dark:text-red-400"><strong>Jadwal Penghapusan Otomatis:</strong>
-                                <x-waktu-dibuat :date="$user->created_at->addDays(4)" />
-                            </p>
-                        @endif
+
                         <p><strong>Terakhir Login:</strong>
                             @if ($user->last_login_at)
                                 <x-waktu-dibuat :date="$user->last_login_at" />
