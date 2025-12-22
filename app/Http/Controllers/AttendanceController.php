@@ -99,20 +99,20 @@ class AttendanceController extends Controller
         } elseif ($user->hasRole("danru")) {
             $attendanceQuery->whereHas(
                 "user.roles",
-                fn($q) => $q->whereIn("name", ["anggota", "danru"]),
+                fn($q) => $q->whereIn("name", ["anggota", "danru", "backup"]),
             );
             $leaveQuery->whereHas(
                 "user.roles",
-                fn($q) => $q->whereIn("name", ["anggota", "danru"]),
+                fn($q) => $q->whereIn("name", ["anggota", "danru", "backup"]),
             );
         } elseif ($user->hasRole("manajemen")) {
             $attendanceQuery->whereHas(
                 "user.roles",
-                fn($q) => $q->whereIn("name", ["anggota", "danru"]),
+                fn($q) => $q->whereIn("name", ["anggota", "danru", "backup"]),
             );
             $leaveQuery->whereHas(
                 "user.roles",
-                fn($q) => $q->whereIn("name", ["anggota", "danru"]),
+                fn($q) => $q->whereIn("name", ["anggota", "danru", "backup"]),
             );
         }
     }
