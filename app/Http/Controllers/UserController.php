@@ -37,12 +37,19 @@ class UserController extends Controller
             $users = $query->orderBy($sortBy, $sortDirection)->paginate(15);
         } elseif (Auth::user()->hasRole('danru')) {
             // danru hanya melihat pengguna dengan peran anggota
-            $users = User::whereHas('roles', function ($query) {
+            $query = User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['anggota', 'backup']);
-            })
-                ->with('roles')
-                ->orderBy($sortBy, $sortDirection)
-                ->paginate(15);
+            })->with('roles');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('username', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            }
+
+            $users = $query->orderBy($sortBy, $sortDirection)->paginate(15);
         } elseif (Auth::user()->hasRole('manajemen')) {
             $query = User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['anggota', 'danru']);
