@@ -105,7 +105,16 @@ class LeaveRequestController extends Controller
             $data['end_time'] = $validatedData['end_time'];
         }
 
-        LeaveRequest::create($data);
+        $leaveRequest = LeaveRequest::create($data);
+
+        // Notify Danru and Superadmin
+        $notifiableUsers = \App\Models\User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['danru', 'superadmin']);
+        })->get();
+
+        foreach ($notifiableUsers as $notifiableUser) {
+            $notifiableUser->notify(new \App\Notifications\NewLeaveRequestNotification($leaveRequest));
+        }
 
         return redirect()->route('leave-requests.index')->with('success', 'Pengajuan izin berhasil dibuat.');
     }

@@ -149,32 +149,45 @@
                 <div class="mr-2 relative">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="relative p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button
+                                class="relative p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <span class="sr-only">View notifications</span>
-                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                @if(auth()->user()->unreadNotifications->count() > 0)
-                                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
+                                @if (auth()->user()->unreadNotifications->count() > 0)
+                                    <span
+                                        class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
                                 @endif
                             </button>
                         </x-slot>
 
                         <x-slot name="content">
-                            <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
+                            <div
+                                class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
                                 Notifikasi
                             </div>
                             @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
-                                    @if ($notification->type === 'App\Notifications\NewReportNotification')
-                                        <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
-                                    @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
-                                        <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
-                                    @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
-                                        <span class="font-medium">Pengajuan Cuti ({{ $notification->data['leave_type'] }}) Anda {{ $notification->data['status'] }}</span>
-                                    @endif
-                                        <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+                                        @if ($notification->type === 'App\Notifications\NewReportNotification')
+                                            <span class="font-medium">{{ $notification->data['user_name'] }} membuat
+                                                laporan baru</span>
+                                        @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
+                                            <span class="font-medium">Laporan {{ $notification->data['report_type'] }}
+                                                Anda {{ $notification->data['status'] }}</span>
+                                        @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
+                                            <span class="font-medium">Pengajuan Cuti
+                                                ({{ $notification->data['leave_type'] }}) Anda
+                                                {{ $notification->data['status'] }}</span>
+                                        @elseif ($notification->type === 'App\Notifications\NewLeaveRequestNotification')
+                                            <span class="font-medium">{{ $notification->data['user_name'] }} mengajukan
+                                                izin: {{ $notification->data['leave_type'] }}</span>
+                                        @endif
+                                        <span
+                                            class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                 </x-dropdown-link>
                             @empty
@@ -183,12 +196,14 @@
                                 </div>
                             @endforelse
                             <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                            <x-dropdown-link :href="route('notifications.index')" class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                            <x-dropdown-link :href="route('notifications.index')"
+                                class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                                 Lihat Semua Notifikasi
                             </x-dropdown-link>
-                            @if(auth()->user()->unreadNotifications->count() > 0)
+                            @if (auth()->user()->unreadNotifications->count() > 0)
                                 <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                                <x-dropdown-link :href="route('notifications.markAllAsRead')" class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
+                                <x-dropdown-link :href="route('notifications.markAllAsRead')"
+                                    class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
                                     Tandai semua sudah dibaca
                                 </x-dropdown-link>
                             @endif
@@ -264,32 +279,42 @@
                 <div class="mr-2 relative">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="relative p-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700">
+                            <button
+                                class="relative p-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700">
                                 <span class="sr-only">View notifications</span>
-                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                @if(auth()->user()->unreadNotifications->count() > 0)
-                                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
+                                @if (auth()->user()->unreadNotifications->count() > 0)
+                                    <span
+                                        class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
                                 @endif
                             </button>
                         </x-slot>
 
                         <x-slot name="content">
-                            <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
+                            <div
+                                class="px-4 py-2 border-b border-gray-100 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-300">
                                 Notifikasi
                             </div>
                             @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                                 <x-dropdown-link :href="route('notifications.markAsRead', $notification->id)" class="text-sm">
                                     <div class="flex flex-col">
-                                    @if ($notification->type === 'App\Notifications\NewReportNotification')
-                                        <span class="font-medium">{{ $notification->data['user_name'] }} membuat laporan baru</span>
-                                    @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
-                                        <span class="font-medium">Laporan {{ $notification->data['report_type'] }} Anda {{ $notification->data['status'] }}</span>
-                                    @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
-                                        <span class="font-medium">Pengajuan Cuti ({{ $notification->data['leave_type'] }}) Anda {{ $notification->data['status'] }}</span>
-                                    @endif
-                                        <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+                                        @if ($notification->type === 'App\Notifications\NewReportNotification')
+                                            <span class="font-medium">{{ $notification->data['user_name'] }} membuat
+                                                laporan baru</span>
+                                        @elseif ($notification->type === 'App\Notifications\ReportStatusNotification')
+                                            <span class="font-medium">Laporan {{ $notification->data['report_type'] }}
+                                                Anda {{ $notification->data['status'] }}</span>
+                                        @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
+                                            <span class="font-medium">Pengajuan Cuti
+                                                ({{ $notification->data['leave_type'] }}) Anda
+                                                {{ $notification->data['status'] }}</span>
+                                        @endif
+                                        <span
+                                            class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                 </x-dropdown-link>
                             @empty
@@ -298,12 +323,14 @@
                                 </div>
                             @endforelse
                             <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                            <x-dropdown-link :href="route('notifications.index')" class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                            <x-dropdown-link :href="route('notifications.index')"
+                                class="text-center text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                                 Lihat Semua Notifikasi
                             </x-dropdown-link>
-                            @if(auth()->user()->unreadNotifications->count() > 0)
+                            @if (auth()->user()->unreadNotifications->count() > 0)
                                 <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                                <x-dropdown-link :href="route('notifications.markAllAsRead')" class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
+                                <x-dropdown-link :href="route('notifications.markAllAsRead')"
+                                    class="text-center text-xs font-medium text-indigo-600 hover:text-indigo-500">
                                     Tandai semua sudah dibaca
                                 </x-dropdown-link>
                             @endif
@@ -327,7 +354,8 @@
                             fill-rule="evenodd" clip-rule="evenodd"></path>
                     </svg>
                     <!-- Moon Icon -->
-                    <svg x-show="darkMode" style="display: none;" x-transition:enter="transition ease-out duration-300"
+                    <svg x-show="darkMode" style="display: none;"
+                        x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 transform -rotate-90 scale-50"
                         x-transition:enter-end="opacity-100 transform rotate-0 scale-100"
                         x-transition:leave="transition ease-in duration-300"

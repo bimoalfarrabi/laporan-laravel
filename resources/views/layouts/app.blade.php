@@ -141,45 +141,45 @@
 
             // Polling for new notifications
             @auth
-                let lastNotificationCount = {{ auth()->user()->unreadNotifications->count() }};
-                
-                setInterval(() => {
-                    fetch('{{ route('notifications.check') }}')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.unread_count > lastNotificationCount) {
-                                // Play sound or show toast
-                                const Toast = Swal.mixin({
-                                    toast: true,
-                                    position: "top-end",
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    timerProgressBar: true,
-                                    didOpen: (toast) => {
-                                        toast.onmouseenter = Swal.stopTimer;
-                                        toast.onmouseleave = Swal.resumeTimer;
-                                    }
-                                });
-                                Toast.fire({
-                                    icon: "info",
-                                    title: "Notifikasi Baru!",
-                                    text: "Klik untuk melihat detail."
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                                
-                                // Update Badge
-                                const badge = document.querySelector('.notification-badge');
-                                if (badge) {
-                                    badge.innerText = data.unread_count;
-                                } else {
-                                    // Create badge if not exists (simplified, better to reload or use more complex DOM manipulation)
-                                    // For now, reloading is a safe bet for complex UI updates, but let's try to update the count if element exists
+            let lastNotificationCount = {{ auth()->user()->unreadNotifications->count() }};
+
+            setInterval(() => {
+                fetch('{{ route('notifications.check') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.unread_count > lastNotificationCount) {
+                            // Play sound or show toast
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: "top-end",
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.onmouseenter = Swal.stopTimer;
+                                    toast.onmouseleave = Swal.resumeTimer;
                                 }
+                            });
+                            Toast.fire({
+                                icon: "info",
+                                title: "Notifikasi Baru!",
+                                text: "Klik untuk melihat detail."
+                            }).then(() => {
+                                window.location.reload();
+                            });
+
+                            // Update Badge
+                            const badge = document.querySelector('.notification-badge');
+                            if (badge) {
+                                badge.innerText = data.unread_count;
+                            } else {
+                                // Create badge if not exists (simplified, better to reload or use more complex DOM manipulation)
+                                // For now, reloading is a safe bet for complex UI updates, but let's try to update the count if element exists
                             }
-                            lastNotificationCount = data.unread_count;
-                        });
-                }, 30000); // Check every 30 seconds
+                        }
+                        lastNotificationCount = data.unread_count;
+                    });
+            }, 5000); // Check every 5 seconds
 
             // Web Push Subscription
             if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -189,7 +189,7 @@
                     swReg.pushManager.getSubscription().then(function(subscription) {
                         if (subscription === null) {
                             // User is not subscribed, ask for permission
-                             Notification.requestPermission().then(function(permission) {
+                            Notification.requestPermission().then(function(permission) {
                                 if (permission === 'granted') {
                                     subscribeUser(swReg);
                                 }
@@ -243,7 +243,7 @@
                 }
                 return outputArray;
             }
-            @endauth
+        @endauth
         });
     </script>
 </body>
