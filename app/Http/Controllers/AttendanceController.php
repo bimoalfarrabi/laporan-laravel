@@ -236,6 +236,9 @@ class AttendanceController extends Controller
 
             // 1. Check for duplicate actions
             if ($error = $this->checkDuplicateAttendance($user, $now)) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $error], 422);
+                }
                 return redirect()->back()->with("error", $error);
             }
 
@@ -256,10 +259,15 @@ class AttendanceController extends Controller
                 } else {
                     // Clock In
                     if ($error = $this->checkClockInConstraints($user, $now)) {
-                        // If constraint check fails, we must rollback file upload if possible, 
-                        // but since we are in transaction, just throwing exception or returning error is enough.
-                        // However, file is already stored. In a perfect world we'd delete it.
-                        // For now, let's just return the error.
+                        /* 
+                           If constraint check fails, we must rollback file upload if possible, 
+                           but since we are in transaction, just throwing exception or returning error is enough.
+                           However, file is already stored. In a perfect world we'd delete it.
+                           For now, let's just return the error.
+                        */
+                        if ($request->expectsJson()) {
+                            return response()->json(['message' => $error], 422);
+                        }
                         return redirect()->back()->with("error", $error);
                     }
 
