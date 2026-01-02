@@ -112,6 +112,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/location', [SettingController::class, 'updateLocationSettings'])->name('settings.location.update');
         Route::get('/settings/media', [SettingController::class, 'mediaSettings'])->name('settings.media');
         Route::post('/settings/media', [SettingController::class, 'updateMediaSettings'])->name('settings.media.update');
+
+        // Manajemen Media (Manual Delete)
+        Route::get('/media-management', [\App\Http\Controllers\MediaManagementController::class, 'index'])->name('media.index');
+        Route::post('/media-management/delete-reports', [\App\Http\Controllers\MediaManagementController::class, 'deleteReports'])->name('media.deleteReports');
+        Route::post('/media-management/delete-attendance', [\App\Http\Controllers\MediaManagementController::class, 'deleteAttendance'])->name('media.deleteAttendance');
     });
 });
 

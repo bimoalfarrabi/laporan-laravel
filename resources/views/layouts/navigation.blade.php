@@ -133,6 +133,9 @@
                                         <x-dropdown-link :href="route('settings.location')">
                                             {{ __('Pengaturan Lokasi Absensi') }}
                                         </x-dropdown-link>
+                                        <x-dropdown-link :href="route('media.index')">
+                                            {{ __('Manajemen Media') }}
+                                        </x-dropdown-link>
                                     @endrole
                                 </x-slot>
                             </x-dropdown>
@@ -180,7 +183,8 @@
                                                 Anda {{ $notification->data['status'] }}</span>
                                         @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
                                             <span class="font-medium">Pengajuan Cuti
-                                                ({{ $notification->data['leave_type'] }}) Anda
+                                                ({{ $notification->data['leave_type'] }})
+                                                Anda
                                                 {{ $notification->data['status'] }}</span>
                                         @elseif ($notification->type === 'App\Notifications\NewLeaveRequestNotification')
                                             <span class="font-medium">{{ $notification->data['user_name'] }} mengajukan
@@ -310,7 +314,8 @@
                                                 Anda {{ $notification->data['status'] }}</span>
                                         @elseif ($notification->type === 'App\Notifications\LeaveRequestStatusNotification')
                                             <span class="font-medium">Pengajuan Cuti
-                                                ({{ $notification->data['leave_type'] }}) Anda
+                                                ({{ $notification->data['leave_type'] }})
+                                                Anda
                                                 {{ $notification->data['status'] }}</span>
                                         @endif
                                         <span
@@ -431,6 +436,9 @@
                             </x-responsive-nav-link>
                             <x-responsive-nav-link :href="route('settings.location')" :active="request()->routeIs('settings.location')">
                                 {{ __('Pengaturan Lokasi') }}
+                            </x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('media.index')" :active="request()->routeIs('media.*')">
+                                {{ __('Manajemen Media') }}
                             </x-responsive-nav-link>
                         @endrole
                     </div>
