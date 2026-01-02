@@ -57,12 +57,18 @@ class MediaManagementController extends Controller
                         }
                         if ($fieldUpdated) {
                             $data[$field->name] = []; // Reset to empty array
+                            // Set status flag
+                            $data['_media_status'][$field->name] = 'deleted';
+                            $data['_media_status'][$field->name . '_deleted_at'] = now()->toIso8601String();
                             $updated = true;
                         }
                     } else {
                         if (Storage::disk('public')->exists($files)) {
                             Storage::disk('public')->delete($files);
                             $data[$field->name] = null;
+                            // Set status flag
+                            $data['_media_status'][$field->name] = 'deleted';
+                            $data['_media_status'][$field->name . '_deleted_at'] = now()->toIso8601String();
                             $updated = true;
                         }
                     }
