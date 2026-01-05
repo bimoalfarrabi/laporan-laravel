@@ -73,14 +73,34 @@ class DeleteExpiredMedia extends Command
                     ($mediaType === 'video' && $field->type === 'video');
 
                 if ($isTargetField && !empty($data[$field->name])) {
-                    $filePath = $data[$field->name];
+                    $files = $data[$field->name];
+                    $fieldUpdated = false;
 
-                    // Check and delete from Public disk ONLY
-                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($filePath)) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($filePath);
-                        $this->info("Deleted {$mediaType} from Public: {$filePath}");
-                        $data[$field->name] = null;
-                        $updated = true;
+                    if (is_array($files)) {
+                        foreach ($files as $file) {
+                            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($file)) {
+                                \Illuminate\Support\Facades\Storage::disk('public')->delete($file);
+                                $this->info("Deleted {$mediaType} from Public: {$file}");
+                                $fieldUpdated = true;
+                            }
+                        }
+                        if ($fieldUpdated) {
+                            $data[$field->name] = []; // Reset to empty array
+                            // Set status flag
+                            $data['_media_status'][$field->name] = 'deleted';
+                            $data['_media_status'][$field->name . '_deleted_at'] = now()->toIso8601String();
+                            $updated = true;
+                        }
+                    } else {
+                        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($files)) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($files);
+                            $this->info("Deleted {$mediaType} from Public: {$files}");
+                            $data[$field->name] = null;
+                            // Set status flag
+                            $data['_media_status'][$field->name] = 'deleted';
+                            $data['_media_status'][$field->name . '_deleted_at'] = now()->toIso8601String();
+                            $updated = true;
+                        }
                     }
                 }
             }
